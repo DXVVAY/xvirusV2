@@ -10,12 +10,14 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 import httpx
 import requests
+import string
 from colorama import Fore
 from capmonster_python import capmonster, HCaptchaTask
 import tls_client
 
 from utils import *
 
+THIS_VERSION = "1.0.0"
 
 class Output:
     def __init__(self, level, config, token=None):
@@ -152,63 +154,134 @@ class Config:
         except FileNotFoundError:
             raise FileNotFoundError(f"Error: {file_name} not found.")
     
+    def reset(self, file_name):
+        if file_name not in ['xvirus_tokens', 'xvirus_proxies', 'xvirus_usernames', 'xvirus_ids']:
+            raise ValueError(f"Error: {file_name} is not a valid file name.")
+        
+        file_path = os.path.join(self.folder_path, file_name)
+        try:
+            with open(file_path, 'w') as file:
+                pass
+        except Exception as e:
+            print(f"An error occurred while resetting the {file_name} file: {e}")
+ 
 class DiscordProps:
     @staticmethod
     def get_build_number():
-        scripts = re.compile(r'/assets/.{20}.js', re.I).findall(requests.get("https://discord.com/app", headers={'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; NiggaOs x16; rv:109.0) Gecko/20100101 Niggafox/114.0'}).text)
+        scripts = re.compile(r'/assets/.{20}.js', re.I).findall(requests.get("https://discord.com/app", headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0'}).text)
         scripts.reverse()
         for v in scripts:
-            content = requests.get(f"https://discord.com{v}", headers={'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; NiggaOs x16; rv:109.0) Gecko/20100101 Niggafox/114.0'}).content.decode()
+            content = requests.get(f"https://discord.com{v}", headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0'}).content.decode()
             if content.find("build_number:\"") != -1:
                 return re.compile(r"build_number:\"(.*?)\"", re.I).findall(content)[0]
-
     user_agents = [
         'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         'Mozilla/5.0 (iPhone; CPU iPhone OS 15_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.2 Mobile/15E148 Safari/604.1',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36'
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9011 Chrome/91.0.4472.164 Electron/13.6.6 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9016 Chrome/108.0.5359.215 Electron/22.3.12 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0'
     ]
-
+    lang = [
+        "de,de-DE;q=0.9",
+        "en,en-US;q=0.9",
+        "es,es-ES;q=0.9",
+        "fr,fr-FR;q=0.9",
+        "ja;q=0.9",
+        "ru,ru-RU;q=0.9",
+        "pt-BR;q=0.9",
+        "tr;q=0.9",
+        "ar,ar-SA;q=0.9",
+        "zh,zh-CN;q=0.9"
+    ]
+    brands = [
+        """Not?A_Brand";v="8", "Chromium";v="108""",
+        """Not?A_Brand";v="8", "Firefox";v="92""",
+        """Not?A_Brand";v="8", "Safari";v="15""",
+        """Edge";v="96", "Chromium";v="108""",
+        """Brave";v="1.31", "Chromium";v="108""",
+        """Opera";v="88", "Chromium";v="108""",
+        """Internet Explorer";v="11", "Chromium";v="108"""
+    ]
+    channels = [
+        "ptb", 
+        "canary", 
+        "stable"
+    ] 
+    times = [
+        "Europe/Berlin",
+        "America/New_York",
+        "Asia/Tokyo",
+        "Australia/Sydney",
+        "America/Los_Angeles",
+        "Africa/Cairo",
+        "Asia/Dubai",
+        "America/Mexico_City",
+        "Pacific/Auckland",
+        "America/Chicago"
+    ]
+    zone = random.choice(times)
+    channels = ["ptb", "canary", "stable"] 
     user_agent = random.choice(user_agents)
+    language = random.choice(lang)
+    channel = random.choice(channels)  
     buildNumber = get_build_number()
-
-    _get_mobile_x_super_properties = base64.b64encode(json.dumps({
-            "os": "Windows",
-            "browser": "Chrome",
-            "device": "",
-            "system_locale": "en-US",
-            "browser_user_agent": user_agent,
-            "browser_version": random.randint(110, 116), 
-            "os_version": "10",
-            "referrer": "",
-            "referring_domain": "",
-            "referrer_current": "",
-            "referring_domain_current": "",
-            "release_channel": "stable",
-            "client_build_number": buildNumber,
-            "client_event_source": None,
-            "design_id": 0}).encode()).decode()
+    x_super_properties = base64.b64encode(json.dumps({
+        "os": "Windows",
+        "browser": "Discord Client",
+        "release_channel": channel,
+        "client_version": "1.0.9011",
+        "os_version": "10.0.22638",
+        "os_arch": "x64",
+        "system_locale": "en",
+        "client_build_number": buildNumber,
+        "native_build_number": 30306,
+        "client_version_string": "1.0.9011",
+        "os_version_string": "10.0.22638",
+        "os_arch_string": "x64"}).encode()).decode()
     
-    default_headers = {}
+    bypassheaders = {
+        'authority': 'discord.com',
+        'x-super-properties': x_super_properties,
+        'x-discord-locale': 'en',
+        'x-debug-options': 'bugReporterEnabled',
+        'accept-language': 'en',
+        'user-agent': user_agent,
+        'content-type': 'application/json',
+        'accept': '*/*',
+        'origin': 'https://discord.com',
+        'sec-fetch-site': 'same-origin',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-dest': 'empty',
+        }
+    
+    default_headers = {
+        'authority': 'discord.com',
+        'accept': '*/*',
+        'accept-language': language,
+        'content-type': 'application/json',
+        'origin': 'https://discord.com',
+        'referer': 'https://discord.com/',
+        'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': user_agent,
+        'x-debug-options': 'bugReporterEnabled',
+        'x-discord-locale': 'en-US',
+        'x-discord-timezone': zone,
+        'x-super-properties': x_super_properties,
+    }
 
 class Header:
     @staticmethod
-    def x_content_props(guild):
-        guild_id = guild["guild"]["id"]
-        channel_id = guild["channel"]["id"]
-        location_data = {
-            "location": "Join Guild",
-            "location_guild_id": guild_id,
-            "location_channel_id": channel_id,
-            "location_channel_type": 0
-        }
-        location_json = json.dumps(location_data)
-        return base64.b64encode(location_json.encode()).decode()
-
-    @staticmethod
     def tls_session() -> tls_client.Session:
+        config = Config()
         client = tls_client.Session(
             client_identifier=f"chrome_{random.randint(110, 116)}",
             random_tls_extension_order=True,
@@ -242,6 +315,18 @@ class Header:
             connection_flow=15663105,
             header_order=["accept", "user-agent", "accept-encoding", "accept-language"]
         )
+        if config._get("use_proxies"):
+            proxy = ProxyManager.clean_proxy(ProxyManager.random_proxy())
+            if isinstance(proxy, str):
+                proxy_dict = {
+                    "http": f"{ProxyManager.get_proxy_type()}://{proxy}",
+                    "https": f"{ProxyManager.get_proxy_type()}://{proxy}"
+                }
+            elif isinstance(proxy, dict):
+                proxy_dict = proxy
+
+            client.proxies = proxy_dict
+        
         return client
 
     @staticmethod
@@ -275,6 +360,50 @@ class Header:
         )
     
         return session, default_headers, cookie
+
+class ProxyManager:
+    def get_proxies():
+        config = Config()
+        f = config.read('xvirus_proxies')
+        proxies = f.strip().splitlines()
+        proxies = [proxy for proxy in proxies if proxy not in [" ", "", "\n"]]
+        return proxies
+    
+    def random_proxy():
+        try:
+            return random.choice(ProxyManager.get_proxies())
+        except:
+            return {}
+
+    def clean_proxy(proxy):
+        if isinstance(proxy, str):
+            parts = proxy.split(':')
+            if '@' in proxy or len(parts) == 2:
+                return proxy
+            elif len(parts) == 4:
+                return f'{parts[2:]}@{parts[:2]}'
+            elif '.' in parts[0]:
+                return f'{parts[2:]}@{parts[:2]}'
+            else:
+                return f'{parts[:2]}@{parts[2:]}'
+        elif isinstance(proxy, dict):
+            http_proxy = proxy.get("http") or proxy.get("https")
+            https_proxy = proxy.get("https") or proxy.get("http")
+            if http_proxy or https_proxy:
+                return {
+                    "http://": http_proxy,
+                    "https://": https_proxy
+                }
+            elif proxy in [dict(), {}]:
+                return {}
+        return proxy
+    
+    def get_proxy_type():
+        config = Config()
+        h = config._get("proxy_type", "http")
+        if "socks5" in h and "h" in h:
+            h = "socks5"
+        return h
 
 class TokenManager:
     @classmethod
@@ -314,6 +443,14 @@ class TokenManager:
             if token not in line:
                 f.write(line)
         f.truncate()
+    
+    @classmethod
+    def get_random_token(cls):
+        tokens = cls.get_tokens()
+        if tokens:
+            return random.choice(tokens)
+        else:
+            return None
 
 class utility:
     def threads(func, args=[], delay=0, thread_amount=None, return_home=True, text=""):
@@ -370,6 +507,9 @@ class utility:
             Output("error", config).notime(f"{Fore.RED}ERROR: {e}")
             if return_home:
                 Output.PETC()
+
+    def rand_str(length:int) -> str:
+        return ''.join(random.sample(string.ascii_lowercase+string.digits, length))
     
     def get_guild(invite):
         try:
@@ -389,6 +529,48 @@ class utility:
         ask = input(f"{Fore.RED}<~> {num}: {Fore.BLUE}")
         return ask
     
+    def get_random_id(id):
+        folder_path = os.path.join(os.getenv('LOCALAPPDATA'), 'xvirus_config')
+        file = os.path.join(folder_path, 'xvirus_ids')
+        with open(file, "r", encoding="utf8") as f:
+            users = [line.strip() for line in f.readlines()]
+        randomid = random.sample(users, id)
+        return "<@!" + "> <@!".join(randomid) + ">"
+    
+    def get_ids():
+        config = Config()
+        f = config.read('xvirus_ids')
+        ids = f.strip().splitlines()
+        ids = [idd for idd in ids if idd not in [" ", "", "\n"]]
+        return ids
+
+class Captcha:
+    def solve(url, sitekey, data=None):
+        config = Config()
+        captchaKey = config._get("captcha_key")
+        cap = HCaptchaTask(captchaKey)
+        cap.set_user_agent(f"Discord-Android/{DiscordProps.buildNumber};RNA")
+        proxy = ProxyManager.random_proxy()
+        if proxy:
+            proxy_type = ProxyManager.get_proxy_type()
+            proxy_parts = proxy.split(':')
+            if len(proxy_parts) == 2:
+                proxy_address, proxy_port = proxy_parts
+                cap.set_proxy(proxy_type, proxy_address, int(proxy_port), proxy_login=None, proxy_password=None)
+        if data:
+            task = cap.create_task(
+                website_url=url,
+                website_key=sitekey,
+                custom_data=data,
+            )
+        else:
+            task = cap.create_task(
+                website_url=url,
+                website_key=sitekey,
+            )
+        result = cap.join_task_result(task)
+        return result.get("gRecaptchaResponse")
+    
     def getCapBal():
         config = Config()
         key = config._get("captcha_key")
@@ -396,17 +578,3 @@ class utility:
         bal = json.loads(get_balance_resp)["balance"]
         balance = f"${bal}"
         return balance
-
-class Captcha:
-    def solve(url, sitekey, data = None):
-            config = Config()
-            captchaKey = config._get("captcha_key")
-            cap = HCaptchaTask(captchaKey)
-            cap.set_user_agent(f"Discord-Android/{DiscordProps.buildNumber};RNA")
-            task = cap.create_task(
-                website_url=url, 
-                website_key=sitekey, 
-                custom_data=data,
-            )
-            result = cap.join_task_result(task)
-            return result.get("gRecaptchaResponse")
