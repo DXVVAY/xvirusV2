@@ -5,49 +5,49 @@ from concurrent.futures import ThreadPoolExecutor
 
 from colorama import Fore
 
-from utils import *
+from utils.util import *
 
-def token_joiner():
-    joined = 0
+def token_leaver():
+    left = 0
     error = 0
     config = Config()
     args = []
     tokens = TokenManager.get_tokens()
 
-    def join(token, invite):
-        nonlocal joined, error
+    def leave(token, guild_id):
+        nonlocal left, error
         session, headers, cookie = Header.get_client(token)
-        result = session.post(f"https://discord.com/api/v9/invites/{invite}", headers=headers, cookies=cookie, json={
+        result = session.delete(f"https://discord.com/api/v9/users/@me/guilds/{guild_id}", headers=headers, cookies=cookie, json={
             'session_id': utility.rand_str(32),
         })
 
-        if result.status_code == 200:
-            Output("good", config, token).log(f"Successfully Joined Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-            joined += 1
+        if result.status_code == 204:
+            Output("good", config, token).log(f"Successfully Left Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            left += 1
         elif result.text.startswith('{"captcha_key"'):
-            Output("bad", config, token).log(f"Error Joining Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
+            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
             error += 1
         elif result.text.startswith('{"message": "401: Unauthorized'):
-            Output("bad", config, token).log(f"Error Joining Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
+            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
             error += 1
         elif "Cloudflare" in result.text:
-            Output("bad", config, token).log(f"Error Joining Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
+            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
             error += 1
         elif "\"code\": 40007" in result.text:
-            Output("bad", config, token).log(f"Error Joining Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
+            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
             error += 1
         elif "\"code\": 40002" in result.text:
-            Output("bad", config, token).log(f"Error Joining Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
+            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
             error += 1
         elif "\"code\": 10006" in result.text:
-            Output("bad", config, token).log(f"Error Joining Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
+            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
             error += 1
         else:
-            Output("bad", config, token).log(f"Error Joining Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
             error += 1
 
     def thread_complete(future):
-        nonlocal joined, error
+        nonlocal left, error
         result = future.result()
 
     if tokens is None:
@@ -55,9 +55,7 @@ def token_joiner():
         Output.PETC()
         return
 
-    invite = utility.ask("Invite")
-    invite = invite.replace("https://discord.gg/", "").replace("https://discord.com/invite/", "").replace("discord.gg/", "").replace("https://discord.com/invite/", "")
-    invite_parts = invite.split("/")
+    guild_id = utility.ask("Guild ID")
     max_threads = utility.asknum("Thread Count")
 
     try:
@@ -75,18 +73,18 @@ def token_joiner():
             for token in tokens:
                 try:
                     token = TokenManager.OnlyToken(token)
-                    args = [token, invite]
-                    future = executor.submit(join, *args)
+                    args = [token, guild_id]
+                    future = executor.submit(leave, *args)
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
                     Output("bad", config).log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Joined {str(joined)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info", config).notime(f"Left {str(left)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
-            f"{Fore.LIGHTGREEN_EX}Joined: {str(joined)}",
+            f"{Fore.LIGHTGREEN_EX}Left: {str(left)}",
             f"{Fore.LIGHTRED_EX}Errors: {str(error)}",
             f"{Fore.LIGHTCYAN_EX}Total: {len(tokens)}"
         ]

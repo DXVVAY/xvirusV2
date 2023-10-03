@@ -8,7 +8,7 @@ import requests
 import websocket
 from colorama import Fore
 
-from utils import *
+from utils.util import *
 
 folder_path = os.path.join(os.getenv('LOCALAPPDATA'), 'xvirus_config')
 file = os.path.join(folder_path, 'xvirus_ids')

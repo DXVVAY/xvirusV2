@@ -5,7 +5,7 @@ import time
 import random
 import sys
 import websocket
-from utils import *
+from utils.util import *
 from colorama import Fore
 
 def onliner(token, show=False):

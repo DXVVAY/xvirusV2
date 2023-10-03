@@ -1,4 +1,5 @@
 import base64
+import ctypes
 import json
 import os
 import random
@@ -15,79 +16,7 @@ from colorama import Fore
 from capmonster_python import capmonster, HCaptchaTask
 import tls_client
 
-from utils import *
-
 THIS_VERSION = "1.0.0"
-
-class Output:
-    def __init__(self, level, config, token=None):
-        self.level = level
-        self.config = config
-        self.token = token
-        self.color_map = {
-            "info": (Fore.BLUE, "<~>"),
-            "bad": (Fore.RED, "<!>"),
-            "good": (Fore.GREEN, "<*>")
-        }
-
-    def should_hide(self):
-        return not self.config._get('debug_mode', True)
-
-    def hide_token(self, text):
-        if self.should_hide() and self.token:
-            token_length = len(self.token)
-            if token_length >= 10:
-                censored_part = '*' * 10
-                text = text.replace(self.token[-10:], censored_part)
-        return text
-
-    def notime(self, *args, **kwargs):
-        color, text = self.color_map.get(self.level, (Fore.LIGHTWHITE_EX, self.level))
-        time_now = datetime.now().strftime("%H:%M:%S")
-
-        base = f"{color}{text.upper()}"
-        for arg in args:
-            arg = self.hide_token(arg)
-            base += f" {arg}"
-        if kwargs:
-            for key, value in kwargs.items():
-                value = self.hide_token(value)
-                base += f" {key}={value}"
-        print(base)
-
-    def log(self, *args, **kwargs):
-        color, text = self.color_map.get(self.level, (Fore.LIGHTWHITE_EX, self.level))
-        time_now = datetime.now().strftime("%H:%M:%S")
-
-        base = f"{Fore.RED}│{Fore.BLUE}{time_now}{Fore.RED}│ {color}{text.upper()}"
-        updated_args = []
-
-        for arg in args:
-            arg = self.hide_token(arg)
-            updated_args.append(arg)
-
-        for arg in updated_args:
-            base += f" {arg}"
-
-        if kwargs:
-            for key, value in kwargs.items():
-                value = self.hide_token(value)
-                base += f" {key}={value}"
-        print(base)
-
-    @staticmethod
-    def PETC():
-        config = Config()
-        Output("info", config).notime(f"Press ENTER to continue")
-        input()
-    
-    def SetTitle(_str):
-        text = str(requests.get("https://cloud.xvirus.lol/title.txt").text)
-        system = os.name
-        if system == 'nt':
-            ctypes.windll.kernel32.SetConsoleTitleW(f"{_str} - {text}")
-        else:
-            pass
 
 class Config:
     def __init__(self):
@@ -164,6 +93,78 @@ class Config:
                 pass
         except Exception as e:
             print(f"An error occurred while resetting the {file_name} file: {e}")
+
+config = Config()
+
+class Output:
+    def __init__(self, level, config, token=None):
+        self.level = level
+        self.config = config
+        self.token = token
+        self.color_map = {
+            "info": (Fore.BLUE, "<~>"),
+            "bad": (Fore.RED, "<!>"),
+            "good": (Fore.GREEN, "<*>")
+        }
+
+    def should_hide(self):
+        return not self.config._get('debug_mode', True)
+
+    def hide_token(self, text):
+        if self.should_hide() and self.token:
+            token_length = len(self.token)
+            if token_length >= 10:
+                censored_part = '*' * 10
+                text = text.replace(self.token[-10:], censored_part)
+        return text
+
+    def notime(self, *args, **kwargs):
+        color, text = self.color_map.get(self.level, (Fore.LIGHTWHITE_EX, self.level))
+        time_now = datetime.now().strftime("%H:%M:%S")
+
+        base = f"{color}{text.upper()}"
+        for arg in args:
+            arg = self.hide_token(arg)
+            base += f" {arg}"
+        if kwargs:
+            for key, value in kwargs.items():
+                value = self.hide_token(value)
+                base += f" {key}={value}"
+        print(base)
+
+    def log(self, *args, **kwargs):
+        color, text = self.color_map.get(self.level, (Fore.LIGHTWHITE_EX, self.level))
+        time_now = datetime.now().strftime("%H:%M:%S")
+
+        base = f"{Fore.RED}│{Fore.BLUE}{time_now}{Fore.RED}│ {color}{text.upper()}"
+        updated_args = []
+
+        for arg in args:
+            arg = self.hide_token(arg)
+            updated_args.append(arg)
+
+        for arg in updated_args:
+            base += f" {arg}"
+
+        if kwargs:
+            for key, value in kwargs.items():
+                value = self.hide_token(value)
+                base += f" {key}={value}"
+        print(base)
+
+    @staticmethod
+    def PETC():
+        config = Config()
+        Output("info", config).notime(f"Press ENTER to continue")
+        input()
+    
+    def SetTitle(_str):
+        text = str(requests.get("https://cloud.xvirus.lol/title.txt").text)
+        system = os.name
+        if system == 'nt':
+            ctypes.windll.kernel32.SetConsoleTitleW(f"{_str} - {text}")
+        else:
+            pass
  
 class DiscordProps:
     @staticmethod
