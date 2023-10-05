@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from colorama import Fore
 
 from utils.util import *
-from src.main.scrape_ids import id_scraper
+from main.scrape_ids import id_scraper
 
 def send(token, message, channelid, massping, amount=None):
     config = Config()

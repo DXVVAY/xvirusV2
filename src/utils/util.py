@@ -1,20 +1,22 @@
 import base64
 import ctypes
+import getpass
 import json
 import os
 import random
 import re
+import string
 import sys
 import time
 import types
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+
 import httpx
 import requests
-import string
-from colorama import Fore
-from capmonster_python import capmonster, HCaptchaTask
 import tls_client
+from capmonster_python import HCaptchaTask, capmonster
+from colorama import Fore
 
 THIS_VERSION = "1.0.0"
 
@@ -92,7 +94,7 @@ class Config:
             with open(file_path, 'w') as file:
                 pass
         except Exception as e:
-            print(f"An error occurred while resetting the {file_name} file: {e}")
+            print(f"{e}")
 
 config = Config()
 
@@ -120,9 +122,7 @@ class Output:
 
     def notime(self, *args, **kwargs):
         color, text = self.color_map.get(self.level, (Fore.LIGHTWHITE_EX, self.level))
-        time_now = datetime.now().strftime("%H:%M:%S")
-
-        base = f"{color}{text.upper()}"
+        base = f" {color}{text.upper()}"
         for arg in args:
             arg = self.hide_token(arg)
             base += f" {arg}"
@@ -135,8 +135,7 @@ class Output:
     def log(self, *args, **kwargs):
         color, text = self.color_map.get(self.level, (Fore.LIGHTWHITE_EX, self.level))
         time_now = datetime.now().strftime("%H:%M:%S")
-
-        base = f"{Fore.RED}│{Fore.BLUE}{time_now}{Fore.RED}│ {color}{text.upper()}"
+        base = f" {Fore.RED}│{Fore.BLUE}{time_now}{Fore.RED}│ {color}{text.upper()}"
         updated_args = []
 
         for arg in args:
@@ -157,6 +156,7 @@ class Output:
         config = Config()
         Output("info", config).notime(f"Press ENTER to continue")
         input()
+        gui.main_menu()
     
     def SetTitle(_str):
         text = str(requests.get("https://cloud.xvirus.lol/title.txt").text)
@@ -544,6 +544,14 @@ class utility:
         ids = f.strip().splitlines()
         ids = [idd for idd in ids if idd not in [" ", "", "\n"]]
         return ids
+    
+    def clear():
+        system = os.name
+        if system == 'nt':
+            os.system('cls')
+        else:
+            print('\n'*120)
+        return
 
 class Captcha:
     def solve(url, sitekey, data=None):
@@ -579,3 +587,56 @@ class Captcha:
         bal = json.loads(get_balance_resp)["balance"]
         balance = f"${bal}"
         return balance
+
+class gui:
+    lr = Fore.LIGHTRED_EX
+    lb = Fore.LIGHTBLACK_EX
+    r = Fore.RED
+    pc_username = getpass.getuser()
+    logo = f'''{Fore.RED}
+                                                                                  
+                                         ,.   (   .      )        .      "        
+                                       ("     )  )'     ,'        )  . (`     '`   
+                                     .; )  ' (( (" )    ;(,     ((  (  ;)  "  )"  │Tokens: {len(TokenManager.get_tokens())}
+                                    _"., ,._'_.,)_(..,( . )_  _' )_') (. _..( '.. │Proxies: {len(ProxyManager.get_proxies())}
+                                    ██╗  ██╗██╗   ██╗██╗██████╗ ██╗   ██╗ ██████╗ ├─────────────
+                                    ╚██╗██╔╝██║   ██║██║██╔══██╗██║   ██║██╔════╝ │Running on:
+                                     ╚███╔╝ ╚██╗ ██╔╝██║██████╔╝██║   ██║╚█████╗  │{pc_username}\'s PC
+                                     ██╔██╗  ╚████╔╝ ██║██╔══██╗██║   ██║ ╚═══██╗ ├─────────────
+> [RPC] Toggle RPC                  ██╔╝╚██╗  ╚██╔╝  ██║██║  ██║╚██████╔╝██████╔╝ │Discord link:          
+> [TM] Made by Xvirus™              ╚═╝  ╚═╝   ╚═╝   ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝  │.gg/xvirustool         Notes [NOTE] <
+> [?] {THIS_VERSION} Changelog                                                                                    Restart [RST] <
+> [!] Settings                                                                                     Manage Tokens [TKN] <'''
+
+    options = f'''{r} 
+{r} ╔═══                              ═══╗ ╔═══                               ═══╗ ╔═══                               ═══╗
+{r} ║   ({lb}01{r}) {lb}> Joiner                    {r}║ ║   {r}({lb}10{r}) {lb}> Message Reactor            {r}║ ║   {r}({lb}19{r}) {lb}> N/A{r}                        ║
+{r}     ({lb}02{r}) {lb}> Leaver                          {r}({lb}11{r}) {lb}> Bio Changer                      {r}({lb}21{r}) {lb}> N/A{r}
+{r}     ({lb}03{r}) {lb}> Spammer                         {r}({lb}12{r}) {lb}> User Mass Friender               {r}({lb}22{r}) {lb}> N/A{r}
+{r}     ({lb}04{r}) {lb}> Vc Joiner                       {r}({lb}13{r}) {lb}> Server Mass Friender             {r}({lb}23{r}) {lb}> N/A{r}
+{r}     ({lb}05{r}) {lb}> Server Nickname Changer         {r}({lb}14{r}) {lb}> User Mass DM                     {r}({lb}24{r}) {lb}> N/A{r}
+{r}     ({lb}06{r}) {lb}> Global Nickname Changer         {r}({lb}15{r}) {lb}> Server Mass DM                   {r}({lb}25{r}) {lb}> N/A{r}
+{r}     ({lb}07{r}) {lb}> Accept Rules                    {r}({lb}16{r}) {lb}> N/A                              {r}({lb}26{r}) {lb}> N/A{r}
+{r}     ({lb}08{r}) {lb}> Token Onliner                   {r}({lb}17{r}) {lb}> N/A                              {r}({lb}27{r}) {lb}> N/A{r}
+{r} ║   ({lb}09{r}) {lb}> Button Presser            {r}║ ║   {r}({lb}18{r}) {lb}> N/A                         {r}║ ║  {r}({lb}28{r}) {lb}> N/A{r}                        ║
+{r} ╚═══                              ═══╝ ╚═══                                ═══╝ ╚═══                              ═══╝'''
+
+    def main_menu():
+        utility.clear()
+        print(gui.logo)
+        print(gui.options)
+        print(f'{Fore.RED} ┌──<{gui.pc_username}@Xvirus>─[~]')
+        choicee = input(f' └──╼ $ {Fore.BLUE}').lstrip("0")
+        choice = choicee.upper()
+        
+        if choice == '1':
+            Output("good", config).notime("sex fr")
+            Output.PETC()
+        
+        elif choice == '2':
+            Output("good", config).notime("cum fr")
+            Output.PETC()
+        
+        else:
+            Output("bad", config).notime("Invalid choice please try again!")
+            Output.PETC()

@@ -131,7 +131,7 @@ def token_checker():
         ]
 
         status = f"{Fore.RED} | ".join(info) + f"{Fore.RED}\n"
-        print(status)
+        print(f" {status}")
         
         Output.PETC()
     else:

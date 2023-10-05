@@ -92,7 +92,7 @@ def token_joiner():
         ]
 
         status = f"{Fore.RED} | ".join(info) + f"{Fore.RED}\n"
-        print(status)
+        print(f" {status}")
         Output.PETC()
     else:
         Output("bad", config).log(f"No tokens were found in cache")
