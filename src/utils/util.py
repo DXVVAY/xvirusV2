@@ -11,14 +11,16 @@ import time
 import types
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
-
+from time import sleep
 import httpx
 import requests
 import tls_client
-from capmonster_python import HCaptchaTask, capmonster
+from capsolver_python import HCaptchaTask, capsolver
 from colorama import Fore
+from src import *
 
-THIS_VERSION = "1.0.0"
+
+THIS_VERSION = "2.0.0"
 
 class Config:
     def __init__(self):
@@ -106,7 +108,8 @@ class Output:
         self.color_map = {
             "info": (Fore.BLUE, "<~>"),
             "bad": (Fore.RED, "<!>"),
-            "good": (Fore.GREEN, "<*>")
+            "good": (Fore.GREEN, "<*>"),
+            "cap": (Fore.CYAN, "<CAP>")
         }
 
     def should_hide(self):
@@ -122,7 +125,7 @@ class Output:
 
     def notime(self, *args, **kwargs):
         color, text = self.color_map.get(self.level, (Fore.LIGHTWHITE_EX, self.level))
-        base = f" {color}{text.upper()}"
+        base = f"{color}{text.upper()}"
         for arg in args:
             arg = self.hide_token(arg)
             base += f" {arg}"
@@ -135,7 +138,7 @@ class Output:
     def log(self, *args, **kwargs):
         color, text = self.color_map.get(self.level, (Fore.LIGHTWHITE_EX, self.level))
         time_now = datetime.now().strftime("%H:%M:%S")
-        base = f" {Fore.RED}│{Fore.BLUE}{time_now}{Fore.RED}│ {color}{text.upper()}"
+        base = f"{Fore.RED}│{Fore.BLUE}{time_now}{Fore.RED}│ {color}{text.upper()}"
         updated_args = []
 
         for arg in args:
@@ -153,18 +156,21 @@ class Output:
 
     @staticmethod
     def PETC():
-        config = Config()
         Output("info", config).notime(f"Press ENTER to continue")
         input()
-        gui.main_menu()
     
-    def SetTitle(_str):
-        text = str(requests.get("https://cloud.xvirus.lol/title.txt").text)
+    def SetTitle(text):
         system = os.name
         if system == 'nt':
-            ctypes.windll.kernel32.SetConsoleTitleW(f"{_str} - {text}")
+            ctypes.windll.kernel32.SetConsoleTitleW(f"{text} - Discord API Tool | https://xvirus.lol | Made By Xvirus™")
         else:
             pass
+    
+    def WebText():
+        r = requests.get("https://cloud.xvirus.lol/webtext.txt")
+        text = r.text.strip()
+        print(f"{Fore.RED}Text Of The Week:\n {Fore.BLUE}{text}")
+        sleep(2.5)
  
 class DiscordProps:
     @staticmethod
@@ -175,6 +181,15 @@ class DiscordProps:
             content = requests.get(f"https://discord.com{v}", headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0'}).content.decode()
             if content.find("build_number:\"") != -1:
                 return re.compile(r"build_number:\"(.*?)\"", re.I).findall(content)[0]
+
+    @staticmethod       
+    def getFingerprint() -> str:
+        res = requests.get(
+            'https://discord.com/api/v9/experiments'
+        )
+        requests.cookies = res.cookies
+        return res.json()['fingerprint']
+        
     user_agents = [
         'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
@@ -230,6 +245,7 @@ class DiscordProps:
     language = random.choice(lang)
     channel = random.choice(channels)  
     buildNumber = get_build_number()
+    fingerprint = getFingerprint()
     x_super_properties = base64.b64encode(json.dumps({
         "os": "Windows",
         "browser": "Discord Client",
@@ -268,7 +284,6 @@ class DiscordProps:
         'referer': 'https://discord.com/',
         'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108"',
         'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
@@ -276,13 +291,13 @@ class DiscordProps:
         'x-debug-options': 'bugReporterEnabled',
         'x-discord-locale': 'en-US',
         'x-discord-timezone': zone,
+        'x-fingerprint': fingerprint,
         'x-super-properties': x_super_properties,
     }
 
 class Header:
     @staticmethod
     def tls_session() -> tls_client.Session:
-        config = Config()
         client = tls_client.Session(
             client_identifier=f"chrome_{random.randint(110, 116)}",
             random_tls_extension_order=True,
@@ -364,7 +379,6 @@ class Header:
 
 class ProxyManager:
     def get_proxies():
-        config = Config()
         f = config.read('xvirus_proxies')
         proxies = f.strip().splitlines()
         proxies = [proxy for proxy in proxies if proxy not in [" ", "", "\n"]]
@@ -400,7 +414,6 @@ class ProxyManager:
         return proxy
     
     def get_proxy_type():
-        config = Config()
         h = config._get("proxy_type", "http")
         if "socks5" in h and "h" in h:
             h = "socks5"
@@ -409,7 +422,6 @@ class ProxyManager:
 class TokenManager:
     @classmethod
     def get_tokens(cls):
-        config = Config()
         f = config.read('xvirus_tokens')
         tokens = f.strip().splitlines()
         tokens = [token for token in tokens if token not in [" ", "", "\n"]]
@@ -455,7 +467,6 @@ class TokenManager:
 
 class utility:
     def threads(func, args=[], delay=0, thread_amount=None, return_home=True, text=""):
-        config = Config()
         try:
             tokens = TokenManager.get_tokens()
             maxine = thread_amount
@@ -539,7 +550,6 @@ class utility:
         return "<@!" + "> <@!".join(randomid) + ">"
     
     def get_ids():
-        config = Config()
         f = config.read('xvirus_ids')
         ids = f.strip().splitlines()
         ids = [idd for idd in ids if idd not in [" ", "", "\n"]]
@@ -554,89 +564,58 @@ class utility:
         return
 
 class Captcha:
-    def solve(url, sitekey, data=None):
-        config = Config()
+    def payload(self, proxy:str=None, rqdata:str=None) -> None:
         captchaKey = config._get("captcha_key")
-        cap = HCaptchaTask(captchaKey)
-        cap.set_user_agent(f"Discord-Android/{DiscordProps.buildNumber};RNA")
-        proxy = ProxyManager.random_proxy()
-        if proxy:
-            proxy_type = ProxyManager.get_proxy_type()
-            proxy_parts = proxy.split(':')
-            if len(proxy_parts) == 2:
-                proxy_address, proxy_port = proxy_parts
-                cap.set_proxy(proxy_type, proxy_address, int(proxy_port), proxy_login=None, proxy_password=None)
-        if data:
-            task = cap.create_task(
-                website_url=url,
-                website_key=sitekey,
-                custom_data=data,
-            )
-        else:
-            task = cap.create_task(
-                website_url=url,
-                website_key=sitekey,
-            )
-        result = cap.join_task_result(task)
-        return result.get("gRecaptchaResponse")
-    
+        p = {
+            "clientKey":captchaKey,
+            "task": {
+                "websiteURL":"https://discord.com/",
+                "websiteKey":"a9b5fb07-92ff-493f-86fe-352a2803b3df",
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+                "enterprisePayload":{
+                    "rqdata": rqdata,
+                }
+            }
+        }
+        p['appId']="E68E89B1-C5EB-49FE-A57B-FBE32E34A2B4"
+        p['task']['type'] = "HCaptchaTurboTask"
+        p['task']['proxy'] = proxy 
+        return p
+
+
+    def __init__(self, proxy:str, siteKey:str, siteUrl:str, rqdata:str) -> None:
+        self.debug = False
+        self.proxy = proxy
+        self.siteKey = siteKey
+        self.siteUrl = siteUrl
+        self.rqdata = rqdata
+
+    def solveCaptcha(self) -> str:
+        captchaKey = config._get("captcha_key")
+        r = requests.post(f"https://api.capsolver.com/createTask",json=self.payload(self.proxy, self.rqdata))
+        try:
+            if r.json().get("taskId"):
+                taskid = r.json()["taskId"]
+            else:
+                return None
+        except:
+            Output("bad", config).log("Couldn't get task id.",r.text)
+            return None
+        while True:
+            try:
+                r = requests.post(f"https://api.capsolver.com/getTaskResult",json={"clientKey":captchaKey,"taskId":taskid})
+                if r.json()["status"] == "ready":
+                    key = r.json()["solution"]["gRecaptchaResponse"]
+                    return key
+                elif r.json()['status'] == "failed":
+                    return None
+            except:
+                Output("bad", config).log("Failed to get status.",r.text)
+                return None
+
     def getCapBal():
-        config = Config()
-        key = config._get("captcha_key")
-        get_balance_resp = httpx.post(f"https://api.capmonster.cloud/getBalance", json={"clientKey": key}).text
+        captchaKey = config._get("captcha_key")
+        get_balance_resp = httpx.post(f"https://api.capsolver.com/getBalance", json={"clientKey": captchaKey}).text
         bal = json.loads(get_balance_resp)["balance"]
         balance = f"${bal}"
         return balance
-
-class gui:
-    lr = Fore.LIGHTRED_EX
-    lb = Fore.LIGHTBLACK_EX
-    r = Fore.RED
-    pc_username = getpass.getuser()
-    logo = f'''{Fore.RED}
-                                                                                  
-                                         ,.   (   .      )        .      "        
-                                       ("     )  )'     ,'        )  . (`     '`   
-                                     .; )  ' (( (" )    ;(,     ((  (  ;)  "  )"  │Tokens: {len(TokenManager.get_tokens())}
-                                    _"., ,._'_.,)_(..,( . )_  _' )_') (. _..( '.. │Proxies: {len(ProxyManager.get_proxies())}
-                                    ██╗  ██╗██╗   ██╗██╗██████╗ ██╗   ██╗ ██████╗ ├─────────────
-                                    ╚██╗██╔╝██║   ██║██║██╔══██╗██║   ██║██╔════╝ │Running on:
-                                     ╚███╔╝ ╚██╗ ██╔╝██║██████╔╝██║   ██║╚█████╗  │{pc_username}\'s PC
-                                     ██╔██╗  ╚████╔╝ ██║██╔══██╗██║   ██║ ╚═══██╗ ├─────────────
-> [RPC] Toggle RPC                  ██╔╝╚██╗  ╚██╔╝  ██║██║  ██║╚██████╔╝██████╔╝ │Discord link:          
-> [TM] Made by Xvirus™              ╚═╝  ╚═╝   ╚═╝   ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝  │.gg/xvirustool         Notes [NOTE] <
-> [?] {THIS_VERSION} Changelog                                                                                    Restart [RST] <
-> [!] Settings                                                                                     Manage Tokens [TKN] <'''
-
-    options = f'''{r} 
-{r} ╔═══                              ═══╗ ╔═══                               ═══╗ ╔═══                               ═══╗
-{r} ║   ({lb}01{r}) {lb}> Joiner                    {r}║ ║   {r}({lb}10{r}) {lb}> Message Reactor            {r}║ ║   {r}({lb}19{r}) {lb}> N/A{r}                        ║
-{r}     ({lb}02{r}) {lb}> Leaver                          {r}({lb}11{r}) {lb}> Bio Changer                      {r}({lb}21{r}) {lb}> N/A{r}
-{r}     ({lb}03{r}) {lb}> Spammer                         {r}({lb}12{r}) {lb}> User Mass Friender               {r}({lb}22{r}) {lb}> N/A{r}
-{r}     ({lb}04{r}) {lb}> Vc Joiner                       {r}({lb}13{r}) {lb}> Server Mass Friender             {r}({lb}23{r}) {lb}> N/A{r}
-{r}     ({lb}05{r}) {lb}> Server Nickname Changer         {r}({lb}14{r}) {lb}> User Mass DM                     {r}({lb}24{r}) {lb}> N/A{r}
-{r}     ({lb}06{r}) {lb}> Global Nickname Changer         {r}({lb}15{r}) {lb}> Server Mass DM                   {r}({lb}25{r}) {lb}> N/A{r}
-{r}     ({lb}07{r}) {lb}> Accept Rules                    {r}({lb}16{r}) {lb}> N/A                              {r}({lb}26{r}) {lb}> N/A{r}
-{r}     ({lb}08{r}) {lb}> Token Onliner                   {r}({lb}17{r}) {lb}> N/A                              {r}({lb}27{r}) {lb}> N/A{r}
-{r} ║   ({lb}09{r}) {lb}> Button Presser            {r}║ ║   {r}({lb}18{r}) {lb}> N/A                         {r}║ ║  {r}({lb}28{r}) {lb}> N/A{r}                        ║
-{r} ╚═══                              ═══╝ ╚═══                                ═══╝ ╚═══                              ═══╝'''
-
-    def main_menu():
-        utility.clear()
-        print(gui.logo)
-        print(gui.options)
-        print(f'{Fore.RED} ┌──<{gui.pc_username}@Xvirus>─[~]')
-        choicee = input(f' └──╼ $ {Fore.BLUE}').lstrip("0")
-        choice = choicee.upper()
-        
-        if choice == '1':
-            Output("good", config).notime("sex fr")
-            Output.PETC()
-        
-        elif choice == '2':
-            Output("good", config).notime("cum fr")
-            Output.PETC()
-        
-        else:
-            Output("bad", config).notime("Invalid choice please try again!")
-            Output.PETC()

@@ -5,7 +5,7 @@ import time
 import random
 import sys
 import websocket
-from utils.util import *
+from src import *
 from colorama import Fore
 
 def onliner(token, show=False):
@@ -38,7 +38,6 @@ def onliner(token, show=False):
         )
     )
     if show:
-        config = Config()
         Output("good", config, token).log(f"Successfully Onlined {Fore.BLUE}({token})")
 
     time.sleep(heartbeat_interval)
@@ -47,7 +46,6 @@ def onliner(token, show=False):
 def token_onliner():
     max_threads = utility.asknum("Thread Count")
     tokens = TokenManager.get_tokens()
-    config = Config()
     show = True
     if tokens:
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
@@ -68,7 +66,6 @@ def token_onliner():
 def online_tokens(show=False):
     max_threads = 9
     tokens = TokenManager.get_tokens()
-    config = Config()
     show = show
     if tokens:
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:

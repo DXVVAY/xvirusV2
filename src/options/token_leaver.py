@@ -5,12 +5,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 from colorama import Fore
 
-from utils.util import *
+from src import *
 
 def token_leaver():
     left = 0
     error = 0
-    config = Config()
     args = []
     tokens = TokenManager.get_tokens()
 
@@ -22,28 +21,28 @@ def token_leaver():
         })
 
         if result.status_code == 204:
-            Output("good", config, token).log(f"Successfully Left Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             left += 1
         elif result.text.startswith('{"captcha_key"'):
-            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
             error += 1
         elif result.text.startswith('{"message": "401: Unauthorized'):
-            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
             error += 1
         elif "Cloudflare" in result.text:
-            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
             error += 1
         elif "\"code\": 40007" in result.text:
-            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
             error += 1
         elif "\"code\": 40002" in result.text:
-            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
             error += 1
         elif "\"code\": 10006" in result.text:
-            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
             error += 1
         else:
-            Output("bad", config, token).log(f"Error Leaving Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
             error += 1
 
     def thread_complete(future):

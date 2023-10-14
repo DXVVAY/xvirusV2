@@ -2,32 +2,69 @@ import base64
 import datetime
 import time
 from concurrent.futures import ThreadPoolExecutor
-
+import webbrowser
 from colorama import Fore
 
-from utils.util import *
+from src import *
 
+def buyTokensDazeer(): 
+    redirect = utility.ask("Do you want to redirect to dazeer.sellpass.io (y/n)")
+    if redirect.lower() == 'y':
+        webbrowser.open("https://dazeer.sellpass.io/products/634d684f745af")
+    elif redirect.lower() == 'n':
+        Output("bad", config)("Redirect not requested.")
+    else:
+        Output("bad", config)("Invalid input. Redirect not requested.")
 
-def token_checker():
+def buyTokensBody(): 
+    redirect = utility.ask("Do you want to redirect to https://bodyx.mysellix.io/product/ (y/n)")
+    if redirect.lower() == 'y':
+        webbrowser.open("https://bodyx.mysellix.io/product/64e4b3244c004")
+    elif redirect.lower() == 'n':
+        Output("bad", config)("Redirect not requested.")
+    else:
+        Output("bad", config)("Invalid input. Redirect not requested.")
+
+def choose_store():
+    print(f'''
+        {Fore.BLUE}[{Fore.RED}1{Fore.BLUE}] Body Tokens
+        {Fore.BLUE}[{Fore.RED}2{Fore.BLUE}] Dazeer Tokens
+    ''')
+    choice = utility.ask("Choice")
+
+    if choice == '1':
+        buyTokensBody()
+    
+    if choice == '2':
+        buyTokensBody()
+
+def token_manager():
+    print(f'''
+        {Fore.BLUE}[{Fore.RED}1{Fore.BLUE}] Save Tokens
+        {Fore.BLUE}[{Fore.RED}2{Fore.BLUE}] Empty Tokens
+        {Fore.BLUE}[{Fore.RED}3{Fore.BLUE}] Buy Tokens
+    ''')
+    choice = utility.ask("Choice")
+
+    if choice == '1':
+        checker()
+    
+    if choice == '2':
+        config.reset('xvirus_tokens')
+        Output("info", config).notime("Tokens Chache Emptied.")
+        Output.PETC()
+    
+    if choice == '3':
+        choose_store()
+
+def checker():
     valid = 0
     locked = 0
     invalid = 0
     error = 0
-    config = Config()
-    args = []
-    Output("info", config).notime("Do you want to check the tokens in cache or custom path")
-    print(f'''
-    {Fore.BLUE}[{Fore.RED}1{Fore.BLUE}] Cache Checker
-    {Fore.BLUE}[{Fore.RED}2{Fore.BLUE}] Custom Checker\n''')
-
-    path = utility.ask("Choice")
-
-    if path == '2':
-        path = utility.ask("Enter the custom path to load tokens from").strip()
-        tokens = TokenManager.custom_path(path)
-    else:
-        tokens = TokenManager.get_tokens()
-
+    
+    token_file_path = utility.ask("Enter the path to the text file containing tokens").strip()
+    tokens = TokenManager.custom_path(token_file_path)
 
     def check_token(token):
         nonlocal valid, locked, invalid, error
@@ -37,6 +74,7 @@ def token_checker():
         if result.status_code == 200:
             Output("good", config, token).log(f"Valid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             valid += 1
+            config.add('xvirus_tokens', token)
         elif "You need to verify your account in order to perform this action." in result.text:
             Output("info", config, token).log(f"Locked -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             locked += 1
@@ -44,7 +82,6 @@ def token_checker():
             Output("bad", config, token).log(f"Invalid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             invalid += 1
         else:
-            
             error += 1
 
     def thread_complete(future):
@@ -92,8 +129,8 @@ def token_checker():
 
         status = f"{Fore.RED} | ".join(info) + f"{Fore.RED}\n"
         print(f" {status}")
+        
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad", config).log(f"No tokens were found in the specified text file")
         Output.PETC()
-        

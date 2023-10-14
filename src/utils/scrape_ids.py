@@ -3,19 +3,16 @@ import os
 import random
 import threading
 import time
-
 import requests
 import websocket
 from colorama import Fore
-
-from utils.util import *
+from src import *
 
 folder_path = os.path.join(os.getenv('LOCALAPPDATA'), 'xvirus_config')
 file = os.path.join(folder_path, 'xvirus_ids')
-config = Config()
 
-class WebSocket(websocket.WebSocketApp):
-    
+
+class WebSocket(websocket.WebSocketApp): 
     def __init__(self, token, guild_id, channel_id):
         self.MAX_ITER = 10
         self.token = token
@@ -150,11 +147,11 @@ class WebSocket(websocket.WebSocketApp):
             elif decoded["t"] == "GUILD_MEMBER_LIST_UPDATE":
                 parsed = self.parseGuildMemberListUpdate(decoded)
                 self.msgs.append(len(self.members))
-                print(f"{Fore.BLUE} <*> Scraped {Fore.RED}{len(self.members)}{Fore.BLUE} members", end="\r")
+                print(f"{Fore.BLUE}<*> Scraping {Fore.RED}{len(self.members)}{Fore.BLUE} members", end="\r")
                 if self.d == len(self.members):
                     self.iter += 1
                     if self.iter == self.MAX_ITER:
-                        print(f"{Fore.BLUE} <*> Scraped {Fore.RED}{len(self.members)}{Fore.BLUE} members")
+                        print(f"{Fore.BLUE}<*> Scraping {Fore.RED}{len(self.members)}{Fore.BLUE} members")
                         self.endScraping = True
                         self.close()
                         return
@@ -196,7 +193,7 @@ class WebSocket(websocket.WebSocketApp):
                         time.sleep(0.45)
                         self.scrapeUsers()
                 if self.endScraping:
-                    print(f"{Fore.BLUE} <*> Scraped {Fore.RED}{len(self.members)}{Fore.BLUE} members")
+                    print(f"{Fore.BLUE}<*> Scraping {Fore.RED}{len(self.members)}{Fore.BLUE} members")
                     self.close()
         except Exception as e:
             print(e)
