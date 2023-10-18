@@ -7,23 +7,22 @@ from colorama import Fore
 
 from src import *
 
-def token_leaver():
-    Output.SetTitle(f"Token Leaver")
-    left = 0
+def bypass_rules():
+    Output.SetTitle(f"Rules Bypasser")
+    accepted = 0
     error = 0
     args = []
     tokens = TokenManager.get_tokens()
 
-    def leave(token, guild_id):
-        nonlocal left, error
+    def accept(token, guild_id):
+        nonlocal accepted, error
         session, headers, cookie = Header.get_client(token)
-        result = session.delete(f"https://discord.com/api/v9/users/@me/guilds/{guild_id}", headers=headers, cookies=cookie, json={
-            'session_id': utility.rand_str(32),
-        })
+        rules = session.get(f"https://discord.com/api/v9/guilds/{guild_id}/member-verification?with_guild=false", headers=headers, cookies=cookie).json()
+        result = session.put(f"https://discord.com/api/v9/guilds/{guild_id}/requests/@me", headers=headers, cookies=cookie, json=rules)
 
-        if result.status_code == 204:
+        if result.status_code == 201:
             Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-            left += 1
+            accepted += 1
         elif result.text.startswith('{"captcha_key"'):
             Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
             error += 1
@@ -31,7 +30,7 @@ def token_leaver():
             Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
             error += 1
         elif "Cloudflare" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare)")
             error += 1
         elif "\"code\": 40007" in result.text:
             Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
@@ -42,12 +41,18 @@ def token_leaver():
         elif "\"code\": 10006" in result.text:
             Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
             error += 1
+        elif "\"code\": 50001" in result.text:
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")
+            error += 1
+        elif "\"code\": 150009" in result.text:
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Alr Accepted)")
+            error += 1
         else:
             Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
             error += 1
 
     def thread_complete(future):
-        nonlocal left, error
+        nonlocal accepted, error
         result = future.result()
 
     if tokens is None:
@@ -74,17 +79,17 @@ def token_leaver():
                 try:
                     token = TokenManager.OnlyToken(token)
                     args = [token, guild_id]
-                    future = executor.submit(leave, *args)
+                    future = executor.submit(accept, *args)
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
                     Output("bad", config).log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Left {str(left)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info", config).notime(f"{str(accepted)} Tokens Accepted Rules In {elapsed_time:.2f} Seconds")
 
         info = [
-            f"{Fore.LIGHTGREEN_EX}Left: {str(left)}",
+            f"{Fore.LIGHTGREEN_EX}Accepted: {str(accepted)}",
             f"{Fore.LIGHTRED_EX}Errors: {str(error)}",
             f"{Fore.LIGHTCYAN_EX}Total: {len(tokens)}"
         ]

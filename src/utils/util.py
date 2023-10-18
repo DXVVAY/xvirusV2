@@ -17,10 +17,11 @@ import requests
 import tls_client
 from capsolver_python import HCaptchaTask, capsolver
 from colorama import Fore
+from decimal import Decimal
 from src import *
 
-
 THIS_VERSION = "2.0.0"
+whitelisted = ["1157400926877925558", "1157399811423731753", "1157401701481979914", "1157605101901467689", "1146496916419526727"]
 
 class Config:
     def __init__(self):
@@ -28,8 +29,8 @@ class Config:
         os.makedirs(self.folder_path, exist_ok=True)
         self.config_file = os.path.join(self.folder_path, 'config.json')
         self.config_data = self._load('config.json')
-
-        for file_name in ['xvirus_tokens', 'xvirus_proxies', 'xvirus_usernames', 'xvirus_ids']:
+        self.xvirus_files = ['xvirus_tokens', 'xvirus_proxies', 'xvirus_usernames', 'xvirus_ids', 'xvirus_key']
+        for file_name in self.xvirus_files:
             file_path = os.path.join(self.folder_path, file_name)
             if not os.path.exists(file_path):
                 with open(file_path, 'w') as file:
@@ -58,7 +59,6 @@ class Config:
     def _get(self, key, default=None):
         return self.config_data.get(key, default) if default is not None else self.config_data.get(key)
 
-
     def _remove(self, key):
         if key in self.config_data:
             del self.config_data[key]
@@ -69,7 +69,7 @@ class Config:
         self._save('config.json', self.config_data)
 
     def add(self, file_name, data):
-        if file_name not in ['xvirus_tokens', 'xvirus_proxies', 'xvirus_usernames', 'xvirus_ids']:
+        if file_name not in self.xvirus_files:
             raise ValueError(f"Error: {file_name} is not a valid file name.")
         
         file_path = os.path.join(self.folder_path, file_name)
@@ -77,7 +77,7 @@ class Config:
             file.write(data + '\n')
 
     def read(self, file_name):
-        if file_name not in ['xvirus_tokens', 'xvirus_proxies', 'xvirus_usernames', 'xvirus_ids']:
+        if file_name not in self.xvirus_files:
             raise ValueError(f"Error: {file_name} is not a valid file name.")
         
         file_path = os.path.join(self.folder_path, file_name)
@@ -88,7 +88,7 @@ class Config:
             raise FileNotFoundError(f"Error: {file_name} not found.")
     
     def reset(self, file_name):
-        if file_name not in ['xvirus_tokens', 'xvirus_proxies', 'xvirus_usernames', 'xvirus_ids']:
+        if file_name not in self.xvirus_files:
             raise ValueError(f"Error: {file_name} is not a valid file name.")
         
         file_path = os.path.join(self.folder_path, file_name)
@@ -158,7 +158,9 @@ class Output:
     def PETC():
         Output("info", config).notime(f"Press ENTER to continue")
         input()
+        __import__("main").gui.main_menu()
     
+    @staticmethod
     def SetTitle(text):
         system = os.name
         if system == 'nt':
@@ -166,6 +168,7 @@ class Output:
         else:
             pass
     
+    @staticmethod
     def WebText():
         r = requests.get("https://cloud.xvirus.lol/webtext.txt")
         text = r.text.strip()
@@ -182,6 +185,16 @@ class DiscordProps:
             if content.find("build_number:\"") != -1:
                 return re.compile(r"build_number:\"(.*?)\"", re.I).findall(content)[0]
 
+
+    @staticmethod       
+    def getFingerprint() -> str:
+        res = requests.get(
+            'https://discord.com/api/v9/experiments'
+        )
+        requests.cookies = res.cookies
+        return res.json()['fingerprint']
+        
+        
     @staticmethod       
     def getFingerprint() -> str:
         res = requests.get(
@@ -244,8 +257,8 @@ class DiscordProps:
     user_agent = random.choice(user_agents)
     language = random.choice(lang)
     channel = random.choice(channels)  
+    brand = random.choice(brands)
     buildNumber = get_build_number()
-    fingerprint = getFingerprint()
     x_super_properties = base64.b64encode(json.dumps({
         "os": "Windows",
         "browser": "Discord Client",
@@ -260,21 +273,6 @@ class DiscordProps:
         "os_version_string": "10.0.22638",
         "os_arch_string": "x64"}).encode()).decode()
     
-    bypassheaders = {
-        'authority': 'discord.com',
-        'x-super-properties': x_super_properties,
-        'x-discord-locale': 'en',
-        'x-debug-options': 'bugReporterEnabled',
-        'accept-language': 'en',
-        'user-agent': user_agent,
-        'content-type': 'application/json',
-        'accept': '*/*',
-        'origin': 'https://discord.com',
-        'sec-fetch-site': 'same-origin',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-dest': 'empty',
-        }
-    
     default_headers = {
         'authority': 'discord.com',
         'accept': '*/*',
@@ -282,7 +280,7 @@ class DiscordProps:
         'content-type': 'application/json',
         'origin': 'https://discord.com',
         'referer': 'https://discord.com/',
-        'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108"',
+        'sec-ch-ua': brand,
         'sec-ch-ua-mobile': '?0',
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
@@ -291,7 +289,6 @@ class DiscordProps:
         'x-debug-options': 'bugReporterEnabled',
         'x-discord-locale': 'en-US',
         'x-discord-timezone': zone,
-        'x-fingerprint': fingerprint,
         'x-super-properties': x_super_properties,
     }
 
@@ -345,6 +342,14 @@ class Header:
         
         return client
 
+    @staticmethod       
+    def getFingerprint() -> str:
+        res = requests.get(
+            'https://discord.com/api/v9/experiments'
+        )
+        requests.cookies = res.cookies
+        return res.json()['fingerprint']
+
     @staticmethod
     def get_cookies(session, headers):
         cookies = dict(
@@ -363,10 +368,10 @@ class Header:
     def get_client(token):
         default_headers = DiscordProps.default_headers.copy()
         default_headers["authorization"] = token
-
+        fingerprint = Header.getFingerprint()
         session = Header.tls_session()
         cookie = Header.get_cookies(session, headers=default_headers)
-    
+        default_headers["x-fingerprint"] = fingerprint
         default_headers["cookie"] = (
             f'__dcfduid={cookie["__dcfduid"]}; '
             f'__sdcfduid={cookie["__sdcfduid"]}; '
@@ -466,79 +471,26 @@ class TokenManager:
             return None
 
 class utility:
-    def threads(func, args=[], delay=0, thread_amount=None, return_home=True, text=""):
-        try:
-            tokens = TokenManager.get_tokens()
-            maxine = thread_amount
-            
-            if thread_amount is None:
-                thread_amount = utility.ask(f"Amount Of Threads")
-                try:
-                    thread_amount = int(thread_amount)
-                except ValueError:
-                    pass
-                
-                if not thread_amount:
-                    thread_amount = len(tokens)
-                
-                if thread_amount > len(tokens):
-                    thread_amount = len(tokens)
-            
-            if tokens:
-                try:
-                    with ThreadPoolExecutor(max_workers=int(thread_amount)) as executor:
-                        for token in tokens:
-                            try:
-                                token = TokenManager.OnlyToken(token)
-                                args.append(token)
-                                executor.submit(func, *args)
-                                args.remove(token)
-                                time.sleep(delay)
-                                    
-                            except Exception as e:
-                                Output("error", config).log(f"{Fore.RED}Error: {e}")
-                    
-                    if maxine is not None:
-                        name = " ".join([name.capitalize() for name in func.__name__.split('_')])
-                        if return_home:
-                            Output.PETC()
-                    
-                    time.sleep(5)
-                    
-                    if return_home:
-                        Output.PETC()
-                except Exception as e:
-                    Output("error", config).log(f"{Fore.RED}Error: {e}")
-                    if return_home:
-                        Output.PETC()
-            else:
-                Output("error", config).notime(f"No tokens were found in the cache")
-                if return_home:
-                    Output.PETC()
-        except Exception as e:
-            Output("error", config).notime(f"{Fore.RED}ERROR: {e}")
-            if return_home:
-                Output.PETC()
-
     def rand_str(length:int) -> str:
         return ''.join(random.sample(string.ascii_lowercase+string.digits, length))
     
-    def get_guild(invite):
-        try:
-            result = requests.get(f"https://discord.com/api/v9/invites/{invite}?inputValue={invite}&with_counts=true&with_expiration=true")
-            data = result.json()
-            if "Unknown Invite" in data.get("message"):
-                return None
-            return data
-        except:
-            return None
-
     def ask(text: str = ""):
         ask = input(f"{Fore.RED}<~> {text}: {Fore.BLUE}")
+        if ask in whitelisted:
+            Output("bad", config).notime(f"Answer Whitelisted! Press enter to continue...")
+            input()
+            __import__("main").gui.main_menu()
+        elif ask == "back":
+            Output("info", config).notime(f"Going Back...")
+            sleep(2)
+            __import__("main").gui.main_menu()
         return ask
     
-    def asknum(num: int = ""):
+    def asknum(num = ""):
         ask = input(f"{Fore.RED}<~> {num}: {Fore.BLUE}")
+        if ask == "back":
+            Output("info", config).notime(f"Going Back...")
+            __import__("main").gui.main_menu()
         return ask
     
     def get_random_id(id):
@@ -547,13 +499,19 @@ class utility:
         with open(file, "r", encoding="utf8") as f:
             users = [line.strip() for line in f.readlines()]
         randomid = random.sample(users, id)
-        return "<@!" + "> <@!".join(randomid) + ">"
+        return "<@" + "> <@".join(randomid) + ">"
     
     def get_ids():
         f = config.read('xvirus_ids')
         ids = f.strip().splitlines()
         ids = [idd for idd in ids if idd not in [" ", "", "\n"]]
         return ids
+    
+    def get_usernames():
+        f = config.read('xvirus_usernames')
+        users = f.strip().splitlines()
+        users = [user for user in users if user not in [" ", "", "\n"]]
+        return users
     
     def clear():
         system = os.name
@@ -562,6 +520,114 @@ class utility:
         else:
             print('\n'*120)
         return
+
+    def message_info(message_link = None):
+        if message_link is None:
+            message_link = utility.ask("Message link")
+        pattern = re.compile(r"^https:\/\/(ptb\.|canary\.)?discord\.com\/channels\/\d+\/\d+\/\d+$")
+        if pattern.match(message_link):
+            link_parts = message_link.split("/")
+            guild_id, channel_id, message_id = link_parts[4], link_parts[5], link_parts[6]
+            return {
+                "guild_id": guild_id,
+                "channel_id": channel_id,
+                "message_id": message_id
+            }
+        else:
+            Output("bad", config).notime("Invalid message link")
+            return None
+
+    def get_message(token, channel_id, message_id, session=None, headers=None, cookie=None):
+        if session is None or headers is None or cookie is None:
+            session, headers, cookie = Header.get_client(token)
+
+        try:
+            response = session.get(f"https://discord.com/api/v9/channels/{channel_id}/messages?limit=1&around={message_id}", headers=headers, cookies=cookie).json()
+            return response[0]
+        except Exception as e:
+            return {"code": 10008}
+
+    def get_buttons(token, guild_id, channel_id, message_id, session=None, headers=None, cookie=None):
+        try:
+            message = utility.get_message(token, str(channel_id), str(message_id), session, headers, cookie)
+
+            if message.get("code") == 10008 or len(message.get("components", [])) == 0:
+                return None
+
+            buttons = []
+            for component in message["components"]:
+                for button in component.get("components", []):
+                    buttons.append({
+                        "label": button.get("label"),
+                        "custom_id": button["custom_id"],
+                        "application_id": message["author"]["id"],
+                    })
+
+            return buttons
+        except Exception as e:
+            Output("bad", config).notime(f"{e}")
+            return None
+    
+    def get_reactions(channel_id, message_id, iteration=0):
+        if iteration > 5:
+            return None
+
+        try:
+            token = TokenManager.get_random_token()
+            message = utility.get_message(token=token, channel_id=channel_id, message_id=message_id)
+            if message.get("code") == 10008:
+                return get_reactions(channel_id, message_id, iteration=iteration+1)
+            emojis = []
+            reactions = message.get("reactions", [])
+
+            if not reactions:
+                return None
+
+            for reaction in reactions:
+                emoji = reaction["emoji"]
+                emoji_name = emoji["name"]
+                emoji_id = emoji["id"]
+
+                if emoji_id is None:
+                    custom = False
+                    emoji_name_with_id = emoji_name
+                else:
+                    custom = True
+                    emoji_name_with_id = f"{emoji_name}:{emoji_id}"
+
+                emojis.append({
+                    "name": emoji_name_with_id,
+                    "count": reaction["count"],
+                    "custom": custom
+                })
+            return emojis
+        except Exception as e:
+            Output("bad", config).notime(f"{e}")
+            return None
+
+    def CheckWebhook(webhook):
+        try:
+            response = requests.get(webhook)
+            response.raise_for_status()
+        except requests.exceptions.RequestException:
+            Output("bad", config).notime(f"Invalid Webhook.")
+            sleep(1)
+            Output.PETC()
+    
+        try:
+            json_data = response.json()
+            j = json_data["name"]
+            Output("info", config).notime(f"Valid webhook! {Fore.RED}({j})")
+        except (KeyError, json.decoder.JSONDecodeError):
+            Output("bad", config).notime(f"Invalid Webhook.")
+            sleep(1)
+    
+    def make_menu(*options):
+        print()
+        for num, option in enumerate(options, start=1):
+            label = f"    {Fore.BLUE}[{Fore.RED}{num}{Fore.BLUE}] {Fore.RED}{option}"
+            print(label)
+        print()
 
 class Captcha:
     def payload(self, proxy:str=None, rqdata:str=None) -> None:
@@ -617,5 +683,4 @@ class Captcha:
         captchaKey = config._get("captcha_key")
         get_balance_resp = httpx.post(f"https://api.capsolver.com/getBalance", json={"clientKey": captchaKey}).text
         bal = json.loads(get_balance_resp)["balance"]
-        balance = f"${bal}"
-        return balance
+        Output("info", config).notime(f"Captcha Balance: ${bal}")

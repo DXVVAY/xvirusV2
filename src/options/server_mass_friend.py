@@ -7,41 +7,44 @@ from colorama import Fore
 
 from src import *
 
-def token_joiner():
-    Output.SetTitle(f"Token Joiner")
-    joined = 0
+def server_mass_friend():
+    Output.SetTitle(f"Server Mass Friend")
+    sent = 0
     error = 0
     args = []
     tokens = TokenManager.get_tokens()
+    id_scraper()
+    user_scraper()
 
-    def runJoiner(token, invite):
+    def runFrinder(token, username):
         proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
-        retry, rqdata, rqtoken = join(token, invite, "","")
+        retry, rqdata, rqtoken = send(token, username, "","")
         if retry:
-            solver = Captcha(proxy=proxy, siteKey="4c672d35-0701-42b2-88c3-78380b0db560", siteUrl="https://discord.com/", rqdata=rqdata)
+            solver = Captcha(proxy=proxy, siteKey="b2b02ab5-7dae-4d6f-830e-7b55634c888b", siteUrl="https://discord.com/", rqdata=rqdata)
             Output("cap", config).log(f'Solving Captcha...')
             capkey = solver.solveCaptcha()
             if capkey is not None:
                 Output("cap", config).log(f"Solved -> {Fore.LIGHTBLACK_EX} {capkey[-40:]}")
             else: 
                 Output("bad", config).log(f"Failed To Solve -> {Fore.LIGHTBLACK_EX} {capkey}")
-            join(token, invite, capkey, rqtoken)
+            send(token, username, capkey, rqtoken)
 
-    def join(token, invite, capkey, rqtoken):
-        nonlocal joined, error
+    def send(token, username, capkey, rqtoken):
+        nonlocal sent, error
         session, headers, cookie = Header.get_client(token)
         
         if capkey != "":
             headers["x-captcha-key"] = capkey
             headers["x-captcha-rqtoken"] = rqtoken
             
-        result = session.post(f"https://discord.com/api/v9/invites/{invite}", headers=headers, cookies=cookie, json={
+        result = session.post(f"https://discord.com/api/v9/users/@me/relationships", headers=headers, cookies=cookie, json={
             'session_id': utility.rand_str(32),
+            'username': username,
         })
 
-        if result.status_code == 200:
+        if result.status_code == 204:
             Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-            joined += 1
+            sent += 1
             return False, None, None  
         elif result.text.startswith('{"captcha_key"'):
             Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
@@ -77,7 +80,7 @@ def token_joiner():
 
         return False
     def thread_complete(future):
-        nonlocal joined, error
+        nonlocal sent, error
         result = future.result()
 
     if tokens is None:
@@ -85,9 +88,8 @@ def token_joiner():
         Output.PETC()
         return
 
-    invite = utility.ask("Invite")
-    invite = invite.replace("https://discord.gg/", "").replace("https://discord.com/invite/", "").replace("discord.gg/", "").replace("https://discord.com/invite/", "")
-    invite_parts = invite.split("/")
+    usernames  = utility.get_usernames()
+    username = random.choice(usernames)
     max_threads = utility.asknum("Thread Count")
 
     try:
@@ -105,18 +107,18 @@ def token_joiner():
             for token in tokens:
                 try:
                     token = TokenManager.OnlyToken(token)
-                    args = [token, invite]
-                    future = executor.submit(runJoiner, *args)
+                    args = [token, username]
+                    future = executor.submit(runFrinder, *args)
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
                     Output("bad", config).log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Joined {str(joined)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info", config).notime(f"Sent Friend Request Using {str(sent)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
-            f"{Fore.LIGHTGREEN_EX}Joined: {str(joined)}",
+            f"{Fore.LIGHTGREEN_EX}Sent: {str(sent)}",
             f"{Fore.LIGHTRED_EX}Errors: {str(error)}",
             f"{Fore.LIGHTCYAN_EX}Total: {len(tokens)}"
         ]

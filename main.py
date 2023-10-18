@@ -1,6 +1,11 @@
 from src import *
 
 class gui:
+    def WIP():
+        Output.SetTitle("This Option Is A WIP")
+        Output("info", config).notime("This Option Is A Work In Progress, It Will Be Available In The Next Update!")
+        Output.PETC()
+
     lr = Fore.LIGHTRED_EX
     lb = Fore.LIGHTBLACK_EX
     r = Fore.RED
@@ -22,15 +27,15 @@ class gui:
 
     options = f'''{r} 
 {r}╔═══                              ═══╗ ╔═══                               ═══╗ ╔═══                                 ═══╗
-{r}║   ({lb}01{r}) {lb}> Joiner                    {r}║ ║   {r}({lb}10{r}) {lb}> Message Reactor            {r}║ ║   {r}({lb}19{r}) {lb}> N/A{r}                          ║
-{r}    ({lb}02{r}) {lb}> Leaver                          {r}({lb}11{r}) {lb}> Bio Changer                      {r}({lb}21{r}) {lb}> N/A{r}
-{r}    ({lb}03{r}) {lb}> Spammer                         {r}({lb}12{r}) {lb}> User Mass Friender               {r}({lb}22{r}) {lb}> N/A{r}
-{r}    ({lb}04{r}) {lb}> Checker                         {r}({lb}13{r}) {lb}> Server Mass Friender             {r}({lb}23{r}) {lb}> N/A{r}
-{r}    ({lb}05{r}) {lb}> Server Nickname Changer         {r}({lb}14{r}) {lb}> User Mass DM                     {r}({lb}24{r}) {lb}> N/A{r}
-{r}    ({lb}06{r}) {lb}> Global Nickname Changer         {r}({lb}15{r}) {lb}> Server Mass DM                   {r}({lb}25{r}) {lb}> N/A{r}
-{r}    ({lb}07{r}) {lb}> Accept Rules                    {r}({lb}16{r}) {lb}> N/A                              {r}({lb}26{r}) {lb}> N/A{r}
-{r}    ({lb}08{r}) {lb}> Token Onliner                   {r}({lb}17{r}) {lb}> N/A                              {r}({lb}27{r}) {lb}> N/A{r}
-{r}║   ({lb}09{r}) {lb}> Button Presser            {r}║ ║   {r}({lb}18{r}) {lb}> N/A                         {r}║ ║  {r}({lb}28{r}) {lb}> N/A{r}                          ║
+{r}║   ({lb}01{r}) {lb}> Joiner                    {r}║ ║   {r}({lb}10{r}) {lb}> Global Nick Changer        {r}║ ║   {r}({lb}19{r}) {lb}> User Mass Friend{r}             ║
+{r}    ({lb}02{r}) {lb}> Leaver                          {r}({lb}11{r}) {lb}> Server Nick Changer              {r}({lb}20{r}) {lb}> Server Mass Friend{r}
+{r}    ({lb}03{r}) {lb}> Spammer                         {r}({lb}12{r}) {lb}> HypeSquad Changer                {r}({lb}21{r}) {lb}> N/A{r}
+{r}    ({lb}04{r}) {lb}> Checker                         {r}({lb}13{r}) {lb}> Bio Changer                      {r}({lb}22{r}) {lb}> N/A{r}
+{r}    ({lb}05{r}) {lb}> Bypass Rules                    {r}({lb}14{r}) {lb}> Pronouns Changer                 {r}({lb}23{r}) {lb}> N/A{r}
+{r}    ({lb}06{r}) {lb}> Bypass RestoreCord              {r}({lb}15{r}) {lb}> VC Joiner                        {r}({lb}24{r}) {lb}> N/A{r}
+{r}    ({lb}07{r}) {lb}> Button Presser                  {r}({lb}16{r}) {lb}> Sound Board Spammer              {r}({lb}25{r}) {lb}> N/A{r}
+{r}    ({lb}08{r}) {lb}> Reactor                         {r}({lb}17{r}) {lb}> Fake Typer                       {r}({lb}26{r}) {lb}> N/A{r}
+{r}║   ({lb}09{r}) {lb}> Mass Thread               {r}║ ║   {r}({lb}18{r}) {lb}> Forum Spammer               {r}║ ║  {r}({lb}27{r}) {lb}> N/A{r}                          ║
 {r}╚═══                              ═══╝ ╚═══                                ═══╝ ╚═══                                ═══╝'''
 
     def main_menu():
@@ -44,13 +49,55 @@ class gui:
 
         try:
             if choice == '1':
-                token_joiner()
+                utility.make_menu(f"RestoreCord Mode {Fore.RED}(bypass captcha)", f"Normal Mode {Fore.RED}(solve captcha)")
+                choice = utility.ask("Choice")
+                if choice == '1':
+                    restorecord_bypass()
+                else:
+                    token_joiner()
             elif choice == '2':
                 token_leaver()
             elif choice == '3':
                 channel_spammer()
             elif choice == '4':
                 token_checker()
+            elif choice == '5':
+                bypass_rules()
+            elif choice == '6':
+                restorecord_bypass()
+            elif choice == '7':
+                button_presser()
+            elif choice == '8':
+                token_reactor()
+            elif choice == '9':
+                mass_thread()
+            elif choice == '10':
+                global_nicker()
+            elif choice == '11':
+                server_nicker()
+            elif choice == '12':
+                hypesquad_changer()
+            elif choice == '13':
+                token_bio_changer()
+            elif choice == '14':
+                token_pron_changer()
+            elif choice == '15':
+                utility.make_menu("Join And Stay", "Join And Leave Spamm")
+                choice = utility.ask("Choice")
+                if choice == '1':
+                    token_vc_joiner()
+                else:
+                    vc_join_spammer()
+            elif choice == '16':
+                soundboard_spammer()
+            elif choice == '17':
+                token_typer()
+            elif choice == '18':
+                gui.WIP()
+            elif choice == '19':
+                user_mass_friend()
+            elif choice == '20':
+                server_mass_friend()
             elif choice == 'TKN':
                 token_manager()
             else:

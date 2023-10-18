@@ -1,4 +1,4 @@
-import base64
+
 import datetime
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -9,15 +9,14 @@ from src import *
 
 
 def token_checker():
+    Output.SetTitle(f"Token Checker")
     valid = 0
     locked = 0
     invalid = 0
     error = 0
     args = []
     Output("info", config).notime("Do you want to check the tokens in cache or custom path")
-    print(f'''
-    {Fore.BLUE}[{Fore.RED}1{Fore.BLUE}] Cache Checker
-    {Fore.BLUE}[{Fore.RED}2{Fore.BLUE}] Custom Checker\n''')
+    utility.make_menu("Cache Checker", "Custom Checker")
 
     path = utility.ask("Choice")
 
@@ -59,11 +58,11 @@ def token_checker():
 
     try:
         if not max_threads.strip():
-            max_threads = "13"
+            max_threads = "16"
         else:
             max_threads = int(max_threads)
     except ValueError:
-        max_threads = "13"
+        max_threads = "16"
 
     if tokens:
         start_time = time.time()

@@ -147,11 +147,11 @@ class WebSocket(websocket.WebSocketApp):
             elif decoded["t"] == "GUILD_MEMBER_LIST_UPDATE":
                 parsed = self.parseGuildMemberListUpdate(decoded)
                 self.msgs.append(len(self.members))
-                print(f"{Fore.BLUE}<*> Scraping {Fore.RED}{len(self.members)}{Fore.BLUE} members", end="\r")
+                print(f"{Fore.BLUE} <*> Scraping {Fore.RED}{len(self.members)}{Fore.BLUE} members", end="\r")
                 if self.d == len(self.members):
                     self.iter += 1
                     if self.iter == self.MAX_ITER:
-                        print(f"{Fore.BLUE}<*> Scraping {Fore.RED}{len(self.members)}{Fore.BLUE} members")
+                        print(f"{Fore.BLUE} <*> Scraping {Fore.RED}{len(self.members)}{Fore.BLUE} members")
                         self.endScraping = True
                         self.close()
                         return
@@ -193,7 +193,7 @@ class WebSocket(websocket.WebSocketApp):
                         time.sleep(0.45)
                         self.scrapeUsers()
                 if self.endScraping:
-                    print(f"{Fore.BLUE}<*> Scraping {Fore.RED}{len(self.members)}{Fore.BLUE} members")
+                    print(f"{Fore.BLUE} <*> Scraping {Fore.RED}{len(self.members)}{Fore.BLUE} members")
                     self.close()
         except Exception as e:
             print(e)
@@ -205,10 +205,13 @@ def reset_ids():
 def scrape_id(token, guild_id, channel_id):
         return WebSocket(token, guild_id, channel_id).run()
 
-def id_scraper():
+def id_scraper(guild_id=None, channel_id=None):
     reset_ids()
-    guild_id = utility.ask("guild id")
-    channel_id = utility.ask("channel id")
+    if guild_id is None:
+        guild_id = utility.ask("guild id")
+    
+    if channel_id is None:
+        channel_id = utility.ask("channel id")
     
     token = TokenManager.OnlyToken(TokenManager.get_random_token())
     

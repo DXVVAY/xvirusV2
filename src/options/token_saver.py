@@ -1,4 +1,4 @@
-import base64
+
 import datetime
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -26,24 +26,18 @@ def buyTokensBody():
         Output("bad", config)("Invalid input. Redirect not requested.")
 
 def choose_store():
-    print(f'''
-        {Fore.BLUE}[{Fore.RED}1{Fore.BLUE}] Body Tokens
-        {Fore.BLUE}[{Fore.RED}2{Fore.BLUE}] Dazeer Tokens
-    ''')
+    utility.make_menu("Body Tokens", "Dazeer Tokens")
     choice = utility.ask("Choice")
 
     if choice == '1':
         buyTokensBody()
     
     if choice == '2':
-        buyTokensBody()
+        buyTokensDazeer()
 
 def token_manager():
-    print(f'''
-        {Fore.BLUE}[{Fore.RED}1{Fore.BLUE}] Save Tokens
-        {Fore.BLUE}[{Fore.RED}2{Fore.BLUE}] Empty Tokens
-        {Fore.BLUE}[{Fore.RED}3{Fore.BLUE}] Buy Tokens
-    ''')
+    Output.SetTitle(f"Token Manager")
+    utility.make_menu("Save Tokens", "Empty Tokens", "Buy Tokens")
     choice = utility.ask("Choice")
 
     if choice == '1':
@@ -97,11 +91,11 @@ def checker():
 
     try:
         if not max_threads.strip():
-            max_threads = "13"
+            max_threads = "16"
         else:
             max_threads = int(max_threads)
     except ValueError:
-        max_threads = "13"
+        max_threads = "16"
 
     if tokens:
         start_time = time.time()
