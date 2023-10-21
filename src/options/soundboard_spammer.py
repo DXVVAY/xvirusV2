@@ -49,7 +49,10 @@ def soundboard_spammer():
                 Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
 
     def thread_complete(future):
-        result = future.result()
+        try:
+            result = future.result()
+        except Exception as e:
+            pass
 
     if tokens is None:
         Output("bad", config).log("Token retrieval failed or returned None.")

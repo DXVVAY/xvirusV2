@@ -80,7 +80,10 @@ def checker():
 
     def thread_complete(future):
         nonlocal valid, locked, invalid, error
-        result = future.result()
+        try:
+            result = future.result()
+        except Exception as e:
+            pass
 
     if tokens is None:
         Output("bad", config).log("Token retrieval failed or returned None.")

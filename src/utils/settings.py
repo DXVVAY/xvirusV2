@@ -9,11 +9,11 @@ class proxy_setting():
 
         if current_setting == True:
             config._set("use_proxies", False)
-            Output("info", config).notime(f"Proxy Use Toggled {Fore.BLUE}OFF")
+            Output("info", config).notime(f"Proxy Use Toggled {Fore.RED}OFF")
             sleep(1)
         else:
             config._set("use_proxies", True)
-            Output("info", config).notime(f"Proxy Use Toggled {Fore.BLUE}ON")
+            Output("info", config).notime(f"Proxy Use Toggled {Fore.RED}ON")
             sleep(1)
 
     def clear_proxy():
@@ -42,11 +42,23 @@ class captcha_setting():
 
         if current_setting == True:
             config._set("use_captcha", False)
-            Output("info", config).notime(f"Captcha Use Toggled {Fore.BLUE}OFF")
+            Output("info", config).notime(f"Captcha Use Toggled {Fore.RED}OFF")
             sleep(1)
         else:
             config._set("use_captcha", True)
-            Output("info", config).notime(f"Captcha Use Toggled {Fore.BLUE}ON")
+            Output("info", config).notime(f"Captcha Use Toggled {Fore.RED}ON")
+            sleep(1)
+            
+    def change_service():
+        utility.make_menu("Capsolver", "Capmonster")
+        choice = utility.ask('Choice')
+        if choice == "1":
+            config._set("captcha_typ", "capsolver")
+            Output("info", config).notime(f"Using {Fore.RED}Capsolver")
+            sleep(1)
+        elif choice == "2":
+            config._set("captcha_typ", "capmonster")
+            Output("info", config).notime(f"Using {Fore.RED}Capmonster")
             sleep(1)
 
     def change_key():
@@ -62,11 +74,13 @@ def settings():
         Output("bad", config).notime(f'Invalid Setting')
         sleep(1)
     elif choice == "1":
-        utility.make_menu("Toggle Captcha Use", "Add/Change Captcha Key")
+        utility.make_menu("Toggle Captcha Use", "Choose Captcha Service", "Add/Change Captcha Key")
         captchachoice = utility.ask('Choice')
         if captchachoice == '1':
             captcha_setting.toggle_captcha()
-        elif captchachoice == '2':
+        elif captchoice == '2':
+            change_service()
+        elif captchachoice == '3':
             captcha_setting.change_key()
         else:
             Output("bad", config).notime("Invalid Choice")
@@ -88,11 +102,11 @@ def settings():
 
         if current_setting == True:
             config._set("debug_mode", False)
-            Output("info", config).notime(f"Debug Mode Toggled {Fore.BLUE}OFF")
+            Output("info", config).notime(f"Debug Mode Toggled {Fore.RED}OFF")
             sleep(1)
         else:
             config._set("debug_mode", True)
-            Output("info", config).notime(f"Debug Mode Toggled {Fore.BLUE}ON")
+            Output("info", config).notime(f"Debug Mode Toggled {Fore.RED}ON")
             sleep(1)
 
     elif choice == "4":

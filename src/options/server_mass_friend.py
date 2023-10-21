@@ -26,7 +26,7 @@ def server_mass_friend():
             if capkey is not None:
                 Output("cap", config).log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
             else: 
-                Output("bad", config).log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
+                Output("bad", config).log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey}")
             send(token, username, capkey, rqtoken)
 
     def send(token, username, capkey, rqtoken):
@@ -36,11 +36,20 @@ def server_mass_friend():
         if capkey != "":
             headers["x-captcha-key"] = capkey
             headers["x-captcha-rqtoken"] = rqtoken
-            
-        result = session.post(f"https://discord.com/api/v9/users/@me/relationships", headers=headers, cookies=cookie, json={
-            'session_id': utility.rand_str(32),
-            'username': username,
-        })
+        
+        if capkey != "":
+            data = {
+                "captcha_key": capkey,
+                "captcha_rqtoken": rqtoken,
+                "session_id": utility.rand_str(32),
+                "username": username,
+            }  
+        else:
+            data = {
+                "session_id": utility.rand_str(32),
+                "username": username,
+            }
+        result = session.post(f"https://discord.com/api/v9/users/@me/relationships", headers=headers, cookies=cookie, json=data)
 
         if result.status_code == 204:
             Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
@@ -81,7 +90,10 @@ def server_mass_friend():
         return False
     def thread_complete(future):
         nonlocal sent, error
-        result = future.result()
+        try:
+            result = future.result()
+        except Exception as e:
+            pass
 
     if tokens is None:
         Output("bad", config).log("Token retrieval failed or returned None.")

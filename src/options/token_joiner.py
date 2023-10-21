@@ -24,7 +24,7 @@ def token_joiner():
             if capkey is not None:
                 Output("cap", config).log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
             else: 
-                Output("bad", config).log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
+                Output("bad", config).log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey}")
             join(token, invite, capkey, rqtoken)
 
     def join(token, invite, capkey, rqtoken):
@@ -35,9 +35,15 @@ def token_joiner():
             headers["x-captcha-key"] = capkey
             headers["x-captcha-rqtoken"] = rqtoken
             
-        result = session.post(f"https://discord.com/api/v9/invites/{invite}", headers=headers, cookies=cookie, json={
-            'session_id': utility.rand_str(32),
-        })
+        if capkey != "":
+            data = {
+                "captcha_key": capkey,
+                "captcha_rqtoken": rqtoken,
+                "session_id": utility.rand_str(32),
+            }  
+        else:
+            data = {"session_id": utility.rand_str(32),}
+        result = session.post(f"https://discord.com/api/v9/invites/{invite}", headers=headers, cookies=cookie, json=data)
 
         if result.status_code == 200:
             Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
@@ -76,9 +82,14 @@ def token_joiner():
             error += 1
 
         return False
+        
     def thread_complete(future):
         nonlocal joined, error
-        result = future.result()
+        try:
+            result = future.result()
+        except Exception as e:
+            pass
+
 
     if tokens is None:
         Output("bad", config).log("Token retrieval failed or returned None.")

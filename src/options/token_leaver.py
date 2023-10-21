@@ -48,7 +48,10 @@ def token_leaver():
 
     def thread_complete(future):
         nonlocal left, error
-        result = future.result()
+        try:
+            result = future.result()
+        except Exception as e:
+            pass
 
     if tokens is None:
         Output("bad", config).log("Token retrieval failed or returned None.")

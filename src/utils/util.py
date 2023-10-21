@@ -15,7 +15,7 @@ from time import sleep
 import httpx
 import requests
 import tls_client
-from capsolver_python import HCaptchaTask, capsolver
+from capmonster_python import HCaptchaTask, capmonster
 from colorama import Fore
 from decimal import Decimal
 from src import *
@@ -39,6 +39,7 @@ class Config:
             "use_proxies": False,
             "use_captcha": False,
             "captcha_key": "",
+            "captcha_typ": "",
             "debug_mode": False
         }
         if not os.path.exists(self.file):
@@ -663,29 +664,58 @@ class Captcha:
 
     def solveCaptcha(self) -> str:
         captchaKey = config._get("captcha_key")
-        r = requests.post(f"https://api.capsolver.com/createTask",json=self.payload(self.proxy, self.rqdata))
-        try:
-            if r.json().get("taskId"):
-                taskid = r.json()["taskId"]
-            else:
-                return None
-        except:
-            Output("bad", config).log("Couldn't get task id.",r.text)
-            return None
-        while True:
+        captchaType = config._get("captcha_typ")
+        if captchaType == "capsolver":
+            r = requests.post(f"https://api.capsolver.com/createTask",json=self.payload(self.proxy, self.rqdata))
             try:
-                r = requests.post(f"https://api.capsolver.com/getTaskResult",json={"clientKey":captchaKey,"taskId":taskid})
-                if r.json()["status"] == "ready":
-                    key = r.json()["solution"]["gRecaptchaResponse"]
-                    return key
-                elif r.json()['status'] == "failed":
+                if r.json().get("taskId"):
+                    taskid = r.json()["taskId"]
+                else:
                     return None
             except:
-                Output("bad", config).log("Failed to get status.",r.text)
+                Output("bad", config).log("Couldn't get task id.",r.text)
                 return None
+            while True:
+                try:
+                    r = requests.post(f"https://api.capsolver.com/getTaskResult",json={"clientKey":captchaKey,"taskId":taskid})
+                    if r.json()["status"] == "ready":
+                        key = r.json()["solution"]["gRecaptchaResponse"]
+                        return key
+                    elif r.json()['status'] == "failed":
+                        return None
+                except:
+                    Output("bad", config).log("Failed to get status.",r.text)
+                    return None
+        elif captchaType == "capmonster":
+            capmonster = HCaptchaTask(captchaKey)
+            capmonster.set_user_agent(f"Discord-Android/{DiscordProps.buildNumber};RNA")
+            task_id = capmonster.create_task(
+                website_url=self.siteUrl, 
+                website_key=self.siteKey, 
+                custom_data=self.rqdata,
+            )
+            result = capmonster.join_task_result(task_id)
+            return result.get("gRecaptchaResponse")
+        else:
+            utility.make_menu("Capsolver", "Capmonster")
+            choice = utility.ask('Choice')
+            if choice == "1":
+                config._set("captcha_typ", "capsolver")
+                Output("info", config).notime(f"Using {Fore.RED}Capsolver")
+                sleep(1)
+            elif choice == "2":
+                config._set("captcha_typ", "capmonster")
+                Output("info", config).notime(f"Using {Fore.RED}Capmonster")
+                sleep(1)
 
     def getCapBal():
         captchaKey = config._get("captcha_key")
-        get_balance_resp = httpx.post(f"https://api.capsolver.com/getBalance", json={"clientKey": captchaKey}).text
-        bal = json.loads(get_balance_resp)["balance"]
-        Output("info", config).notime(f"Captcha Balance: ${bal}")
+        captchaType = config._get("captcha_typ")
+        if captchaType == "capsolver":
+            get_balance_resp = httpx.post(f"https://api.capsolver.com/getBalance", json={"clientKey": captchaKey}).text
+            bal = json.loads(get_balance_resp)["balance"]
+            Output("info", config).notime(f"Captcha Balance: ${bal}")
+        elif captchaType == "capmonster":
+            get_balance_resp = httpx.post(f"https://api.capmonster.cloud/getBalance", json={"clientKey": captchaKey}).text
+            bal = json.loads(get_balance_resp)["balance"]
+            Output("info", config).notime(f"Captcha Balance: ${bal}")

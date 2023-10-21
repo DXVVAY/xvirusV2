@@ -27,7 +27,10 @@ def vc_join_spammer():
 
     def thread_complete(future):
         nonlocal joined, error
-        result = future.result()
+        try:
+            result = future.result()
+        except Exception as e:
+            pass
 
     if tokens is None:
         Output("bad", config).log("Token retrieval failed or returned None.")
