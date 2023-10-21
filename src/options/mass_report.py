@@ -2,7 +2,7 @@ import random
 import threading
 from colorama import Fore
 import time
-from src.utils.util import Header, bestheader
+from src import *
 
 def report(channel_id, message_id):
     session = Header.tls_session()
