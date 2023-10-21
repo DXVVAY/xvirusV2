@@ -42,6 +42,18 @@ def ask_for_key():
         sleep(2)
             
 class gui:
+    def get_tokens():
+        f = config.read('xvirus_tokens')
+        tokens = f.strip().splitlines()
+        tokens = [token for token in tokens if token not in [" ", "", "\n"]]
+        return tokens
+    
+    def get_proxies():
+        f = config.read('xvirus_proxies')
+        proxies = f.strip().splitlines()
+        proxies = [proxy for proxy in proxies if proxy not in [" ", "", "\n"]]
+        return proxies
+    
     def WIP():
         Output.SetTitle("This Option Is A WIP")
         Output("info", config).notime("This Option Is A Work In Progress, It Will Be Available In The Next Update!")
@@ -55,8 +67,8 @@ class gui:
                                                                                   
                                          ,.   (   .      )        .      "        
                                        ("     )  )'     ,'        )  . (`     '`   
-                                     .; )  ' (( (" )    ;(,     ((  (  ;)  "  )"  │Tokens: {len(TokenManager.get_tokens())}
-                                    _"., ,._'_.,)_(..,( . )_  _' )_') (. _..( '.. │Proxies: {len(ProxyManager.get_proxies())}
+                                     .; )  ' (( (" )    ;(,     ((  (  ;)  "  )"  │Tokens: {len(get_tokens())}
+                                    _"., ,._'_.,)_(..,( . )_  _' )_') (. _..( '.. │Proxies: {len(get_proxies())}
                                     ██╗  ██╗██╗   ██╗██╗██████╗ ██╗   ██╗ ██████╗ ├─────────────
                                     ╚██╗██╔╝██║   ██║██║██╔══██╗██║   ██║██╔════╝ │Running on:
                                      ╚███╔╝ ╚██╗ ██╔╝██║██████╔╝██║   ██║╚█████╗  │{pc_username}\'s PC

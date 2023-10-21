@@ -78,8 +78,8 @@ def settings():
         captchachoice = utility.ask('Choice')
         if captchachoice == '1':
             captcha_setting.toggle_captcha()
-        elif captchoice == '2':
-            change_service()
+        elif captchachoice == '2':
+            captcha_setting.change_service()
         elif captchachoice == '3':
             captcha_setting.change_key()
         else:

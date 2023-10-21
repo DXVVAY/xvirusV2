@@ -55,8 +55,8 @@ def token_joiner():
             if use_captcha is True:
                 return True, result.json()["captcha_rqdata"], result.json()["captcha_rqtoken"]
             else:
-                return False, None, None 
                 error += 1
+                return False, None, None 
         elif result.text.startswith('{"message": "401: Unauthorized'):
             Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
             error += 1
@@ -98,7 +98,6 @@ def token_joiner():
 
     invite = utility.ask("Invite")
     invite = invite.replace("https://discord.gg/", "").replace("https://discord.com/invite/", "").replace("discord.gg/", "").replace("https://discord.com/invite/", "")
-    invite_parts = invite.split("/")
     max_threads = utility.asknum("Thread Count")
 
     try:

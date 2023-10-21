@@ -400,7 +400,7 @@ class ProxyManager:
         proxies = f.strip().splitlines()
         proxies = [proxy for proxy in proxies if proxy not in [" ", "", "\n"]]
         return proxies
-    
+        
     def random_proxy():
         try:
             return random.choice(ProxyManager.get_proxies())
@@ -437,7 +437,7 @@ class TokenManager:
         tokens = f.strip().splitlines()
         tokens = [token for token in tokens if token not in [" ", "", "\n"]]
         return tokens
-
+    
     @classmethod
     def custom_path(cls, custom_path):
         try:
