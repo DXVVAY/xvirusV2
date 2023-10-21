@@ -1,5 +1,46 @@
 from src import *
 
+pc_username = getpass.getuser()
+def move_key():
+    old_key = os.path.join(os.environ.get("TEMP", "C:\\temp"), "xvirus_key")
+    if os.path.exists(old_key):
+        with open(old_key, "r") as key_file:
+            key = key_file.read().strip()
+            config._set("xvirus_key", key)
+        os.remove(old_key)
+    else:
+        pass
+
+def get_checksum():
+    md5_hash = hashlib.md5()
+    with open("".join(sys.argv), "rb") as file:
+        md5_hash.update(file.read())
+    digest = md5_hash.hexdigest()
+    return digest
+
+auth = api(
+    name="xvirus",
+    ownerid="H1Blx2txmS",
+    secret="f8a86b6a889a4c6da214ceabc99fedffbbe464adb64d7df87934afb70625ad92",
+    version="1.0",
+    hash_to_check=get_checksum())
+
+def license_check():
+    saved_key = config._get("xvirus_key")
+    if saved_key:
+            auth.license(saved_key)
+            Output("info", config).notime(f"Welcome Back {pc_username}!")
+            sleep(2)
+    else:
+        ask_for_key()
+
+def ask_for_key():
+        key = utility.ask("Enter your Xvirus License Key")
+        config._set("xvirus_key", key)
+        auth.license(key)
+        Output("info", config).notime(f"Welcome Back {pc_username}!")
+        sleep(2)
+            
 class gui:
     def WIP():
         Output.SetTitle("This Option Is A WIP")
@@ -98,6 +139,8 @@ class gui:
                 user_mass_friend()
             elif choice == '20':
                 server_mass_friend()
+            elif choice == '!':
+                settings()
             elif choice == 'TKN':
                 token_manager()
             else:
@@ -113,4 +156,6 @@ class gui:
 if __name__ == "__main__":
     utility.clear()
     Output.SetTitle("Xvirus Loading")
+    move_key()
+    license_check()
     gui.main_menu()

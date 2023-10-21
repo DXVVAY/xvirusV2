@@ -61,7 +61,17 @@ def token_reactor():
     message_id = message["message_id"]
     max_threads = utility.asknum("Thread Count")
     emojis = utility.get_reactions(channel_id, message_id)
-    utility.make_menu(emojis)
+
+    if emojis == None:
+        Output("bad", config).notime("Invalid message and or message has no reacts")
+        Output.PETC()
+
+    print()
+    for num, emoji in enumerate(emojis):
+        name = emoji['name'].replace(' ', '')
+        labels = f"    {Fore.BLUE}[{Fore.RED}{num}{Fore.BLUE}] {Fore.RED}{name}"
+        print(labels)
+    print()
 
     emojinum = utility.ask("Emoji number")
     for emoji in emojis:

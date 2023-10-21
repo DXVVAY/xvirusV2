@@ -24,10 +24,10 @@ def restorecord_bypass():
             "scope":"identify guilds.join",
             "state":str(guild_id)
         }
-        auth = session.post(f"https://discord.com/api/v9/oauth2/authorize", headers=headers, params=query, json={"permissions":"0","authorize":True})
+        auth = requests.post(f"https://discord.com/api/v9/oauth2/authorize", headers=headers, params=query, json={"permissions":"0","authorize":True})
         if "location" in auth.text:
             answer = auth.json()["location"]
-            result = session.get(answer, headers=headers, cookies=cookie, allow_redirects=True)
+            result = requests.get(answer, headers=headers, cookies=cookie, allow_redirects=True)
 
             if result.status_code in [307, 403, 200]:
                 Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
@@ -54,7 +54,7 @@ def restorecord_bypass():
                 Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
                 error += 1
         else:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({auth.status_code}) {Fore.RED}({auth.text})")
             error += 1
 
     def thread_complete(future):

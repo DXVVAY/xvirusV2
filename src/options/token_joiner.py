@@ -15,16 +15,16 @@ def token_joiner():
     tokens = TokenManager.get_tokens()
 
     def runJoiner(token, invite):
-        proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
         retry, rqdata, rqtoken = join(token, invite, "","")
         if retry:
+            proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
             solver = Captcha(proxy=proxy, siteKey="4c672d35-0701-42b2-88c3-78380b0db560", siteUrl="https://discord.com/", rqdata=rqdata)
             Output("cap", config).log(f'Solving Captcha...')
             capkey = solver.solveCaptcha()
             if capkey is not None:
-                Output("cap", config).log(f"Solved -> {Fore.LIGHTBLACK_EX} {capkey[-40:]}")
+                Output("cap", config).log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
             else: 
-                Output("bad", config).log(f"Failed To Solve -> {Fore.LIGHTBLACK_EX} {capkey}")
+                Output("bad", config).log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
             join(token, invite, capkey, rqtoken)
 
     def join(token, invite, capkey, rqtoken):
@@ -123,8 +123,10 @@ def token_joiner():
 
         status = f"{Fore.RED} | ".join(info) + f"{Fore.RED}"
         print(f" {status}")
-        Captcha.getCapBal()
-        print()
+        use_captcha = config._get("use_captcha")
+        if use_captcha is True:
+            Captcha.getCapBal()
+            print()
         Output.PETC()
     else:
         Output("bad", config).log(f"No tokens were found in cache")

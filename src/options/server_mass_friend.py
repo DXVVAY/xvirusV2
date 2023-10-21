@@ -17,16 +17,16 @@ def server_mass_friend():
     user_scraper()
 
     def runFrinder(token, username):
-        proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
         retry, rqdata, rqtoken = send(token, username, "","")
         if retry:
+            proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
             solver = Captcha(proxy=proxy, siteKey="b2b02ab5-7dae-4d6f-830e-7b55634c888b", siteUrl="https://discord.com/", rqdata=rqdata)
             Output("cap", config).log(f'Solving Captcha...')
             capkey = solver.solveCaptcha()
             if capkey is not None:
-                Output("cap", config).log(f"Solved -> {Fore.LIGHTBLACK_EX} {capkey[-40:]}")
+                Output("cap", config).log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
             else: 
-                Output("bad", config).log(f"Failed To Solve -> {Fore.LIGHTBLACK_EX} {capkey}")
+                Output("bad", config).log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
             send(token, username, capkey, rqtoken)
 
     def send(token, username, capkey, rqtoken):

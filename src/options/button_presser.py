@@ -89,8 +89,13 @@ def button_presser():
     if buttons == None:
         Output("bad", config).notime("Invalid message and or message has no buttons")
         Output.PETC()
-    
-    utility.make_menu(buttons)
+
+    print()
+    for num, button in enumerate(buttons):
+        label = button['label'].replace(' ', '') if button['label'] is not None else 'None'
+        labels = f"    {Fore.BLUE}[{Fore.RED}{num}{Fore.BLUE}] {Fore.RED}{label}"
+        print(labels)
+    print()
 
     buttonnum = utility.ask("button number")
     for button in buttons:

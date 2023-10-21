@@ -6,6 +6,8 @@
 from .utils.util import *
 from .utils.scrape_ids import *
 from .utils.scrape_users import *
+from .utils.settings import *
+from .utils.auth import *
 
 #options
 from .options.channel_spammer import *

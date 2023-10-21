@@ -58,7 +58,7 @@ def soundboard_spammer():
 
     channel_id = utility.ask("Channel ID")
     max_threads = utility.asknum("Thread Count")
-    sounds = session.get("https://discord.com/api/v9/soundboard-default-sounds", headers=headers, cookies=cookie).json()
+    sounds = requests.get("https://discord.com/api/v9/soundboard-default-sounds", headers=headers, cookies=cookie).json()
 
     try:
         if not max_threads.strip():

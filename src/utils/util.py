@@ -21,20 +21,32 @@ from decimal import Decimal
 from src import *
 
 THIS_VERSION = "2.0.0"
-whitelisted = ["1157400926877925558", "1157399811423731753", "1157401701481979914", "1157605101901467689", "1146496916419526727"]
+whitelisted = ["1157603083308761118", "1157425827517055017", "1146496916419526727", "1157400926877925558", "1156946611646247013", "1149731357656883311"]
 
 class Config:
     def __init__(self):
         self.folder_path = os.path.join(os.getenv('LOCALAPPDATA'), 'xvirus_config')
+        self.file = os.path.join(self.folder_path, 'config.json')
         os.makedirs(self.folder_path, exist_ok=True)
-        self.config_file = os.path.join(self.folder_path, 'config.json')
-        self.config_data = self._load('config.json')
-        self.xvirus_files = ['xvirus_tokens', 'xvirus_proxies', 'xvirus_usernames', 'xvirus_ids', 'xvirus_key']
+        self.xvirus_files = ['xvirus_tokens', 'xvirus_proxies', 'xvirus_usernames', 'xvirus_ids']
         for file_name in self.xvirus_files:
             file_path = os.path.join(self.folder_path, file_name)
             if not os.path.exists(file_path):
                 with open(file_path, 'w') as file:
                     pass
+        self.content = {
+            "xvirus_key": "",
+            "use_proxies": False,
+            "use_captcha": False,
+            "captcha_key": "",
+            "debug_mode": False
+        }
+        if not os.path.exists(self.file):
+            with open(self.file, 'w') as f:
+                json.dump(self.content, f, indent=3)
+        else:
+            pass
+        self.config_data = self._load('config.json')
 
     def _load(self, file_name):
         file_path = os.path.join(self.folder_path, file_name)
@@ -63,10 +75,6 @@ class Config:
         if key in self.config_data:
             del self.config_data[key]
             self._save('config.json', self.config_data)
-    
-    def _reset(self):
-        self.config_data = {}
-        self._save('config.json', self.config_data)
 
     def add(self, file_name, data):
         if file_name not in self.xvirus_files:
@@ -174,7 +182,7 @@ class Output:
         text = r.text.strip()
         print(f"{Fore.RED}Text Of The Week:\n {Fore.BLUE}{text}")
         sleep(2.5)
- 
+
 class DiscordProps:
     @staticmethod
     def get_build_number():
@@ -194,15 +202,6 @@ class DiscordProps:
         requests.cookies = res.cookies
         return res.json()['fingerprint']
         
-        
-    @staticmethod       
-    def getFingerprint() -> str:
-        res = requests.get(
-            'https://discord.com/api/v9/experiments'
-        )
-        requests.cookies = res.cookies
-        return res.json()['fingerprint']
-        
     user_agents = [
         'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
@@ -212,8 +211,16 @@ class DiscordProps:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9011 Chrome/91.0.4472.164 Electron/13.6.6 Safari/537.36',
         'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9016 Chrome/108.0.5359.215 Electron/22.3.12 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0'
-    ]
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 OPR/102.0.0.0',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Whale/3.22.205.18 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.47',
+        'Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5823.221 Safari/537.36',
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.60']
+
     lang = [
         "de,de-DE;q=0.9",
         "en,en-US;q=0.9",
@@ -224,8 +231,8 @@ class DiscordProps:
         "pt-BR;q=0.9",
         "tr;q=0.9",
         "ar,ar-SA;q=0.9",
-        "zh,zh-CN;q=0.9"
-    ]
+        "zh,zh-CN;q=0.9"]
+
     brands = [
         """Not?A_Brand";v="8", "Chromium";v="108""",
         """Not?A_Brand";v="8", "Firefox";v="92""",
@@ -233,13 +240,13 @@ class DiscordProps:
         """Edge";v="96", "Chromium";v="108""",
         """Brave";v="1.31", "Chromium";v="108""",
         """Opera";v="88", "Chromium";v="108""",
-        """Internet Explorer";v="11", "Chromium";v="108"""
-    ]
+        """Internet Explorer";v="11", "Chromium";v="108"""]
+
     channels = [
         "ptb", 
         "canary", 
-        "stable"
-    ] 
+        "stable"] 
+
     times = [
         "Europe/Berlin",
         "America/New_York",
@@ -250,8 +257,8 @@ class DiscordProps:
         "Asia/Dubai",
         "America/Mexico_City",
         "Pacific/Auckland",
-        "America/Chicago"
-    ]
+        "America/Chicago"]
+
     zone = random.choice(times)
     channels = ["ptb", "canary", "stable"] 
     user_agent = random.choice(user_agents)
@@ -276,8 +283,7 @@ class DiscordProps:
     default_headers = {
         'authority': 'discord.com',
         'accept': '*/*',
-        'accept-language': language,
-        'content-type': 'application/json',
+        'accept-language': language, 
         'origin': 'https://discord.com',
         'referer': 'https://discord.com/',
         'sec-ch-ua': brand,
@@ -289,8 +295,13 @@ class DiscordProps:
         'x-debug-options': 'bugReporterEnabled',
         'x-discord-locale': 'en-US',
         'x-discord-timezone': zone,
-        'x-super-properties': x_super_properties,
-    }
+        'x-super-properties': x_super_properties,}
+
+os.system('cls')
+Output("info", config).notime("Getting Discord Info..")
+Output("info", config).notime(f"Build Number: {Fore.RED}{DiscordProps.get_build_number()}")
+Output("info", config).notime(f"Finger Print: {Fore.RED}{DiscordProps.getFingerprint()}")
+Output("info", config).notime(f"User Agent: {Fore.RED}{DiscordProps.user_agent[:80]}...")
 
 class Header:
     @staticmethod
@@ -298,12 +309,12 @@ class Header:
         client = tls_client.Session(
             client_identifier=f"chrome_{random.randint(110, 116)}",
             random_tls_extension_order=True,
-            ja3_string="771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,10-23-27-43-13-65281-16-5-45-18-0-11-35-17513-51-21-41,29-23-24,0",
+            ja3_string="769,47-53-5-10-49161-49162-49171-49172-50-56-19-4,0-10-11,23-24-25,0",
             h2_settings={
                 "HEADER_TABLE_SIZE": 65536,
                 "MAX_CONCURRENT_STREAMS": 1000,
-                "MAX_HEADER_LIST_SIZE": 262144,
-                "INITIAL_WINDOW_SIZE": 6291456     
+                "INITIAL_WINDOW_SIZE": 6291456,
+                "MAX_HEADER_LIST_SIZE": 262144
             },
             h2_settings_order=[
                 "HEADER_TABLE_SIZE",
@@ -312,14 +323,14 @@ class Header:
                 "MAX_HEADER_LIST_SIZE"
             ],
             supported_signature_algorithms=[
-                "PKCS1WithSHA384",
-                "PSSWithSHA512",
-                "PKCS1WithSHA512",
                 "ECDSAWithP256AndSHA256",
                 "PSSWithSHA256",
                 "PKCS1WithSHA256",
                 "ECDSAWithP384AndSHA384",
                 "PSSWithSHA384",
+                "PKCS1WithSHA384",
+                "PSSWithSHA512",
+                "PKCS1WithSHA512",
             ],
             supported_versions=["GREASE", "1.3", "1.2"],
             key_share_curves=["GREASE", "X25519"],
@@ -332,8 +343,8 @@ class Header:
             proxy = ProxyManager.clean_proxy(ProxyManager.random_proxy())
             if isinstance(proxy, str):
                 proxy_dict = {
-                    "http": f"{ProxyManager.get_proxy_type()}://{proxy}",
-                    "https": f"{ProxyManager.get_proxy_type()}://{proxy}"
+                    "http": f"http://{proxy}",
+                    "https": f"http://{proxy}"
                 }
             elif isinstance(proxy, dict):
                 proxy_dict = proxy
@@ -418,12 +429,6 @@ class ProxyManager:
                 return {}
         return proxy
     
-    def get_proxy_type():
-        h = config._get("proxy_type", "http")
-        if "socks5" in h and "h" in h:
-            h = "socks5"
-        return h
-
 class TokenManager:
     @classmethod
     def get_tokens(cls):
@@ -542,7 +547,7 @@ class utility:
             session, headers, cookie = Header.get_client(token)
 
         try:
-            response = session.get(f"https://discord.com/api/v9/channels/{channel_id}/messages?limit=1&around={message_id}", headers=headers, cookies=cookie).json()
+            response = requests.get(f"https://discord.com/api/v9/channels/{channel_id}/messages?limit=1&around={message_id}", headers=headers, cookies=cookie).json()
             return response[0]
         except Exception as e:
             return {"code": 10008}
@@ -576,7 +581,7 @@ class utility:
             token = TokenManager.get_random_token()
             message = utility.get_message(token=token, channel_id=channel_id, message_id=message_id)
             if message.get("code") == 10008:
-                return get_reactions(channel_id, message_id, iteration=iteration+1)
+                return utility.get_reactions(channel_id, message_id, iteration=iteration+1)
             emojis = []
             reactions = message.get("reactions", [])
 
