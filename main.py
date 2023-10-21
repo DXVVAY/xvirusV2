@@ -87,65 +87,57 @@ class gui:
         print(f'{Fore.RED}┌──<{gui.pc_username}@Xvirus>─[~]')
         choicee = input(f'└──╼ $ {Fore.BLUE}').lstrip("0")
         choice = choicee.upper()
+        def joiner_menu():
+            utility.make_menu(f"RestoreCord Mode {Fore.RED}(bypass captcha)", f"Normal Mode {Fore.RED}(solve captcha)")
+            choice = utility.ask("Choice")
+            if choice == '1':
+                restorecord_bypass()
+            else:
+                token_joiner()
+        def vc_menu():
+            utility.make_menu("Join And Stay", "Join And Leave Spam")
+            choice = utility.ask("Choice")
+            if choice == '1':
+                token_vc_joiner()
+            else:
+                vc_join_spammer()
+
+        def wip():
+            gui.WIP()
 
         try:
-            if choice == '1':
-                utility.make_menu(f"RestoreCord Mode {Fore.RED}(bypass captcha)", f"Normal Mode {Fore.RED}(solve captcha)")
-                choice = utility.ask("Choice")
-                if choice == '1':
-                    restorecord_bypass()
-                else:
-                    token_joiner()
-            elif choice == '2':
-                token_leaver()
-            elif choice == '3':
-                channel_spammer()
-            elif choice == '4':
-                token_checker()
-            elif choice == '5':
-                bypass_rules()
-            elif choice == '6':
-                restorecord_bypass()
-            elif choice == '7':
-                button_presser()
-            elif choice == '8':
-                token_reactor()
-            elif choice == '9':
-                mass_thread()
-            elif choice == '10':
-                global_nicker()
-            elif choice == '11':
-                server_nicker()
-            elif choice == '12':
-                hypesquad_changer()
-            elif choice == '13':
-                token_bio_changer()
-            elif choice == '14':
-                token_pron_changer()
-            elif choice == '15':
-                utility.make_menu("Join And Stay", "Join And Leave Spamm")
-                choice = utility.ask("Choice")
-                if choice == '1':
-                    token_vc_joiner()
-                else:
-                    vc_join_spammer()
-            elif choice == '16':
-                soundboard_spammer()
-            elif choice == '17':
-                token_typer()
-            elif choice == '18':
-                gui.WIP()
-            elif choice == '19':
-                user_mass_friend()
-            elif choice == '20':
-                server_mass_friend()
-            elif choice == '!':
-                settings()
-            elif choice == 'TKN':
-                token_manager()
+            options = {
+                '1': joiner_menu,
+                '2': token_leaver,
+                '3': channel_spammer,
+                '4': token_checker,
+                '5': bypass_rules,
+                '6': restorecord_bypass,
+                '7': button_presser,
+                '8': token_reactor,
+                '9': mass_thread,
+                '10': global_nicker,
+                '11': server_nicker,
+                '12': hypesquad_changer,
+                '13': token_bio_changer,
+                '14': token_pron_changer,
+                '15': vc_menu,
+                '16': soundboard_spammer,
+                #'17': token_typer,
+                '18': wip,
+                '19': user_mass_friend,
+                '20': server_mass_friend,
+                '!': settings,
+                'TKN': token_manager
+            }
+            choosen = options.get(choice)
+            if choosen:
+                choosen()
+                time.sleep(1)
             else:
                 Output("bad", config).notime("Invalid choice, please try again!")
                 sleep(1)
+
         except Exception as e:
             Output("bad", config).notime(f"{e}")
             input()
