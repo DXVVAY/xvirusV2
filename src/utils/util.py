@@ -115,7 +115,7 @@ class Output:
         self.config = config
         self.token = token
         self.color_map = {
-            "info": (Fore.BLUE, "<~>"),
+            "info": (Fore.BLUE, "<i>"),
             "bad": (Fore.RED, "<!>"),
             "good": (Fore.GREEN, "<*>"),
             "cap": (Fore.CYAN, "<CAP>"),

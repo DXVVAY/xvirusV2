@@ -7,35 +7,31 @@ from colorama import Fore
 
 from src import *
 
-
-def token_checker(tokens):
-    Output.SetTitle(f"Token Checker")
-    valid = 0
-    locked = 0
-    invalid = 0
+def server_checker():
+    Output.SetTitle(f"Token Server Checker")
+    yes = 0
     error = 0
     args = []
+    valid_tokens = []
+    tokens = TokenManager.get_tokens()
+    folder_path = os.path.join(os.getenv('LOCALAPPDATA'), 'xvirus_config')
+    file = os.path.join(folder_path, 'xvirus_tokens')
 
-    def check_token(token):
-        nonlocal valid, locked, invalid, error
+    def check(token, guild_id):
+        nonlocal yes, error
         session, headers, cookie = Header.get_client(token)
-        result = session.get("https://discord.com/api/v9/users/@me/settings", headers=headers, cookies=cookie)
+        result = session.get(f"https://discord.com/api/v9/guilds/{guild_id}", headers=headers, cookies=cookie)
 
         if result.status_code == 200:
-            Output("good", config, token).log(f"Valid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-            valid += 1
-        elif "You need to verify your account in order to perform this action." in result.text:
-            Output("info", config, token).log(f"Locked -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-            locked += 1
-        elif "Unauthorized" in result.text:
-            Output("bad", config, token).log(f"Invalid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-            invalid += 1
+            Output("good", config, token).log(f"In Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            yes += 1
         else:
-            
+            Output("bad", config, token).log(f"Not In Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             error += 1
+            valid_tokens.remove(token)
 
     def thread_complete(future):
-        nonlocal valid, locked, invalid, error
+        nonlocal yes, error
         debug = config._get("debug_mode")
         try:
             result = future.result()
@@ -49,11 +45,13 @@ def token_checker(tokens):
             else:
                 pass
 
+
     if tokens is None:
         Output("bad", config).log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
+    guild_id = utility.ask("Guild ID")
     max_threads = utility.asknum("Thread Count")
 
     try:
@@ -71,21 +69,25 @@ def token_checker(tokens):
             for token in tokens:
                 try:
                     token = TokenManager.OnlyToken(token)
-                    args = [token]
-                    future = executor.submit(check_token, *args)
+                    valid_tokens.append(token)
+                    args = [token, guild_id]
+                    future = executor.submit(check, *args)
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
                     Output("bad", config).log(f"{e}")
-
+        
+        config.reset("xvirus_tokens")
+        with open(file, "w") as f:
+            for token in valid_tokens:
+                f.write(f"{token}\n")
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Checked {len(tokens)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info", config).notime(f"Checked {str(yes)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
-            f"{Fore.LIGHTGREEN_EX}Valid: {str(valid)}",
-            f"{Fore.LIGHTBLACK_EX}Locked: {str(locked)}",
-            f"{Fore.LIGHTRED_EX}Invalid: {str(invalid)}",
-            f"{Fore.LIGHTCYAN_EX}Errors: {str(error)}"
+            f"{Fore.LIGHTGREEN_EX}In Server: {str(yes)}",
+            f"{Fore.LIGHTRED_EX}Errors: {str(error)}",
+            f"{Fore.LIGHTCYAN_EX}Total: {len(tokens)}"
         ]
 
         status = f"{Fore.RED} | ".join(info) + f"{Fore.RED}\n"
@@ -94,4 +96,3 @@ def token_checker(tokens):
     else:
         Output("bad", config).log(f"No tokens were found in cache")
         Output.PETC()
-        

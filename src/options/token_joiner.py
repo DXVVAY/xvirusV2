@@ -2,7 +2,7 @@
 import datetime
 import time
 from concurrent.futures import ThreadPoolExecutor
-
+from base64 import b64encode
 from colorama import Fore
 
 from src import *
@@ -43,6 +43,18 @@ def token_joiner():
             }  
         else:
             data = {"session_id": utility.rand_str(32),}
+
+        res = requests.get(f"https://discord.com/api/v9/invites/{invite}?with_counts=true&with_expiration=true", headers=headers).json()
+        
+        context = {
+            "location": "Join Guild",
+            "location_guild_id": str(res['guild']['id']),
+            "location_channel_id": str(res['channel']['id']),
+            "location_channel_type": int(res['channel']['type'])
+        }
+        json_data = json.dumps(context)
+        xcontext = b64encode(json_data.encode()).decode()
+        headers["x-context-properties"] = xcontext
         result = session.post(f"https://discord.com/api/v9/invites/{invite}", headers=headers, cookies=cookie, json=data)
 
         if result.status_code == 200:
@@ -89,9 +101,13 @@ def token_joiner():
         try:
             result = future.result()
         except Exception as e:
-            if debug == True:
-                Output("dbg", config).log(f"Error -> {e}")
-            else:  
+            if debug:
+                if "failed to do request" in str(e):
+                    message = f"Proxy Error -> {str(e)[:80]}..."
+                else:
+                    message = f"Error -> {e}"
+                Output("dbg", config).log(message)
+            else:
                 pass
 
 
@@ -103,6 +119,8 @@ def token_joiner():
     invite = utility.ask("Invite")
     invite = invite.replace("https://discord.gg/", "").replace("https://discord.com/invite/", "").replace("discord.gg/", "").replace("https://discord.com/invite/", "")
     max_threads = utility.asknum("Thread Count")
+    res = requests.get(f"https://discord.com/api/v9/invites/{invite}?with_counts=true&with_expiration=true").json()
+    Output("info", config).notime(f"Joining {Fore.RED}{res['guild']['name']}")
 
     try:
         if not max_threads.strip():

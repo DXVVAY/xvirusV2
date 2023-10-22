@@ -45,7 +45,7 @@ def token_manager():
     
     if choice == '2':
         config.reset('xvirus_tokens')
-        Output("info", config).notime("Tokens Chache Emptied.")
+        Output("info", config).notime("Tokens Cache Emptied.")
         Output.PETC()
     
     if choice == '3':
@@ -84,9 +84,13 @@ def checker():
         try:
             result = future.result()
         except Exception as e:
-            if debug == True:
-                Output("dbg", config).log(f"Error -> {e}")
-            else:  
+            if debug:
+                if "failed to do request" in str(e):
+                    message = f"Proxy Error -> {str(e)[:80]}..."
+                else:
+                    message = f"Error -> {e}"
+                Output("dbg", config).log(message)
+            else:
                 pass
 
     if tokens is None:

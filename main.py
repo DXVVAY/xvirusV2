@@ -18,7 +18,7 @@ def get_checksum():
     digest = md5_hash.hexdigest()
     return digest
 
-auth = api(
+fr = api(
     name="xvirus",
     ownerid="H1Blx2txmS",
     secret="f8a86b6a889a4c6da214ceabc99fedffbbe464adb64d7df87934afb70625ad92",
@@ -28,7 +28,7 @@ auth = api(
 def license_check():
     saved_key = config._get("xvirus_key")
     if saved_key:
-            auth.license(saved_key)
+            fr.license(saved_key)
             Output("info", config).notime(f"Welcome Back {pc_username}!")
             sleep(2)
     else:
@@ -37,7 +37,7 @@ def license_check():
 def ask_for_key():
         key = utility.ask("Enter your Xvirus License Key")
         config._set("xvirus_key", key)
-        auth.license(key)
+        fr.license(key)
         Output("info", config).notime(f"Welcome Back {pc_username}!")
         sleep(2)
             
@@ -101,12 +101,25 @@ class gui:
         choice = choicee.upper()
 
         def joiner_menu():
-            utility.make_menu(f"RestoreCord Mode {Fore.RED}(bypass captcha)", f"Normal Mode {Fore.RED}(solve captcha)")
+            utility.make_menu(f"Normal Mode {Fore.RED}(solve captcha)", f"RestoreCord Mode {Fore.RED}(bypass captcha)")
             choice = utility.ask("Choice")
             if choice == '1':
-                restorecord_bypass()
-            else:
                 token_joiner()
+            else:
+                restorecord_bypass()
+        
+        def checker_menu():
+            utility.make_menu("Cache Checker", "Custom Checker", "Server Checker")
+            choice = utility.ask("Choice")
+            if choice == '1':
+                tokens = TokenManager.get_tokens()
+                token_checker(tokens)
+            elif choice == '2':
+                path = utility.ask("Enter the custom path to load tokens from").strip()
+                tokens = TokenManager.custom_path(path)
+                token_checker(tokens)
+            elif choice == '3':
+                server_checker()
 
         def vc_menu():
             utility.make_menu("Join And Stay", "Join And Leave Spam")
@@ -124,7 +137,7 @@ class gui:
                 '1': joiner_menu,
                 '2': token_leaver,
                 '3': channel_spammer,
-                '4': token_checker,
+                '4': checker_menu,
                 '5': bypass_rules,
                 '6': restorecord_bypass,
                 '7': button_presser,

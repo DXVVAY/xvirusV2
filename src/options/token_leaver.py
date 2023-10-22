@@ -52,9 +52,13 @@ def token_leaver():
         try:
             result = future.result()
         except Exception as e:
-            if debug == True:
-                Output("dbg", config).log(f"Error -> {e}")
-            else:  
+            if debug:
+                if "failed to do request" in str(e):
+                    message = f"Proxy Error -> {str(e)[:80]}..."
+                else:
+                    message = f"Error -> {e}"
+                Output("dbg", config).log(message)
+            else:
                 pass
 
     if tokens is None:
