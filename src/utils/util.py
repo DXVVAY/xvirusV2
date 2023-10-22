@@ -118,7 +118,8 @@ class Output:
             "info": (Fore.BLUE, "<~>"),
             "bad": (Fore.RED, "<!>"),
             "good": (Fore.GREEN, "<*>"),
-            "cap": (Fore.CYAN, "<CAP>")
+            "cap": (Fore.CYAN, "<CAP>"),
+            "dbg": (Fore.MAGENTA, "<DEBUG>"),
         }
 
     def should_hide(self):

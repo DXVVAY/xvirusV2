@@ -49,10 +49,14 @@ def token_reactor():
 
     def thread_complete(future):
         nonlocal pressed, error
+        debug = config._get("debug_mode")
         try:
             result = future.result()
         except Exception as e:
-            pass
+            if debug == True:
+                Output("dbg", config).log(f"Error -> {e}")
+            else:  
+                pass
 
     if tokens is None:
         Output("bad", config).log("Token retrieval failed or returned None.")

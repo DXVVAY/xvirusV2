@@ -99,6 +99,7 @@ class gui:
         print(f'{Fore.RED}┌──<{gui.pc_username}@Xvirus>─[~]')
         choicee = input(f'└──╼ $ {Fore.BLUE}').lstrip("0")
         choice = choicee.upper()
+
         def joiner_menu():
             utility.make_menu(f"RestoreCord Mode {Fore.RED}(bypass captcha)", f"Normal Mode {Fore.RED}(solve captcha)")
             choice = utility.ask("Choice")
@@ -106,6 +107,7 @@ class gui:
                 restorecord_bypass()
             else:
                 token_joiner()
+
         def vc_menu():
             utility.make_menu("Join And Stay", "Join And Leave Spam")
             choice = utility.ask("Choice")
@@ -135,7 +137,7 @@ class gui:
                 '14': token_pron_changer,
                 '15': vc_menu,
                 '16': soundboard_spammer,
-                #'17': token_typer,
+                '17': token_typer,
                 '18': wip,
                 '19': user_mass_friend,
                 '20': server_mass_friend,
