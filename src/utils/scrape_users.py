@@ -13,7 +13,7 @@ def user_scraper():
     file = os.path.join(folder_path, 'xvirus_usernames')
     reset_users(file)
     token = TokenManager.get_random_token()
-    session, headers, cookie = Header.get_client(token)
+    session = Client.get_session(token)
     
     user_ids = utility.get_ids()
     id_to_username = {}

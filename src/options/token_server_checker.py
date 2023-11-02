@@ -19,8 +19,8 @@ def server_checker():
 
     def check(token, guild_id):
         nonlocal yes, error
-        session, headers, cookie = Header.get_client(token)
-        result = session.get(f"https://discord.com/api/v9/guilds/{guild_id}", headers=headers, cookies=cookie)
+        session = Client.get_session(token)
+        result = session.get(f"https://discord.com/api/v9/guilds/{guild_id}")
 
         if result.status_code == 200:
             Output("good", config, token).log(f"In Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")

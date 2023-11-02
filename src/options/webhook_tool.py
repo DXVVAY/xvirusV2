@@ -8,7 +8,7 @@ from src import *
 
 def webhook_tool():
     Output.SetTitle(f"Webhook Tools")
-    session = Header.tls_session()
+    session = Client.tls_session()
     args = []
     def spammer(webhook, Message):
         result = session.post(webhook, json={"content": Message})

@@ -18,8 +18,8 @@ def token_checker(tokens):
 
     def check_token(token):
         nonlocal valid, locked, invalid, error
-        session, headers, cookie = Header.get_client(token)
-        result = session.get("https://discord.com/api/v9/users/@me/settings", headers=headers, cookies=cookie)
+        session = Client.get_session(token)
+        result = session.get("https://discord.com/api/v9/users/@me/settings")
 
         if result.status_code == 200:
             Output("good", config, token).log(f"Valid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
@@ -31,7 +31,7 @@ def token_checker(tokens):
             Output("bad", config, token).log(f"Invalid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             invalid += 1
         else:
-            
+            Output("bad", config, token).log(f"Invalid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) ({result.text})")
             error += 1
 
     def thread_complete(future):

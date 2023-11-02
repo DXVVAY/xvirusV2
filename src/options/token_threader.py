@@ -10,7 +10,7 @@ from src import *
 
 def send(token, message, channel_id, title):  
     try:
-        session, headers, cookie = Header.get_client(token)
+        session = Client.get_session(token)
         headers["content-type"] = "application/json"
         while True:
             try:
@@ -20,7 +20,7 @@ def send(token, message, channel_id, title):
                     "name": title,
                     "type": "11"
                 }
-                req = session.post(f"https://discord.com/api/v9/channels/{channel_id}/threads", headers=headers, cookies=cookie, json=data)
+                req = session.post(f"https://discord.com/api/v9/channels/{channel_id}/threads", json=data)
                 
                 if req.status_code == 201:
                     result = session.post(
@@ -35,26 +35,10 @@ def send(token, message, channel_id, title):
                     )
                     if result.status_code == 200:
                         Output("good", config, token).log(f"Success {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-                    elif result.text.startswith('{"captcha_key"'):
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
-                    elif result.text.startswith('{"message": "401: Unauthorized'):
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")   
                     elif result.status_code == 429:
                         pass
-                    elif "\"code\": 50001" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")    
-                    elif "Cloudflare" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
-                    elif "\"code\": 40007" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
-                    elif "\"code\": 40002" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
-                    elif "\"code\": 10006" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
-                    elif "\"code\": 50013" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")
                     else:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+                        Output.error_logger(token, result.text, result.status_code)
                 elif req.status_code == 429:
                     Output("bad", config, token).log(f"Rate Limited {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code})")
                     time.sleep(float(req.json()['retry_after']))

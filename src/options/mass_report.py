@@ -5,7 +5,7 @@ import time
 from src import *
 
 def report(channel_id, message_id):
-    session = Header.tls_session()
+    session = Client.tls_session()
     reasons = {
         31: "MESSAGE_SPAM",
         34: "ABUSE_OR_HARASSMENT"

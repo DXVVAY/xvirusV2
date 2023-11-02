@@ -11,10 +11,11 @@ def soundboard_spammer():
     Output.SetTitle(f"Sound Board Spammer")
     tokens = TokenManager.get_tokens()
     tokenn = TokenManager.get_random_token()
-    session, headers, cookie = Header.get_client(tokenn)
+    session = Client.get_session(tokenn)
+    headerss = session.headers
 
     def send(token, channel_id, sounds: list[dict[str, typing.Union[str, int]]]):
-        session, headers, cookie = Header.get_client(token)
+        session = Client.get_session(token)
         while True:
             sound = random.choice(sounds)
             data = {
@@ -23,30 +24,15 @@ def soundboard_spammer():
                 "emoji_name":sound.get("emoji_name"),
                 "override_path": sound.get("override_path")
             }
-            result = session.post(f"https://discord.com/api/v9/channels/{channel_id}/voice-channel-effects", headers=headers, cookies=cookie, json=data)
+            result = session.post(f"https://discord.com/api/v9/channels/{channel_id}/voice-channel-effects", json=data)
 
             if result.status_code == 204:
                 Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             elif result.status_code == 429:
                 pass
-            elif result.text.startswith('{"captcha_key"'):
-                Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
-            elif result.text.startswith('{"message": "401: Unauthorized'):
-                Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
-            elif "Cloudflare" in result.text:
-                Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
-            elif "\"code\": 40007" in result.text:
-                Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
-            elif "\"code\": 40002" in result.text:
-                Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
-            elif "\"code\": 10006" in result.text:
-                Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
-            elif "\"code\": 50168" in result.text:
-                Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Not In A VC)")
-            elif "\"code\": 50001" in result.text:
-                Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")
             else:
-                Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+                Output.error_logger(token, result.text, result.status_code)
+                error += 1
 
     def thread_complete(future):
         debug = config._get("debug_mode")
@@ -69,7 +55,7 @@ def soundboard_spammer():
 
     channel_id = utility.ask("Channel ID")
     max_threads = utility.asknum("Thread Count")
-    sounds = requests.get("https://discord.com/api/v9/soundboard-default-sounds", headers=headers, cookies=cookie).json()
+    sounds = requests.get("https://discord.com/api/v9/soundboard-default-sounds", headers=headerss).json()
 
     try:
         if not max_threads.strip():

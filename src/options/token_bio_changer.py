@@ -16,34 +16,14 @@ def token_bio_changer():
 
     def send(token, bio):
         nonlocal changed, error
-        session, headers, cookie = Header.get_client(token)
-        result = session.patch(f"https://discord.com/api/v9/users/@me", headers=headers, cookies=cookie, json={
-            "bio": bio,
-        })
+        session = Client.get_session(token)
+        result = session.patch(f"https://discord.com/api/v9/users/@me", json={"bio": bio})
 
         if result.status_code == 200:
             Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             changed += 1
-        elif result.text.startswith('{"captcha_key"'):
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
-            error += 1
-        elif result.text.startswith('{"message": "401: Unauthorized'):
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
-            error += 1
-        elif "Cloudflare" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
-            error += 1
-        elif "\"code\": 40007" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
-            error += 1
-        elif "\"code\": 40002" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
-            error += 1
-        elif "\"code\": 10006" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
-            error += 1
         else:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+            Output.error_logger(token, result.text, result.status_code)
             error += 1
 
     def thread_complete(future):

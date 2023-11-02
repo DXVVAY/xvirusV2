@@ -16,39 +16,15 @@ def bypass_rules():
 
     def accept(token, guild_id):
         nonlocal accepted, error
-        session, headers, cookie = Header.get_client(token)
-        rules = session.get(f"https://discord.com/api/v9/guilds/{guild_id}/member-verification?with_guild=false", headers=headers, cookies=cookie).json()
-        result = session.put(f"https://discord.com/api/v9/guilds/{guild_id}/requests/@me", headers=headers, cookies=cookie, json=rules)
+        session = Client.get_session(token)
+        rules = session.get(f"https://discord.com/api/v9/guilds/{guild_id}/member-verification?with_guild=false").json()
+        result = session.put(f"https://discord.com/api/v9/guilds/{guild_id}/requests/@me", json=rules)
 
         if result.status_code == 201:
             Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             accepted += 1
-        elif result.text.startswith('{"captcha_key"'):
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
-            error += 1
-        elif result.text.startswith('{"message": "401: Unauthorized'):
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
-            error += 1
-        elif "Cloudflare" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare)")
-            error += 1
-        elif "\"code\": 40007" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
-            error += 1
-        elif "\"code\": 40002" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
-            error += 1
-        elif "\"code\": 10006" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
-            error += 1
-        elif "\"code\": 50001" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")
-            error += 1
-        elif "\"code\": 150009" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Alr Accepted)")
-            error += 1
         else:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+            Output.error_logger(token, result.text, result.status_code)
             error += 1
 
     def thread_complete(future):

