@@ -34,3 +34,4 @@ from .options.forum_spammer import *
 from .options.user_mass_friend import *
 from .options.server_mass_friend import *
 from .options.token_server_checker import *
+from .options.user_mass_dm import *

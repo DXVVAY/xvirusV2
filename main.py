@@ -82,7 +82,7 @@ class gui:
 {r}╔═══                              ═══╗ ╔═══                               ═══╗ ╔═══                                 ═══╗
 {r}║   ({lb}01{r}) {lb}> Joiner                    {r}║ ║   {r}({lb}10{r}) {lb}> Global Nick Changer        {r}║ ║   {r}({lb}19{r}) {lb}> User Mass Friend{r}             ║
 {r}    ({lb}02{r}) {lb}> Leaver                          {r}({lb}11{r}) {lb}> Server Nick Changer              {r}({lb}20{r}) {lb}> Server Mass Friend{r}
-{r}    ({lb}03{r}) {lb}> Spammer                         {r}({lb}12{r}) {lb}> HypeSquad Changer                {r}({lb}21{r}) {lb}> N/A{r}
+{r}    ({lb}03{r}) {lb}> Spammer                         {r}({lb}12{r}) {lb}> HypeSquad Changer                {r}({lb}21{r}) {lb}> User Mass DM{r}
 {r}    ({lb}04{r}) {lb}> Checker                         {r}({lb}13{r}) {lb}> Bio Changer                      {r}({lb}22{r}) {lb}> N/A{r}
 {r}    ({lb}05{r}) {lb}> Bypass Rules                    {r}({lb}14{r}) {lb}> Pronouns Changer                 {r}({lb}23{r}) {lb}> N/A{r}
 {r}    ({lb}06{r}) {lb}> Bypass RestoreCord              {r}({lb}15{r}) {lb}> VC Joiner                        {r}({lb}24{r}) {lb}> N/A{r}
@@ -154,6 +154,7 @@ class gui:
                 '18': wip,
                 '19': user_mass_friend,
                 '20': server_mass_friend,
+                '21': user_mass_dm,
                 '!': settings,
                 'TKN': token_manager
             }
