@@ -26,7 +26,6 @@ def send(token, message, channel_id, title):
                     result = session.post(
                         f"https://discord.com/api/v9/channels/{req.json()['id']}/messages",
                         headers=headers,
-                        cookies=cookie,
                         json={
                             "content": message,
                             "nonce": str(Decimal(time.time()*1000-1420070400000)*4194304).split(".")[0],

@@ -1,16 +1,36 @@
 from src import *
 
-def send(token, message, channel_id, amount=0):
+def tls_session() -> tls_client.Session:
+    client = tls_client.Session(
+        client_identifier=f"chrome_{random.randint(110, 116)}",
+        random_tls_extension_order=True
+    )   
+    if config._get("use_proxies"):
+        proxy = ProxyManager.clean_proxy(ProxyManager.random_proxy())
+        if isinstance(proxy, str):
+            proxy_dict = {
+                "http": f"http://{proxy}",
+                "https": f"http://{proxy}"
+            }
+        elif isinstance(proxy, dict):
+            proxy_dict = proxy
+        client.proxies = proxy_dict
+    
+    return client
+
+def send(token, message, channelid, massping, amount=None):  
     try:
-        session = Client.get_session(token)
+        session = tls_session()
         while True:
             try:
-                if amount == 0:
-                    content = f'{message} | {utility.rand_str(9)}'
+                if massping == 'y':
+                    content = f"{message} | {utility.get_random_id(int(amount))}"
                 else:
-                    content = f"{message} | {utility.get_random_id(int(amount))} {utility.rand_str(9)}"
-
-                result = session.post(f"https://discord.com/api/v9/channels/{channel_id}/messages", json={"content": content})
+                    content = f"{message} | {utility.rand_str(7)}"
+                session.headers = static_headers
+                session.headers.update({"Authorization":token})
+                data = {'session_id': utility.rand_str(32), "content": content}
+                result = session.post(f"https://discord.com/api/v9/channels/{channelid}/messages", json=data)
 
                 if result.status_code == 200:
                     Output("good", config, token).log(f"Success {Fore.LIGHTBLACK_EX}->{Fore.GREEN} {message[:20]}... {Fore.LIGHTBLACK_EX}-> {token[:50]} {Fore.LIGHTBLACK_EX}({result.status_code})")
@@ -35,13 +55,12 @@ def send(token, message, channel_id, amount=0):
                 else:
                     Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}->{Fore.RED} {message[:20]}... {Fore.LIGHTBLACK_EX}-> {token[:50]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
             except Exception as e:
-                print(f"{e}")
+                Output("bad", config).log(f"{e}")
     except Exception as e:
-        print(f"{e}")
+        Output("bad", config).log(f"{e}")
 
 def channel_spammer():
     Output.SetTitle(f"Channel Spammer")
-    args = []
     tokens = TokenManager.get_tokens()
 
     if tokens is None:

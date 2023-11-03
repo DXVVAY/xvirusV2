@@ -18,13 +18,13 @@ def restorecord_bypass():
         nonlocal bypassed, error
         session = Client.get_session(token)
         query = {
-            "client_id":str(bot_id),
+            "client_id":{bot_id},
             "response_type":"code",
             "redirect_uri": "https://restorecord.com/api/callback",
             "scope":"identify guilds.join",
-            "state":str(guild_id)
+            "state":{guild_id}
         }
-        auth = session.post(f"https://discord.com/api/v9/oauth2/authorize", json={"permissions":"0","authorize":True})
+        auth = session.post(f"https://discord.com/api/v9/oauth2/authorize", params=query, json={"permissions":"0","authorize":True})
         if "location" in auth.text:
             answer = auth.json()["location"]
             result = session.get(answer, allow_redirects=True)

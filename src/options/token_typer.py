@@ -23,7 +23,6 @@ def token_typer():
                 pass
             else:
                 Output.error_logger(token, result.text, result.status_code)
-                error += 1
 
     def thread_complete(future):
         debug = config._get("debug_mode")

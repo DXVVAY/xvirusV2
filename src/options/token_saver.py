@@ -62,7 +62,9 @@ def checker():
 
     def check_token(token):
         nonlocal valid, locked, invalid, error
-        session = Client.get_session(token)
+        session = Client.get_simple_session()
+        session.headers = static_headers
+        session.headers.update({"Authorization":token})
         result = session.get("https://discord.com/api/v9/users/@me/settings")
 
         if result.status_code == 200:

@@ -46,7 +46,7 @@ def server_nicker():
         Output.PETC()
         return
 
-
+    guild_id = utility.ask("Guild ID")
     nick = utility.ask("Nick Name")
     max_threads = utility.asknum("Thread Count")
 
