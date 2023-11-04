@@ -8,7 +8,7 @@ from colorama import Fore
 from src import *
 
 def user_mass_friend():
-    Output.SetTitle(f"User Mass Friend")
+    Output.set_title(f"User Mass Friend")
     sent = 0
     error = 0
     args = []
@@ -19,12 +19,12 @@ def user_mass_friend():
         if retry:
             proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
             solver = Captcha(proxy=proxy, siteKey="b2b02ab5-7dae-4d6f-830e-7b55634c888b", siteUrl="https://discord.com/", rqdata=rqdata)
-            Output("cap", config).log(f'Solving Captcha...')
+            Output("cap").log(f'Solving Captcha...')
             capkey = solver.solveCaptcha()
             if capkey is not None:
-                Output("cap", config).log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
+                Output("cap").log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
             else: 
-                Output("bad", config).log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey}")
+                Output("bad").log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey}")
             send(token, username, capkey, rqtoken)
 
     def send(token, username, capkey, rqtoken):
@@ -79,12 +79,12 @@ def user_mass_friend():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -111,10 +111,10 @@ def user_mass_friend():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Sent Friend Request Using {str(sent)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"Sent Friend Request Using {str(sent)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}Sent: {str(sent)}",
@@ -128,5 +128,5 @@ def user_mass_friend():
         print()
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()

@@ -44,17 +44,17 @@ def send(token, message, channel_id, title):
                 else:
                     Output("bad", config, token).log(f"Error Creating Thread {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code})")
             except Exception as e:
-                Output("bad", config).log(f"{e}")
+                Output("bad").log(f"{e}")
     except Exception as e:
-        Output("bad", config).log(f"{e}")
+        Output("bad").log(f"{e}")
 
 def mass_thread():
-    Output.SetTitle(f"Mass Thread")
+    Output.set_title(f"Mass Thread")
     args = []
     tokens = TokenManager.get_tokens()
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -79,7 +79,7 @@ def mass_thread():
                     args = [token, message, channel_id, title]
                     send(*args)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
             threads = []
             for token in tokens:
@@ -90,5 +90,5 @@ def mass_thread():
             for thread in threads:
                 thread.join()
         else:
-            Output("bad", config).log(f"No tokens were found in cache")
+            Output("bad").log(f"No tokens were found in cache")
             Output.PETC()

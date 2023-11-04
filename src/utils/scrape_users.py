@@ -8,7 +8,7 @@ def reset_users(file):
         os.remove(file)
 
 def user_scraper():
-    Output.SetTitle(f"User Scraper")
+    Output.set_title(f"User Scraper")
     folder_path = os.path.join(os.getenv('LOCALAPPDATA'), 'xvirus_config')
     file = os.path.join(folder_path, 'xvirus_usernames')
     reset_users(file)
@@ -34,14 +34,14 @@ def user_scraper():
             user_data = result.json()
             username = user_data.get('username', 'Username not found')
             id_to_username[user_id] = username
-            Output("good", config).log(f"Success -> Converted {user_id} > {username} {Fore.BLUE}({str(result.status_code)})")
+            Output("good").log(f"Success -> Converted {user_id} > {username} {Fore.BLUE}({str(result.status_code)})")
             with open(file, "a", encoding='utf-8') as x:
                 x.write(f"{username}\n")
         elif result.status_code == 429:
-            Output("bad", config).log(f"Error -> {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Rate Limited)")
+            Output("bad").log(f"Error -> {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Rate Limited)")
             sleep(result.json()["retry_after"] / 1000)
         else:
-            Output("bad", config).log(f"Error -> {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+            Output("bad").log(f"Error -> {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
     
     with ThreadPoolExecutor(max_workers=max_threads) as executor:
         executor.map(fetch_user, user_ids)

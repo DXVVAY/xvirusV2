@@ -34,36 +34,32 @@ def token_vc_joiner():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
     guild_id = utility.ask("Guild ID")
     channel_id = utility.ask("Channel ID")
-
     deaf = utility.ask("Defean (y/n)")
     if deaf == "y":
         deaf = True
-    if deaf == "n":
+    else:
         deaf = False
-
     mute = utility.ask("Mute (y/n)")
     if mute == "y":
         mute = True
-    if mute == "n":
+    else:
         mute = False
-
     video = utility.ask("Video (y/n)")
     if video == "y":
         video = True
-    if video == "n":
+    else:
         video = False
-
     max_threads = utility.asknum("Thread Count")
 
     try:
@@ -86,10 +82,10 @@ def token_vc_joiner():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Joined VC Using {str(joined)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"Joined VC Using {str(joined)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}Joined: {str(joined)}",
@@ -101,5 +97,5 @@ def token_vc_joiner():
         print(f" {status}")
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()

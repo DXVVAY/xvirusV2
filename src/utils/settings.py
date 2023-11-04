@@ -1,7 +1,4 @@
 from src import *
-from colorama import Fore
-from time import sleep
-import subprocess
 
 class proxy_setting():
     def toggle_proxy():
@@ -9,16 +6,16 @@ class proxy_setting():
 
         if current_setting == True:
             config._set("use_proxies", False)
-            Output("info", config).notime(f"Proxy Use Toggled {Fore.RED}OFF")
+            Output("info").notime(f"Proxy Use Toggled {Fore.RED}OFF")
             sleep(1)
         else:
             config._set("use_proxies", True)
-            Output("info", config).notime(f"Proxy Use Toggled {Fore.RED}ON")
+            Output("info").notime(f"Proxy Use Toggled {Fore.RED}ON")
             sleep(1)
 
     def clear_proxy():
         config.reset("xvirus_proxies")
-        Output("info", config).notime("Proxy Cache Cleared")
+        Output("info").notime("Proxy Cache Cleared")
         sleep(1)   
 
     def add_proxies():
@@ -33,7 +30,7 @@ class proxy_setting():
         with open(file_path, 'w') as f:
             f.write(proxies)
 
-        Output("info", config).notime("Successfully Wrote New Proxies")
+        Output("info").notime("Successfully Wrote New Proxies")
         sleep(1) 
 
 class captcha_setting():
@@ -42,11 +39,11 @@ class captcha_setting():
 
         if current_setting == True:
             config._set("use_captcha", False)
-            Output("info", config).notime(f"Captcha Use Toggled {Fore.RED}OFF")
+            Output("info").notime(f"Captcha Use Toggled {Fore.RED}OFF")
             sleep(1)
         else:
             config._set("use_captcha", True)
-            Output("info", config).notime(f"Captcha Use Toggled {Fore.RED}ON")
+            Output("info").notime(f"Captcha Use Toggled {Fore.RED}ON")
             sleep(1)
             
     def change_service():
@@ -54,24 +51,24 @@ class captcha_setting():
         choice = utility.ask('Choice')
         if choice == "1":
             config._set("captcha_typ", "capsolver")
-            Output("info", config).notime(f"Using {Fore.RED}Capsolver")
+            Output("info").notime(f"Using {Fore.RED}Capsolver")
             sleep(1)
         elif choice == "2":
             config._set("captcha_typ", "capmonster")
-            Output("info", config).notime(f"Using {Fore.RED}Capmonster")
+            Output("info").notime(f"Using {Fore.RED}Capmonster")
             sleep(1)
 
     def change_key():
         key = utility.ask("Captcha Key")
         config._set("captcha_key", key)
-        Output("info", config).notime("Captcha Key Applied")
+        Output("info").notime("Captcha Key Applied")
         sleep(1)  
 
 def settings():
     utility.make_menu("Captcha Settings", "Proxy Settings", "Toggle Debug Mode", f"{Fore.RED}Exit... ")
     choice = utility.ask('Setting')
     if choice not in ["1", "2", "3"]:
-        Output("bad", config).notime(f'Invalid Setting')
+        Output("bad").notime(f'Invalid Setting')
         sleep(1)
     elif choice == "1":
         utility.make_menu("Toggle Captcha Use", "Choose Captcha Service", "Add/Change Captcha Key")
@@ -83,7 +80,7 @@ def settings():
         elif captchachoice == '3':
             captcha_setting.change_key()
         else:
-            Output("bad", config).notime("Invalid Choice")
+            Output("bad").notime("Invalid Choice")
 
     elif choice == "2":
         utility.make_menu("Toggle Proxy Use", "Clear Proxy Cache", "Add own Proxies to Cache")
@@ -95,18 +92,18 @@ def settings():
         elif proxychoice == '3':
             proxy_setting.add_proxies()
         else:
-            Output("bad", config).notime("Invalid Choice")
+            Output("bad").notime("Invalid Choice")
 
     elif choice == '3':
         current_setting = config._get("debug_mode")
 
         if current_setting == True:
             config._set("debug_mode", False)
-            Output("info", config).notime(f"Debug Mode Toggled {Fore.RED}OFF")
+            Output("info").notime(f"Debug Mode Toggled {Fore.RED}OFF")
             sleep(1)
         else:
             config._set("debug_mode", True)
-            Output("info", config).notime(f"Debug Mode Toggled {Fore.RED}ON")
+            Output("info").notime(f"Debug Mode Toggled {Fore.RED}ON")
             sleep(1)
 
     elif choice == "4":

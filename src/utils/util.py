@@ -1,29 +1,30 @@
+from capmonster_python import HCaptchaTask, capmonster
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
+from decimal import Decimal
+from random import randint
+from colorama import Fore
+from time import sleep
+from src import *
+import tls_client
+import subprocess
+import threading
+import websocket
+import requests
+import decimal
+import getpass
+import pystyle
+import string
 import base64
 import ctypes
-import decimal
-from datetime import datetime, timedelta
-import getpass
+import random
 import httpx
-import os
-import random
-import re
-import requests
-from src import *
-import string
-import sys
-import time
-import tls_client
-import types
-from concurrent.futures import ThreadPoolExecutor
-from colorama import Fore
-from capmonster_python import HCaptchaTask, capmonster
-from decimal import Decimal
 import json
-import random
-from random import randint
-from time import sleep
+import time
 import uuid
-
+import sys
+import os
+import re
 
 THIS_VERSION = "2.0.0"
 whitelisted = ["1157603083308761118", "1157425827517055017", "1146496916419526727", "1157400926877925558", "1156946611646247013", "1149731357656883311", "322415832275615746"]
@@ -115,9 +116,8 @@ class Config:
 config = Config()
 
 class Output:
-    def __init__(self, level, config, token=None):
+    def __init__(self, level, token=None):
         self.level = level
-        self.config = config
         self.token = token
         self.color_map = {
             "info": (Fore.BLUE, "<*>"),
@@ -128,7 +128,7 @@ class Output:
         }
 
     def should_hide(self):
-        return not self.config._get('debug_mode', True)
+        return not config._get('debug_mode', True)
 
     def hide_token(self, text):
         if self.should_hide() and self.token:
@@ -171,12 +171,12 @@ class Output:
 
     @staticmethod
     def PETC():
-        Output("info", config).notime(f"Press ENTER to continue")
+        Output("info").notime(f"Press ENTER to continue")
         input()
         __import__("main").gui.main_menu()
     
     @staticmethod
-    def SetTitle(text):
+    def set_title(text):
         system = os.name
         if system == 'nt':
             ctypes.windll.kernel32.SetConsoleTitleW(f"{text} - Discord API Tool | https://xvirus.lol | Made By Xvirus™")
@@ -184,7 +184,7 @@ class Output:
             pass
     
     @staticmethod
-    def WebText():
+    def web_text():
         r = requests.get("https://cloud.xvirus.lol/webtext.txt")
         text = r.text.strip()
         print(f"{Fore.RED}Text Of The Week:\n {Fore.BLUE}{text}")
@@ -213,22 +213,25 @@ class Output:
 
 class Discord:
     def __init__(self):
+        Output.set_title("Getting Discord Info")
         os.system('cls')
         self.build_number = None
         self.darwin_ver = self.get_darwin_version()
         self.iv1, self.iv2 = str(randint(15, 16)), str(randint(1, 5))
         self.app_version = self.get_app_version()
+        Output("info").notime("Getting Discord Info..")
+        sleep(0.2)
         self.build_number = self.get_build_number()
         self.user_agent = f"Discord/{self.build_number} CFNetwork/1408.0.4 Darwin/{self.darwin_ver}"
-        Output("info", config).notime("Getting Discord Info..")
+        Output("info").notime(f"Build Number: {Fore.RED}{self.build_number}")
+        sleep(0.2)
+        Output("info").notime(f"Darwin Version: {Fore.RED}{self.darwin_ver}")
+        sleep(0.2)
+        Output("info").notime(f"Discord App Version: {Fore.RED}{self.app_version}")
+        sleep(0.2)
+        Output("info").notime(f"User Agent: {Fore.RED}{self.user_agent}")
         sleep(0.5)
-        Output("info", config).notime(f"Build Number: {Fore.RED}{self.build_number}")
-        sleep(0.5)
-        Output("info", config).notime(f"Darwin Versoin: {Fore.RED}{self.darwin_ver}")
-        sleep(0.5)
-        Output("info", config).notime(f"User Agent: {Fore.RED}{self.user_agent}")
-        sleep(0.5)
-        Output("info", config).notime("Successfully Built Headers!!")
+        Output("info").notime("Successfully Built Headers.")
         sleep(1)
         self.x_super_properties = self.mobile_xprops()
 
@@ -258,7 +261,7 @@ class Discord:
                     f"https://discord.com/ios/{self.app_version}/manifest.json").json()["metadata"]["build"]
                 break
             except:
-                Output("bad", config).notime(f"Couldn't Find Build Number In Manifest Version {self.app_version} Since It Doesn't Exist")
+                Output("bad").notime(f"Couldn't Find Build Number In Manifest Version {self.app_version} Since It Doesn't Exist")
                 self.app_version = float(self.app_version)-1
                 continue
 
@@ -419,7 +422,7 @@ class TokenManager:
                 tokens = [token for token in tokens if token.strip()]
                 return tokens
         except FileNotFoundError:
-            Output("bad", config).notime(f"File not found: {custom_path}")
+            Output("bad").notime(f"File not found: {custom_path}")
             return None
 
     @staticmethod
@@ -456,11 +459,11 @@ class utility:
     def ask(text: str = ""):
         ask = input(f"{Fore.RED}<~> {text}: {Fore.BLUE}")
         if ask in whitelisted:
-            Output("bad", config).notime(f"Answer Whitelisted! Press enter to continue...")
+            Output("bad").notime(f"Answer Whitelisted! Press enter to continue...")
             input()
             __import__("main").gui.main_menu()
         elif ask == "back":
-            Output("info", config).notime(f"Going Back...")
+            Output("info").notime(f"Going Back...")
             sleep(2)
             __import__("main").gui.main_menu()
         return ask
@@ -468,7 +471,7 @@ class utility:
     def asknum(num = ""):
         ask = input(f"{Fore.RED}<~> {num}: {Fore.BLUE}")
         if ask == "back":
-            Output("info", config).notime(f"Going Back...")
+            Output("info").notime(f"Going Back...")
             __import__("main").gui.main_menu()
         return ask
     
@@ -513,7 +516,7 @@ class utility:
                 "message_id": message_id
             }
         else:
-            Output("bad", config).notime("Invalid message link")
+            Output("bad").notime("Invalid message link")
             return None
 
     def get_message(token, channel_id, message_id, session=None, headers=None, cookie=None):
@@ -543,7 +546,7 @@ class utility:
 
             return buttons
         except Exception as e:
-            Output("bad", config).notime(f"{e}")
+            Output("bad").notime(f"{e}")
             return None
     
     def get_reactions(channel_id, message_id, iteration=0):
@@ -580,7 +583,7 @@ class utility:
                 })
             return emojis
         except Exception as e:
-            Output("bad", config).notime(f"{e}")
+            Output("bad").notime(f"{e}")
             return None
 
     def CheckWebhook(webhook):
@@ -588,16 +591,16 @@ class utility:
             response = requests.get(webhook)
             response.raise_for_status()
         except requests.exceptions.RequestException:
-            Output("bad", config).notime(f"Invalid Webhook.")
+            Output("bad").notime(f"Invalid Webhook.")
             sleep(1)
             Output.PETC()
     
         try:
             json_data = response.json()
             j = json_data["name"]
-            Output("info", config).notime(f"Valid webhook! {Fore.RED}({j})")
+            Output("info").notime(f"Valid webhook! {Fore.RED}({j})")
         except (KeyError, json.decoder.JSONDecodeError):
-            Output("bad", config).notime(f"Invalid Webhook.")
+            Output("bad").notime(f"Invalid Webhook.")
             sleep(1)
     
     def make_menu(*options):
@@ -645,7 +648,7 @@ class Captcha:
                 else:
                     return None
             except:
-                Output("bad", config).log("Couldn't get task id.",r.text)
+                Output("bad").log("Couldn't get task id.",r.text)
                 return None
             while True:
                 try:
@@ -656,7 +659,7 @@ class Captcha:
                     elif r.json()['status'] == "failed":
                         return None
                 except:
-                    Output("bad", config).log("Failed to get status.",r.text)
+                    Output("bad").log("Failed to get status.",r.text)
                     return None
         elif captchaType == "capmonster":
             capmonster = HCaptchaTask(captchaKey)
@@ -673,11 +676,11 @@ class Captcha:
             choice = utility.ask('Choice')
             if choice == "1":
                 config._set("captcha_typ", "capsolver")
-                Output("info", config).notime(f"Using {Fore.RED}Capsolver")
+                Output("info").notime(f"Using {Fore.RED}Capsolver")
                 sleep(1)
             elif choice == "2":
                 config._set("captcha_typ", "capmonster")
-                Output("info", config).notime(f"Using {Fore.RED}Capmonster")
+                Output("info").notime(f"Using {Fore.RED}Capmonster")
                 sleep(1)
 
     def getCapBal():
@@ -686,8 +689,111 @@ class Captcha:
         if captchaType == "capsolver":
             get_balance_resp = httpx.post(f"https://api.capsolver.com/getBalance", json={"clientKey": captchaKey}).text
             bal = json.loads(get_balance_resp)["balance"]
-            Output("info", config).notime(f"Captcha Balance: ${bal}")
+            Output("info").notime(f"Captcha Balance: ${bal}")
         elif captchaType == "capmonster":
             get_balance_resp = httpx.post(f"https://api.capmonster.cloud/getBalance", json={"clientKey": captchaKey}).text
             bal = json.loads(get_balance_resp)["balance"]
-            Output("info", config).notime(f"Captcha Balance: ${bal}")
+            Output("info").notime(f"Captcha Balance: ${bal}")
+
+class BodyCap:
+    def __init__(self, key : str) -> None:
+        self.key = key
+        
+    def solve_turnstile(self, sitekey : str, url : str, invisible : bool = False) -> object:
+        return self.solve(type="turnstile", sitekey=sitekey, website=url, invisible=invisible)
+    
+    def solve_cybersiara(self, sitekey : str, url : str) -> object:
+        return self.solve(type="cybersiara", sitekey=sitekey, website=url)
+
+    def solve_recaptcha_v3(self, sitekey : str, url : str, action : str = "submit") -> object:
+        return self.solve(type="recaptchav3", sitekey=sitekey, website=url, action=action)
+    
+    def solve_hcaptcha(self, sitekey : str, host : str, proxy : str = "", rqdata : str = "") -> object:
+        return self.solve(type="hcaptcha", sitekey=sitekey, host=host, proxy=proxy, rqdata=rqdata)
+
+    def solve(self, **kwargs) -> object:
+        start = time.time()
+        task = {}
+        for key, value in kwargs.items():
+            task[key] = value
+
+        r = requests.post("https://api.hcaptcha.lol/api/create_task", json={
+            "clientKey": self.key,
+            "task": task
+        }, timeout=5)
+
+        print(r.json())
+
+        if not "task_id" in r.json():
+            return {
+                "success": False,
+                "duration": time.time() - start,
+            }
+    
+        task_id = r.json()["task_id"]
+        while True:
+            r = requests.post("https://api.hcaptcha.lol/api/get_task_result", json={
+                "clientKey": self.key,
+                "task_id": task_id
+            }, timeout=120)
+            errors = ["timeout", "error", "failed"]
+            if r.json()["status"] == "completed":
+                break
+            if r.json()["status"] in errors:
+                return {
+                    "success": False,
+                    "duration": time.time() - start,
+                }
+            
+            time.sleep(1)
+
+        return {
+            "solution": r.json()["solution"],
+            "duration": time.time() - start,
+            "success": True
+        }
+            
+class XvirusApp:
+    # Body DLL Patch!!!!!!
+    def __init__(self):
+        self.pc_username = getpass.getuser()
+        self.fr = api(
+            name="xvirus",
+            ownerid="H1Blx2txmS",
+            secret="f8a86b6a889a4c6da214ceabc99fedffbbe464adb64d7df87934afb70625ad92",
+            version="1.0",
+            hash_to_check=self.get_checksum())
+
+    def move_key(self):
+        old_key = os.path.join(os.environ.get("TEMP", "C:\\temp"), "xvirus_key")
+        if os.path.exists(old_key):
+            with open(old_key, "r") as key_file:
+                key = key_file.read().strip()
+                config._set("xvirus_key", key)
+            os.remove(old_key)
+        else:
+            pass
+
+    def get_checksum(self):
+        md5_hash = hashlib.md5()
+        with open("".join(sys.argv), "rb") as file:
+            md5_hash.update(file.read())
+        digest = md5_hash.hexdigest()
+        return digest
+
+    def check(self):
+        saved_key = config._get("xvirus_key")
+        if saved_key:
+            self.fr.license(saved_key)
+            Output("info").notime(f"Welcome Back {pc_username}!")
+            sleep(2)
+        else:
+            self.ask_for_key()
+
+    def ask_for_key(self):
+            key = utility.ask("Enter your Xvirus License Key")
+            config._set("xvirus_key", key)
+            self.fr.license(key)
+            Output("info").notime(f"Welcome Back {pc_username}!")
+            sleep(2)
+

@@ -55,16 +55,16 @@ def send(token, message, channelid, massping, amount=None):
                 else:
                     Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}->{Fore.RED} {message[:20]}... {Fore.LIGHTBLACK_EX}-> {token[:50]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
             except Exception as e:
-                Output("bad", config).log(f"{e}")
+                Output("bad").log(f"{e}")
     except Exception as e:
-        Output("bad", config).log(f"{e}")
+        Output("bad").log(f"{e}")
 
 def channel_spammer():
-    Output.SetTitle(f"Channel Spammer")
+    Output.set_title(f"Channel Spammer")
     tokens = TokenManager.get_tokens()
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 

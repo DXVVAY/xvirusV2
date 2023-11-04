@@ -52,7 +52,7 @@ class api:
 
     def init(self):
         if self.sessionid != "":
-            Output("info", config).notime("You've already initialized!")
+            Output("info").notime("You've already initialized!")
             time.sleep(3)
             os._exit(1)
 
@@ -86,7 +86,7 @@ class api:
                 time.sleep(3)
                 os._exit(1)
             else:
-                Output("info", config).notime("Invalid Version, Contact owner to add download link to latest app version")
+                Output("info").notime("Invalid Version, Contact owner to add download link to latest app version")
                 time.sleep(3)
                 os._exit(1)
 
@@ -122,7 +122,7 @@ class api:
         json = jsond.loads(response)
 
         if json["success"]:
-            Output("info", config).notime("Successfully registered")
+            Output("info").notime("Successfully registered")
             self.__load_user_data(json["info"])
         else:
             print(json["message"])
@@ -146,8 +146,8 @@ class api:
         json = jsond.loads(response)
 
         if json["success"]:
-            Output("info", config).notime("Successfully upgraded user")
-            Output("info", config).notime("Please restart program and login")
+            Output("info").notime("Successfully upgraded user")
+            Output("info").notime("Please restart program and login")
             time.sleep(3)
             os._exit(1)
         else:
@@ -176,7 +176,7 @@ class api:
 
         if json["success"]:
             self.__load_user_data(json["info"])
-            Output("info", config).notime("Successfully logged in")
+            Output("info").notime("Successfully logged in")
         else:
             print(json["message"])
             time.sleep(3)
@@ -202,7 +202,7 @@ class api:
 
         if json["success"]:
             self.__load_user_data(json["info"])
-            Output("info", config).notime("Successfully logged in with license")
+            Output("info").notime("Successfully logged in with license")
         else:
             print(json["message"])
             time.sleep(3)
@@ -492,7 +492,7 @@ class api:
         json = jsond.loads(response)
 
         if json["success"]:
-            Output("info", config).notime("Successfully changed username")
+            Output("info").notime("Successfully changed username")
         else:
             print(json["message"])
             time.sleep(3)
@@ -513,7 +513,7 @@ class api:
         json = jsond.loads(response)
 
         if json["success"]:
-            Output("info", config).notime("Successfully logged out")
+            Output("info").notime("Successfully logged out")
             time.sleep(3)
             os._exit(1)
         else:

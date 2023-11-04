@@ -8,7 +8,7 @@ from colorama import Fore
 from src import *
 
 def token_typer():
-    Output.SetTitle(f"Token Fake Typer")
+    Output.set_title(f"Token Fake Typer")
     args = []
     tokens = TokenManager.get_tokens()
 
@@ -34,12 +34,12 @@ def token_typer():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -66,7 +66,7 @@ def token_typer():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()

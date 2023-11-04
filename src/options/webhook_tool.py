@@ -7,30 +7,30 @@ from colorama import Fore
 from src import *
 
 def webhook_tool():
-    Output.SetTitle(f"Webhook Tools")
+    Output.set_title(f"Webhook Tools")
     session = Client.tls_session()
     args = []
     def spammer(webhook, Message):
         result = session.post(webhook, json={"content": Message})
 
         if result.status_code == 204 or result.status_code == 200:
-            Output("good", config).log(f"Success -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good").log(f"Success -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code})")
         elif result.text.startswith('{"captcha_key"'):
-            Output("bad", config).log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
+            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
         elif result.status_code == 429:
             pass   
         elif result.text.startswith('{"message": "401: Unauthorized'):
-            Output("bad", config).log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
+            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
         elif "Cloudflare" in result.text:
-            Output("bad", config).log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
+            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
         elif "\"code\": 40007" in result.text:
-            Output("bad", config).log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
+            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
         elif "\"code\": 40002" in result.text:
-            Output("bad", config).log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
+            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
         elif "\"code\": 10006" in result.text:
-            Output("bad", config).log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
+            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
         else:
-            Output("bad", config).log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
 
     def webhook_spammer():
         webhook = utility.ask("Webhook")
@@ -55,10 +55,10 @@ def webhook_tool():
                         for future in futures:
                             future.result()
                     except Exception as e:
-                        Output("bad", config).log(f"Error: {e}")
+                        Output("bad").log(f"Error: {e}")
 
         else:
-            Output("bad", config).log(f"Invalid Webhook")
+            Output("bad").log(f"Invalid Webhook")
             Output.PETC()
     
     utility.make_menu("Webhook Spammer", "Webhook Deleter")
@@ -71,4 +71,4 @@ def webhook_tool():
         webhook = utility.ask("Webhook")
         utility.CheckWebhook(webhook)
         session.delete(webhook)
-        Output("good", config).notime("Webhook successfully deleted")
+        Output("good").notime("Webhook successfully deleted")

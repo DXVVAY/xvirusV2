@@ -1,7 +1,7 @@
 from src import *
 
 def button_presser():
-    Output.SetTitle(f"Button Presser")
+    Output.set_title(f"Button Presser")
     pressed = 0
     error = 0
     tokens = TokenManager.get_tokens()
@@ -46,13 +46,13 @@ def button_presser():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
     
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -70,7 +70,7 @@ def button_presser():
     )
 
     if buttons == None:
-        Output("bad", config).notime("Invalid message and or message has no buttons")
+        Output("bad").notime("Invalid message and or message has no buttons")
         Output.PETC()
 
     print()
@@ -107,10 +107,10 @@ def button_presser():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Pressed {str(pressed)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"Pressed {str(pressed)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}Pressed: {str(pressed)}",
@@ -122,5 +122,5 @@ def button_presser():
         print(f" {status}")
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()
