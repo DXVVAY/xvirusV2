@@ -23,13 +23,13 @@ def send(token, channel_id, message, title):
                             "content": secrets.token_urlsafe(16)
                         }
                 }
-                req = session.post(f"https://discord.com/api/v9/channels/{channel_id}/threads?use_nested_fields=true", headers=headers, cookies=cookie, json=data)
+                req = session.post(f"https://discord.com/api/v9/channels/{channel_id}/threads?use_nested_fields=true", headers=headers, cookies=Client.get_cookies(session), json=data)
                 
                 if req.status_code == 201:
                     result = session.post(
                         f"https://discord.com/api/v9/channels/{req.json()['id']}/messages",
                         headers=headers,
-                        cookies=cookie,
+                        cookies=Client.get_cookies(session),
                         json={
                             "content": secrets.token_urlsafe(16),
                             "nonce": str(Decimal(time.time()*1000-1420070400000)*4194304).split(".")[0],
