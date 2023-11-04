@@ -227,7 +227,7 @@ class Discord:
         Output("info").notime("Getting Discord Info..")
         sleep(0.2)
         self.build_number = self.get_build_number()
-        self.user_agent = f"Discord/{self.build_number} CFNetwork/1408.0.4 Darwin/{self.darwin_ver}"
+        self.user_agent = f"Discord/{self.build_number} CFNetwork/1402.0.8 Darwin/{self.darwin_ver}"
         Output("info").notime(f"Build Number: {Fore.RED}{self.build_number}")
         sleep(0.2)
         Output("info").notime(f"Darwin Version: {Fore.RED}{self.darwin_ver}")

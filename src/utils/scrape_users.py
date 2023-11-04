@@ -1,6 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
-import os
-import httpx
 from src import *
 
 def reset_users(file):

@@ -11,8 +11,7 @@ from src import *
 def send(token, guild_id, channel_id, message, title):  
     try:
         session = Client.get_session(token)
-        headers["content-type"] = "application/json"
-        headers["referer"] = f"https://discord.com/channels/{guild_id}/{channel_id}"
+        session.headers.update({"referer":f"https://discord.com/channels/{guild_id}/{channel_id}"})
         while True:
             try:
                 data = {
@@ -24,13 +23,11 @@ def send(token, guild_id, channel_id, message, title):
                         "content": message
                     },
                 }
-                req = session.post(f"https://discord.com/api/v9/channels/{channel_id}/threads?use_nested_fields=true", headers=headers, cookies=Client.get_cookies(session), json=data)
+                req = session.post(f"https://discord.com/api/v9/channels/{channel_id}/threads?use_nested_fields=true", json=data)
                 
                 if req.status_code == 201:
                     result = session.post(
                         f"https://discord.com/api/v9/channels/{req.json()['id']}/messages",
-                        headers=headers,
-                        cookies=Client.get_cookies(session),
                         json={
                             "content": secrets.token_urlsafe(16),
                             "nonce": str(Decimal(time.time()*1000-1420070400000)*4194304).split(".")[0],
@@ -39,26 +36,10 @@ def send(token, guild_id, channel_id, message, title):
                     )
                     if result.status_code == 200:
                         Output("good", token).log(f"Success {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-                    elif result.text.startswith('{"captcha_key"'):
-                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
-                    elif result.text.startswith('{"message": "401: Unauthorized'):
-                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")   
                     elif result.status_code == 429:
                         pass
-                    elif "\"code\": 50001" in result.text:
-                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")    
-                    elif "Cloudflare" in result.text:
-                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
-                    elif "\"code\": 40007" in result.text:
-                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
-                    elif "\"code\": 40002" in result.text:
-                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
-                    elif "\"code\": 10006" in result.text:
-                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
-                    elif "\"code\": 50013" in result.text:
-                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")
                     else:
-                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+                        Output.error_logger(token, result.text, result.status_code)
                 elif req.status_code == 429:
                     Output("bad", token).log(f"Rate Limited {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code})")
                     time.sleep(float(req.json()['retry_after']))

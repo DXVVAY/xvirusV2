@@ -10,17 +10,6 @@ class XvirusApp:
             secret="f8a86b6a889a4c6da214ceabc99fedffbbe464adb64d7df87934afb70625ad92",
             version="1.0",
             hash_to_check=self.get_checksum())
-        
-    def list_loaded_dlls():
-        pid = os.getpid()
-        process = psutil.Process(pid)
-
-        dll_list = []
-        for lib in process.memory_maps():
-            if lib.path and lib.path.endswith(".dll"):
-                dll_list.append(lib.path)
-        return dll_list
-
 
     def move_key(self):
         old_key = os.path.join(os.environ.get("TEMP", "C:\\temp"), "xvirus_key")
@@ -97,9 +86,9 @@ class gui:
 {r}    ({lb}02{r}) {lb}> Token Leaver                    {r}({lb}11{r}) {lb}> Server Nick Changer              {r}({lb}20{r}) {lb}> User Mass DM{r}
 {r}    ({lb}03{r}) {lb}> Token Spammer                   {r}({lb}12{r}) {lb}> HypeSquad Changer                {r}({lb}21{r}) {lb}> Mass Report{r}
 {r}    ({lb}04{r}) {lb}> Multi Checker                   {r}({lb}13{r}) {lb}> Bio Changer                      {r}({lb}22{r}) {lb}> Mass Thread{r}
-{r}    ({lb}05{r}) {lb}> Bypass Rules                    {r}({lb}14{r}) {lb}> Pronouns Changer                 {r}({lb}23{r}) {lb}> N/A{r}
+{r}    ({lb}05{r}) {lb}> Bypass Rules                    {r}({lb}14{r}) {lb}> Pronouns Changer                 {r}({lb}23{r}) {lb}> Forum Spammer{r}
 {r}    ({lb}06{r}) {lb}> Bypass RestoreCord              {r}({lb}15{r}) {lb}> Voice Chat Joiner                {r}({lb}24{r}) {lb}> N/A{r}
-{r}    ({lb}07{r}) {lb}> Bypass SledgeHammer             {r}({lb}16{r}) {lb}> Sound Board Spammer              {r}({lb}25{r}) {lb}> N/A{r}
+{r}    ({lb}07{r}) {lb}> Bypass Sledge Hammer            {r}({lb}16{r}) {lb}> Sound Board Spammer              {r}({lb}25{r}) {lb}> N/A{r}
 {r}    ({lb}08{r}) {lb}> Button Presser                  {r}({lb}17{r}) {lb}> Fake Typer                       {r}({lb}26{r}) {lb}> N/A{r}
 {r}║   ({lb}09{r}) {lb}> Message Reactor           {r}║ ║   {r}({lb}18{r}) {lb}> Forum Spammer               {r}║ ║  {r}({lb}27{r}) {lb}> N/A{r}                          ║
 {r}╚═══                              ═══╝ ╚═══                                ═══╝ ╚═══                                ═══╝'''
@@ -171,6 +160,7 @@ class gui:
                 '20': user_mass_dm,
                 '21': mass_report,
                 '22': mass_thread,
+                '23': forum_spammer,
                 '!': settings,
                 'TKN': token_manager
             }
@@ -189,20 +179,10 @@ class gui:
         gui.main_menu()
 
 if __name__ == "__main__":
-    loaded_dlls = XvirusApp.list_loaded_dlls()
     utility.clear()
+    run_anti_debug()
     Output.set_title("Xvirus Loading")
     app = XvirusApp()
-    dll_count = len(loaded_dlls)
-    if dll_count > 94:
-        print("BUY XVIRUS NOT CRACK IT L")
-        time.sleep(2)
-        sys.exit(1)
-    elif dll_count > 0:
-        pass
-    else:
-        print("No DLLs found in the current process.")
-        time.sleep(0.01)
     app.move_key()
     app.check()
     gui.main_menu()

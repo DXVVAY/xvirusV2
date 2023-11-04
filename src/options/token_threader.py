@@ -3,7 +3,6 @@ from src import *
 def send(token, message, channel_id, title):  
     try:
         session = Client.get_session(token)
-        headers["content-type"] = "application/json"
         while True:
             try:
                 data = {
@@ -17,7 +16,6 @@ def send(token, message, channel_id, title):
                 if req.status_code == 201:
                     result = session.post(
                         f"https://discord.com/api/v9/channels/{req.json()['id']}/messages",
-                        headers=headers,
                         json={
                             "content": message,
                             "nonce": str(Decimal(time.time()*1000-1420070400000)*4194304).split(".")[0],
