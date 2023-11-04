@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def user_mass_dm():
@@ -36,7 +29,7 @@ def user_mass_dm():
         })
 
         if result.status_code == 200:
-            Output("good", config, token).log(f"Success {Fore.LIGHTBLACK_EX}->{Fore.GREEN} {message[:20]}... {Fore.LIGHTBLACK_EX}-> {token[:50]} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Success {Fore.LIGHTBLACK_EX}->{Fore.GREEN} {message[:20]}... {Fore.LIGHTBLACK_EX}-> {token[:50]} {Fore.LIGHTBLACK_EX}({result.status_code})")
             sent += 1
         else:
             Output.error_logger(token, result.text, result.status_code)
@@ -65,14 +58,14 @@ def user_mass_dm():
         result = session.post(f"https://discord.com/api/v9/users/@me/channels", json=data)
 
         if result.status_code == 200:
-            Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             if 'id' in result.json():
                 channel_id = result.json()['id']
                 send_message(token, channel_id, message) 
                 sent += 1
             return False, None, None  
         elif result.text.startswith('{"captcha_key"'):
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
             use_captcha = config._get("use_captcha")
             if use_captcha is True:
                 return True, result.json()["captcha_rqdata"], result.json()["captcha_rqtoken"]

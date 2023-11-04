@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-import typing
 from src import *
 
 def soundboard_spammer():
@@ -27,7 +20,7 @@ def soundboard_spammer():
             result = session.post(f"https://discord.com/api/v9/channels/{channel_id}/voice-channel-effects", json=data)
 
             if result.status_code == 204:
-                Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+                Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             elif result.status_code == 429:
                 pass
             else:

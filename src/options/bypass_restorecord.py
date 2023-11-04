@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def restorecord_bypass():
@@ -30,13 +23,13 @@ def restorecord_bypass():
             result = session.get(answer, allow_redirects=True)
 
             if result.status_code in [307, 403, 200]:
-                Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+                Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
                 bypassed += 1
             else:
                 Output.error_logger(token, result.text, result.status_code)
                 error += 1
         else:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({auth.status_code}) {Fore.RED}({auth.text})")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({auth.status_code}) {Fore.RED}({auth.text})")
             error += 1
 
     def thread_complete(future):

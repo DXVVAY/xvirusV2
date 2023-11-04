@@ -1,5 +1,49 @@
 from src import *
 
+class XvirusApp:
+    # Body DLL Patch!!!!!!
+    def __init__(self):
+        self.pc_username = getpass.getuser()
+        self.fr = api(
+            name="xvirus",
+            ownerid="H1Blx2txmS",
+            secret="f8a86b6a889a4c6da214ceabc99fedffbbe464adb64d7df87934afb70625ad92",
+            version="1.0",
+            hash_to_check=self.get_checksum())
+
+    def move_key(self):
+        old_key = os.path.join(os.environ.get("TEMP", "C:\\temp"), "xvirus_key")
+        if os.path.exists(old_key):
+            with open(old_key, "r") as key_file:
+                key = key_file.read().strip()
+                config._set("xvirus_key", key)
+            os.remove(old_key)
+        else:
+            pass
+
+    def get_checksum(self):
+        md5_hash = hashlib.md5()
+        with open("".join(sys.argv), "rb") as file:
+            md5_hash.update(file.read())
+        digest = md5_hash.hexdigest()
+        return digest
+
+    def check(self):
+        saved_key = config._get("xvirus_key")
+        if saved_key:
+            self.fr.license(saved_key)
+            Output("info").notime(f"Welcome Back {self.pc_username}!")
+            sleep(2)
+        else:
+            self.ask_for_key()
+
+    def ask_for_key(self):
+            key = utility.ask("Enter your Xvirus License Key")
+            config._set("xvirus_key", key)
+            self.fr.license(key)
+            Output("info").notime(f"Welcome Back {self.pc_username}!")
+            sleep(2)
+
 class gui:
     def get_tokens():
         f = config.read('xvirus_tokens')
@@ -38,15 +82,15 @@ class gui:
 
     options = f'''{r} 
 {r}╔═══                              ═══╗ ╔═══                               ═══╗ ╔═══                                 ═══╗
-{r}║   ({lb}01{r}) {lb}> Joiner                    {r}║ ║   {r}({lb}10{r}) {lb}> Global Nick Changer        {r}║ ║   {r}({lb}19{r}) {lb}> User Mass Friend{r}             ║
-{r}    ({lb}02{r}) {lb}> Leaver                          {r}({lb}11{r}) {lb}> Server Nick Changer              {r}({lb}20{r}) {lb}> User Mass DM{r}
-{r}    ({lb}03{r}) {lb}> Spammer                         {r}({lb}12{r}) {lb}> HypeSquad Changer                {r}({lb}21{r}) {lb}> N/A{r}
-{r}    ({lb}04{r}) {lb}> Checker                         {r}({lb}13{r}) {lb}> Bio Changer                      {r}({lb}22{r}) {lb}> N/A{r}
+{r}║   ({lb}01{r}) {lb}> Token Joiner              {r}║ ║   {r}({lb}10{r}) {lb}> Global Nick Changer        {r}║ ║   {r}({lb}19{r}) {lb}> User Mass Friend{r}             ║
+{r}    ({lb}02{r}) {lb}> Token Leaver                    {r}({lb}11{r}) {lb}> Server Nick Changer              {r}({lb}20{r}) {lb}> User Mass DM{r}
+{r}    ({lb}03{r}) {lb}> Token Spammer                   {r}({lb}12{r}) {lb}> HypeSquad Changer                {r}({lb}21{r}) {lb}> Mass Report{r}
+{r}    ({lb}04{r}) {lb}> Multi Checker                   {r}({lb}13{r}) {lb}> Bio Changer                      {r}({lb}22{r}) {lb}> Mass Thread{r}
 {r}    ({lb}05{r}) {lb}> Bypass Rules                    {r}({lb}14{r}) {lb}> Pronouns Changer                 {r}({lb}23{r}) {lb}> N/A{r}
-{r}    ({lb}06{r}) {lb}> Bypass RestoreCord              {r}({lb}15{r}) {lb}> VC Joiner                        {r}({lb}24{r}) {lb}> N/A{r}
-{r}    ({lb}07{r}) {lb}> Button Presser                  {r}({lb}16{r}) {lb}> Sound Board Spammer              {r}({lb}25{r}) {lb}> N/A{r}
-{r}    ({lb}08{r}) {lb}> Reactor                         {r}({lb}17{r}) {lb}> Fake Typer                       {r}({lb}26{r}) {lb}> N/A{r}
-{r}║   ({lb}09{r}) {lb}> Mass Thread               {r}║ ║   {r}({lb}18{r}) {lb}> Forum Spammer               {r}║ ║  {r}({lb}27{r}) {lb}> N/A{r}                          ║
+{r}    ({lb}06{r}) {lb}> Bypass RestoreCord              {r}({lb}15{r}) {lb}> Voice Chat Joiner                        {r}({lb}24{r}) {lb}> N/A{r}
+{r}    ({lb}07{r}) {lb}> Bypass SledgeHammer             {r}({lb}16{r}) {lb}> Sound Board Spammer              {r}({lb}25{r}) {lb}> N/A{r}
+{r}    ({lb}08{r}) {lb}> Button Presser                  {r}({lb}17{r}) {lb}> Fake Typer                       {r}({lb}26{r}) {lb}> N/A{r}
+{r}║   ({lb}09{r}) {lb}> Message Reactor           {r}║ ║   {r}({lb}18{r}) {lb}> Forum Spammer               {r}║ ║  {r}({lb}27{r}) {lb}> N/A{r}                          ║
 {r}╚═══                              ═══╝ ╚═══                                ═══╝ ╚═══                                ═══╝'''
 
     def main_menu():
@@ -100,9 +144,9 @@ class gui:
                 '4': checker_menu,
                 '5': bypass_rules,
                 '6': restorecord_bypass,
-                '7': button_presser,
-                '8': token_reactor,
-                '9': mass_thread,
+                '7': sledge_hammer,
+                '8': button_presser,
+                '9': token_reactor,
                 '10': global_nicker,
                 '11': server_nicker,
                 '12': hypesquad_changer,
@@ -114,6 +158,8 @@ class gui:
                 '18': wip,
                 '19': user_mass_friend,
                 '20': user_mass_dm,
+                '21': mass_report,
+                '22': mass_thread,
                 '!': settings,
                 'TKN': token_manager
             }

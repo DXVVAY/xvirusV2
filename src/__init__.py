@@ -35,3 +35,5 @@ from .options.user_mass_friend import *
 from .options.server_mass_friend import *
 from .options.token_server_checker import *
 from .options.user_mass_dm import *
+from .options.mass_report import *
+from .options.bypass_sledge_hammer import *

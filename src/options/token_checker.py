@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 
@@ -24,16 +17,16 @@ def token_checker(tokens):
         result = session.get("https://discord.com/api/v9/users/@me/settings")
 
         if result.status_code == 200:
-            Output("good", config, token).log(f"Valid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Valid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             valid += 1
         elif "You need to verify your account in order to perform this action." in result.text:
-            Output("info", config, token).log(f"Locked -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("info", token).log(f"Locked -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             locked += 1
         elif "Unauthorized" in result.text:
-            Output("bad", config, token).log(f"Invalid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("bad", token).log(f"Invalid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             invalid += 1
         else:
-            Output("bad", config, token).log(f"Invalid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) ({result.text})")
+            Output("bad", token).log(f"Invalid -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) ({result.text})")
             error += 1
 
     def thread_complete(future):

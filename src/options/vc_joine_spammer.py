@@ -1,10 +1,4 @@
-from json import loads
 from src import *
-from time import sleep
-from json import dumps
-from websocket import WebSocket
-from concurrent.futures import ThreadPoolExecutor
-import os
 
 def vc_join_spammer():
     joined = 0
@@ -22,7 +16,7 @@ def vc_join_spammer():
             ws.send(dumps({"op": 1,"d": None}))
             ws.close()
             sleep(0.1)
-            Output("good", config, token).log(f"Success -> {token}")
+            Output("good", token).log(f"Success -> {token}")
             joined += 1
 
     def thread_complete(future):

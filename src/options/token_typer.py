@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def token_typer():
@@ -18,7 +11,7 @@ def token_typer():
             result = session.post(f"https://discord.com/api/v9/channels/{channel_id}/typing")
 
             if result.status_code == 204:
-                Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+                Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             elif result.status_code == 429:
                 pass
             else:

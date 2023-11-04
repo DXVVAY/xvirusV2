@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def token_leaver():
@@ -20,7 +13,7 @@ def token_leaver():
         result = session.delete(f"https://discord.com/api/v9/users/@me/guilds/{guild_id}", json={'session_id': utility.rand_str(32)})
 
         if result.status_code == 204:
-            Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             left += 1
         else:
             Output.error_logger(token, result.text, result.status_code)

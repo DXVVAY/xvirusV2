@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def server_checker():
@@ -23,10 +16,10 @@ def server_checker():
         result = session.get(f"https://discord.com/api/v9/guilds/{guild_id}")
 
         if result.status_code == 200:
-            Output("good", config, token).log(f"In Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"In Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             yes += 1
         else:
-            Output("bad", config, token).log(f"Not In Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("bad", token).log(f"Not In Server -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             error += 1
             valid_tokens.remove(token)
 

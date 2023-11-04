@@ -29,7 +29,7 @@ def button_presser():
         result = session.post(f"https://discord.com/api/v9/interactions", json=data)
 
         if result.status_code == 204:
-            Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             pressed += 1
         else:
             Output.error_logger(token, result.text, result.status_code)

@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def hypesquad_changer():
@@ -22,7 +15,7 @@ def hypesquad_changer():
         })
 
         if result.status_code == 204:
-            Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             changed += 1
         else:
             Output.error_logger(token, result.text, result.status_code)

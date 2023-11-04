@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def token_bio_changer():
@@ -20,7 +13,7 @@ def token_bio_changer():
         result = session.patch(f"https://discord.com/api/v9/users/@me", json={"bio": bio})
 
         if result.status_code == 200:
-            Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             changed += 1
         else:
             Output.error_logger(token, result.text, result.status_code)

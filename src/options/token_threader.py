@@ -1,11 +1,3 @@
-
-import datetime
-import threading
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def send(token, message, channel_id, title):  
@@ -33,16 +25,16 @@ def send(token, message, channel_id, title):
                         }
                     )
                     if result.status_code == 200:
-                        Output("good", config, token).log(f"Success {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+                        Output("good", token).log(f"Success {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
                     elif result.status_code == 429:
                         pass
                     else:
                         Output.error_logger(token, result.text, result.status_code)
                 elif req.status_code == 429:
-                    Output("bad", config, token).log(f"Rate Limited {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code})")
+                    Output("bad", token).log(f"Rate Limited {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code})")
                     time.sleep(float(req.json()['retry_after']))
                 else:
-                    Output("bad", config, token).log(f"Error Creating Thread {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code})")
+                    Output("bad", token).log(f"Error Creating Thread {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code})")
             except Exception as e:
                 Output("bad").log(f"{e}")
     except Exception as e:

@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-from base64 import b64encode
-from colorama import Fore
-
 from src import *
 
 def token_joiner():
@@ -20,7 +13,7 @@ def token_joiner():
         result = session.post(f"https://discord.com/api/v9/invites/{invite}", json={"session_id": utility.rand_str(32)})
 
         if result.status_code == 200:
-            Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             joined += 1
         else:
             Output.error_logger(token, result.text, result.status_code)

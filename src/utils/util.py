@@ -1,6 +1,8 @@
 from capmonster_python import HCaptchaTask, capmonster
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from websocket import WebSocket
+from json import dumps, loads
 from decimal import Decimal
 from random import randint
 from colorama import Fore
@@ -8,6 +10,7 @@ from time import sleep
 from src import *
 import tls_client
 import subprocess
+import webbrowser
 import threading
 import websocket
 import requests
@@ -18,6 +21,7 @@ import string
 import base64
 import ctypes
 import random
+import typing
 import httpx
 import json
 import time
@@ -193,23 +197,23 @@ class Output:
     @staticmethod
     def error_logger(token, res_text, res_status_code):
         if res_text.startswith('{"captcha_key"'):
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Captcha)")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Captcha)")
         elif res_text.startswith('{"message": "401: Unauthorized'):
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Unauthorized)")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Unauthorized)")
         elif "Cloudflare" in res_text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(CloudFlare Blocked)")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(CloudFlare Blocked)")
         elif "\"code\": 40007" in res_text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Token Banned)")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Token Banned)")
         elif "\"code\": 40002" in res_text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Locked Token)")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Locked Token)")
         elif "\"code\": 10006" in res_text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Invalid Invite)")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Invalid Invite)")
         elif "\"code\": 10004" in res_text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Not In Server)")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Not In Server)")
         elif "\"code\": 50013:" or "\"code\": 50001:" in res_text:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(No Access)")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(No Access)")
         else:
-            Output("bad", config, token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}({res_text})")
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}({res_text})")
 
 class Discord:
     def __init__(self):
@@ -753,47 +757,3 @@ class BodyCap:
             "success": True
         }
             
-class XvirusApp:
-    # Body DLL Patch!!!!!!
-    def __init__(self):
-        self.pc_username = getpass.getuser()
-        self.fr = api(
-            name="xvirus",
-            ownerid="H1Blx2txmS",
-            secret="f8a86b6a889a4c6da214ceabc99fedffbbe464adb64d7df87934afb70625ad92",
-            version="1.0",
-            hash_to_check=self.get_checksum())
-
-    def move_key(self):
-        old_key = os.path.join(os.environ.get("TEMP", "C:\\temp"), "xvirus_key")
-        if os.path.exists(old_key):
-            with open(old_key, "r") as key_file:
-                key = key_file.read().strip()
-                config._set("xvirus_key", key)
-            os.remove(old_key)
-        else:
-            pass
-
-    def get_checksum(self):
-        md5_hash = hashlib.md5()
-        with open("".join(sys.argv), "rb") as file:
-            md5_hash.update(file.read())
-        digest = md5_hash.hexdigest()
-        return digest
-
-    def check(self):
-        saved_key = config._get("xvirus_key")
-        if saved_key:
-            self.fr.license(saved_key)
-            Output("info").notime(f"Welcome Back {pc_username}!")
-            sleep(2)
-        else:
-            self.ask_for_key()
-
-    def ask_for_key(self):
-            key = utility.ask("Enter your Xvirus License Key")
-            config._set("xvirus_key", key)
-            self.fr.license(key)
-            Output("info").notime(f"Welcome Back {pc_username}!")
-            sleep(2)
-

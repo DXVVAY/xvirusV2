@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def bypass_rules():
@@ -21,7 +14,7 @@ def bypass_rules():
         result = session.put(f"https://discord.com/api/v9/guilds/{guild_id}/requests/@me", json=rules)
 
         if result.status_code == 201:
-            Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             accepted += 1
         else:
             Output.error_logger(token, result.text, result.status_code)

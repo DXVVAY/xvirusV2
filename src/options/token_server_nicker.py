@@ -1,10 +1,3 @@
-
-import datetime
-import time
-from concurrent.futures import ThreadPoolExecutor
-
-from colorama import Fore
-
 from src import *
 
 def server_nicker():
@@ -20,7 +13,7 @@ def server_nicker():
         result = session.patch(f"https://discord.com/api/v9/guilds/{guild_id}/members/@me", json={'nick': nick})
 
         if result.status_code == 200:
-            Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             changed += 1
         else:
             Output.error_logger(token, result.text, result.status_code)

@@ -1,10 +1,4 @@
-from json import loads
 from src import *
-from time import sleep
-from json import dumps
-from websocket import WebSocket
-from concurrent.futures import ThreadPoolExecutor
-import os
 
 def token_vc_joiner():
     joined = 0
@@ -20,7 +14,7 @@ def token_vc_joiner():
         ws.send(dumps({"op": 4,"d": {"guild_id": guild_id,"channel_id": channel_id,"self_mute": mute,"self_deaf": deaf, "self_video": video}}))
         ws.send(dumps({"op": 1,"d": None}))
         sleep(0.1)
-        Output("good", config, token).log(f"Success -> {token}")
+        Output("good", token).log(f"Success -> {token}")
         joined += 1
 
     def thread_complete(future):

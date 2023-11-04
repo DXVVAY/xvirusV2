@@ -37,32 +37,32 @@ def send(token, channel_id, message, title):
                         }
                     )
                     if result.status_code == 200:
-                        Output("good", config, token).log(f"Success {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+                        Output("good", token).log(f"Success {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
                     elif result.text.startswith('{"captcha_key"'):
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
+                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
                     elif result.text.startswith('{"message": "401: Unauthorized'):
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")   
+                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")   
                     elif result.status_code == 429:
                         pass
                     elif "\"code\": 50001" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")    
+                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")    
                     elif "Cloudflare" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
+                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
                     elif "\"code\": 40007" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
+                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
                     elif "\"code\": 40002" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
+                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
                     elif "\"code\": 10006" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
+                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
                     elif "\"code\": 50013" in result.text:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")
+                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(No Access)")
                     else:
-                        Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+                        Output("bad", token).log(f"Error {Fore.LIGHTBLACK_EX}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
                 elif req.status_code == 429:
-                    Output("bad", config, token).log(f"Rate Limited {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code})")
+                    Output("bad", token).log(f"Rate Limited {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code})")
                     time.sleep(float(req.json()['retry_after']))
                 else:
-                    Output("bad", config, token).log(f"Error Creating Thread {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code}) ({req.text})")
+                    Output("bad", token).log(f"Error Creating Thread {Fore.LIGHTBLACK_EX}-> {token[:70]} {Fore.LIGHTBLACK_EX}({req.status_code}) ({req.text})")
             except Exception as e:
                 Output("bad").log(f"{e}")
     except Exception as e:
