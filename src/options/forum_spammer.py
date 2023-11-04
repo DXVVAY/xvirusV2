@@ -8,20 +8,21 @@ from colorama import Fore
 
 from src import *
 
-def send(token, channel_id, message, title):  
+def send(token, guild_id, channel_id, message, title):  
     try:
         session = Client.get_session(token)
         headers["content-type"] = "application/json"
+        headers["referer"] = f"https://discord.com/channels/{guild_id}/{channel_id}"
         while True:
             try:
                 data = {
-                        "name":secrets.token_urlsafe(16),
-                        "auto_archive_duration":10080,
-                        "applied_tags": [],
-                        "message":
-                        {
-                            "content": secrets.token_urlsafe(16)
-                        }
+                    "name": title,
+                    "applied_tags": [],
+                    "auto_archive_duration":4320,
+                    "message":
+                    {
+                        "content": message
+                    },
                 }
                 req = session.post(f"https://discord.com/api/v9/channels/{channel_id}/threads?use_nested_fields=true", headers=headers, cookies=Client.get_cookies(session), json=data)
                 
@@ -78,6 +79,7 @@ def forum_spammer():
         Output.PETC()
         return
 
+    guild_id = utility.ask("Guild ID")
     channel_id = utility.ask("Channel ID")
     title = utility.ask("Title")
     message = utility.ask("Message")
@@ -96,7 +98,7 @@ def forum_spammer():
             def thread_send(token):
                 try:
                     token = TokenManager.OnlyToken(token)
-                    args = [token, message, channel_id, title]
+                    args = [token, guild_id, channel_id, message, title]
                     send(*args)
                 except Exception as e:
                     Output("bad").log(f"{e}")
