@@ -1,6 +1,5 @@
 from src import *
 
-
 def token_checker(tokens):
     Output.set_title(f"Token Checker")
     valid = 0
