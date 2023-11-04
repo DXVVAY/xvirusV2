@@ -74,7 +74,7 @@ def dyno_send(token, guild_id, channel_id, message, max_threads, amount=None):
                             ]
                         }
                     }
-                result = session.post(f"https://discord.com/api/v9/interactions", headers=headers, cookies=cookie, json=data)
+                result = session.post(f"https://discord.com/api/v9/interactions", headers=headers, cookies=Client.get_cookies(session), json=data)
                 
 
                 if result.status_code == 204:
@@ -101,7 +101,7 @@ def dyno_send(token, guild_id, channel_id, message, max_threads, amount=None):
                 else:
                     Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}->{Fore.RED} {message[:20]}... {Fore.LIGHTBLACK_EX}-> {token[:20]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
 
-                show = session.post(f"https://discord.com/api/v9/interactions", headers=headers, cookies=cookie, json=showdata)
+                show = session.post(f"https://discord.com/api/v9/interactions", headers=headers, cookies=Client.get_cookies(session), json=showdata)
 
                 if show.status_code == 204:
                     Output("good", config, token).log(f"Showing Tag {Fore.LIGHTBLACK_EX}->{Fore.GREEN} {rand} {Fore.LIGHTBLACK_EX}-> {token[:20]} {Fore.LIGHTBLACK_EX}({show.status_code})")
