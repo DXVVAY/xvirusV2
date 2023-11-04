@@ -108,19 +108,19 @@ def dyno_send(token, guild_id, channel_id, message, max_threads, amount=None):
                 if show.status_code == 429:
                     pass
                 else:
-                    Output("bad", config).log(f"Could not show tag {Fore.LIGHTBLACK_EX}->{Fore.RED} {rand} {Fore.LIGHTBLACK_EX}-> {Fore.BLUE} {show.status_code})")
+                    Output("bad").log(f"Could not show tag {Fore.LIGHTBLACK_EX}->{Fore.RED} {rand} {Fore.LIGHTBLACK_EX}-> {Fore.BLUE} {show.status_code})")
             except Exception as e:
-                Output("bad", config).log(f"{e}")
+                Output("bad").log(f"{e}")
     except Exception as e:
-        Output("bad", config).log(f"{e}")
+        Output("bad").log(f"{e}")
 
 def dyno_spammer(guild_id, channel_id, message, max_threads, amount):
-    Output.SetTitle(f"Channel Spammer")
+    Output.set_title(f"Channel Spammer")
     args = []
     tokens = TokenManager.get_tokens()
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
     
@@ -140,7 +140,7 @@ def dyno_spammer(guild_id, channel_id, message, max_threads, amount):
                     args = [token, guild_id, channel_id, message, max_threads, amount]
                     dyno_send(*args)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
             threads = []
             for token in tokens:
@@ -151,7 +151,7 @@ def dyno_spammer(guild_id, channel_id, message, max_threads, amount):
             for thread in threads:
                 thread.join()
         else:
-            Output("bad", config).log(f"No tokens were found in cache")
+            Output("bad").log(f"No tokens were found in cache")
             Output.PETC()
 
 # normal spammer
@@ -193,17 +193,17 @@ def send(token, message, channelid, massping, amount=None):
                 else:
                     Output("bad", config, token).log(f"Error {Fore.LIGHTBLACK_EX}->{Fore.RED} {message[:20]}... {Fore.LIGHTBLACK_EX}-> {token[:20]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
             except Exception as e:
-                Output("bad", config).log(f"{e}")
+                Output("bad").log(f"{e}")
     except Exception as e:
-        Output("bad", config).log(f"{e}")
+        Output("bad").log(f"{e}")
 
 def channel_spammer():
-    Output.SetTitle(f"Channel Spammer")
+    Output.set_title(f"Channel Spammer")
     args = []
     tokens = TokenManager.get_tokens()
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -239,7 +239,7 @@ def channel_spammer():
                     args = [token, message, channel_id, massping, amount]
                     send(*args)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
             threads = []
             for token in tokens:
@@ -250,5 +250,5 @@ def channel_spammer():
             for thread in threads:
                 thread.join()
         else:
-            Output("bad", config).log(f"No tokens were found in cache")
+            Output("bad").log(f"No tokens were found in cache")
             Output.PETC()

@@ -1,16 +1,7 @@
-import json
-import os
-import random
-import threading
-import time
-import requests
-import websocket
-from colorama import Fore
 from src import *
 
 folder_path = os.path.join(os.getenv('LOCALAPPDATA'), 'xvirus_config')
 file = os.path.join(folder_path, 'xvirus_ids')
-
 
 class WebSocket(websocket.WebSocketApp): 
     def __init__(self, token, guild_id, channel_id):
@@ -219,4 +210,4 @@ def id_scraper(guild_id=None, channel_id=None):
         for user in users:
             f.write(f"{user}\n")
         
-    Output("info", config).notime(f"Scraped {len(users)} ids")
+    Output("info").notime(f"Scraped {len(users)} ids")

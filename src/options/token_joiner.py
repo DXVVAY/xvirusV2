@@ -8,7 +8,7 @@ from colorama import Fore
 from src import *
 
 def token_joiner():
-    Output.SetTitle(f"Token Joiner")
+    Output.set_title(f"Token Joiner")
     joined = 0
     error = 0
     args = []
@@ -37,13 +37,13 @@ def token_joiner():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -54,7 +54,7 @@ def token_joiner():
     req = requests.get(f"https://discord.com/api/v9/invites/{invite}?with_counts=true&with_expiration=true")
     if req.status_code == 200:
         res = req.json()
-        Output("info", config).notime(f"Joining {Fore.RED}{res['guild']['name']}")
+        Output("info").notime(f"Joining {Fore.RED}{res['guild']['name']}")
     else:
         pass
 
@@ -78,10 +78,10 @@ def token_joiner():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Joined {str(joined)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"Joined {str(joined)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}Joined: {str(joined)}",
@@ -97,5 +97,5 @@ def token_joiner():
             print()
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()

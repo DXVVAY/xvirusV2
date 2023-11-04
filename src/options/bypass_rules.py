@@ -8,7 +8,7 @@ from colorama import Fore
 from src import *
 
 def bypass_rules():
-    Output.SetTitle(f"Rules Bypasser")
+    Output.set_title(f"Rules Bypasser")
     accepted = 0
     error = 0
     args = []
@@ -38,12 +38,12 @@ def bypass_rules():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -70,10 +70,10 @@ def bypass_rules():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"{str(accepted)} Tokens Accepted Rules In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"{str(accepted)} Tokens Accepted Rules In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}Accepted: {str(accepted)}",
@@ -85,5 +85,5 @@ def bypass_rules():
         print(f" {status}")
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()

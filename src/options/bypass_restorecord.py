@@ -8,7 +8,7 @@ from colorama import Fore
 from src import *
 
 def restorecord_bypass():
-    Output.SetTitle(f"RestoreCord Bypasser")
+    Output.set_title(f"RestoreCord Bypasser")
     bypassed = 0
     error = 0
     args = []
@@ -50,12 +50,12 @@ def restorecord_bypass():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -83,10 +83,10 @@ def restorecord_bypass():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Bypassed {str(bypassed)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"Bypassed {str(bypassed)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}bypassed: {str(bypassed)}",
@@ -98,5 +98,5 @@ def restorecord_bypass():
         print(f" {status}")
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()

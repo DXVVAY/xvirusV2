@@ -8,7 +8,7 @@ from colorama import Fore
 from src import *
 
 def token_joiner():
-    Output.SetTitle(f"Token Joiner")
+    Output.set_title(f"Token Joiner")
     joined = 0
     error = 0
     args = []
@@ -17,14 +17,15 @@ def token_joiner():
     def runJoiner(token, invite):
         retry, rqdata, rqtoken = join(token, invite, "","")
         if retry:
+            cap = BodyCap("nigger")
             proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
-            solver = Captcha(proxy=proxy, siteKey="b2b02ab5-7dae-4d6f-830e-7b55634c888b", siteUrl="https://discord.com/", rqdata=rqdata)
-            Output("cap", config).log(f'Solving Captcha...')
-            capkey = solver.solveCaptcha()
+            capkey = cap.solve_hcaptcha(sitekey="b2b02ab5-7dae-4d6f-830e-7b55634c888b", host="discord.com", rqdata=rqdata)
+            Output("cap").log(f'Solving Captcha...')
+            capkey = capkey.get("solution")
             if capkey is not None:
-                Output("cap", config).log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
+                Output("cap").log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {capkey[:70]}")
             else: 
-                Output("bad", config).log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey}")
+                Output("bad").log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {capkey}")
             join(token, invite, capkey, rqtoken)
 
     def join(token, invite, capkey, rqtoken):
@@ -32,8 +33,8 @@ def token_joiner():
         session = Client.get_session(token)
         
         if capkey != "":
-            headers["x-captcha-key"] = capkey
-            headers["x-captcha-rqtoken"] = rqtoken
+            session.headers.update({"x-captcha-key":capkey})
+            session.headers.update({"x-captcha-rqtoken":rqtoken})
             
         if capkey != "":
             data = {
@@ -44,21 +45,7 @@ def token_joiner():
         else:
             data = {"session_id": utility.rand_str(32),}
 
-        req = requests.get(f"https://discord.com/api/v9/invites/{invite}?with_counts=true&with_expiration=true", headers=headers)
-        if req.status_code == 200:
-            res = req.json()
-            context = {
-                "location": "Join Guild",
-                "location_guild_id": str(res['guild']['id']),
-                "location_channel_id": str(res['channel']['id']),
-                "location_channel_type": int(res['channel']['type'])
-            }
-            json_data = json.dumps(context)
-            xcontext = b64encode(json_data.encode()).decode()
-            headers["x-context-properties"] = xcontext
-        else:
-            pass
-        result = session.post(f"https://discord.com/api/v9/invites/{invite}", headers=headers, cookies=cookie, json=data)
+        result = session.post(f"https://discord.com/api/v9/invites/{invite}", json=data)
 
         if result.status_code == 200:
             Output("good", config, token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
@@ -109,13 +96,13 @@ def token_joiner():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -125,7 +112,7 @@ def token_joiner():
     req = requests.get(f"https://discord.com/api/v9/invites/{invite}?with_counts=true&with_expiration=true")
     if req.status_code == 200:
         res = req.json()
-        Output("info", config).notime(f"Joining {Fore.RED}{res['guild']['name']}")
+        Output("info").notime(f"Joining {Fore.RED}{res['guild']['name']}")
     else:
         pass
 
@@ -149,10 +136,10 @@ def token_joiner():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Joined {str(joined)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"Joined {str(joined)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}Joined: {str(joined)}",
@@ -168,5 +155,5 @@ def token_joiner():
             print()
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()

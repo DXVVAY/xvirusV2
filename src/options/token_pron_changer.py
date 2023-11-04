@@ -8,7 +8,7 @@ from colorama import Fore
 from src import *
 
 def token_pron_changer():
-    Output.SetTitle(f"Pronouns Changer")
+    Output.set_title(f"Pronouns Changer")
     changed = 0
     error = 0
     args = []
@@ -37,12 +37,12 @@ def token_pron_changer():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -52,7 +52,7 @@ def token_pron_changer():
         if get.status_code == 200:
             pronouns = get.text.splitlines()
         else:
-            Output("bad", config).notime(f"Failed to fetch pronouns from {url} ({result.status_code})")
+            Output("bad").notime(f"Failed to fetch pronouns from {url} ({result.status_code})")
             pronouns = utility.ask("pronouns")
     else:
         pronouns = utility.ask("pronouns")
@@ -80,10 +80,10 @@ def token_pron_changer():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Changed Pronouns For {str(changed)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"Changed Pronouns For {str(changed)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}Changed: {str(changed)}",
@@ -95,5 +95,5 @@ def token_pron_changer():
         print(f" {status}")
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()

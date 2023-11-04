@@ -8,7 +8,7 @@ from colorama import Fore
 from src import *
 
 def server_checker():
-    Output.SetTitle(f"Token Server Checker")
+    Output.set_title(f"Token Server Checker")
     yes = 0
     error = 0
     args = []
@@ -41,13 +41,13 @@ def server_checker():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -75,14 +75,14 @@ def server_checker():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
         
         config.reset("xvirus_tokens")
         with open(file, "w") as f:
             for token in valid_tokens:
                 f.write(f"{token}\n")
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Checked {str(yes)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"Checked {str(yes)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}In Server: {str(yes)}",
@@ -94,5 +94,5 @@ def server_checker():
         print(f" {status}")
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in cache")
+        Output("bad").log(f"No tokens were found in cache")
         Output.PETC()

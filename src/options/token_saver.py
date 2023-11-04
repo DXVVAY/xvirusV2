@@ -12,18 +12,18 @@ def buyTokensDazeer():
     if redirect.lower() == 'y':
         webbrowser.open("https://dazeer.sellpass.io/products/634d684f745af")
     elif redirect.lower() == 'n':
-        Output("bad", config)("Redirect not requested.")
+        Output("bad")("Redirect not requested.")
     else:
-        Output("bad", config)("Invalid input. Redirect not requested.")
+        Output("bad")("Invalid input. Redirect not requested.")
 
 def buyTokensBody(): 
     redirect = utility.ask("Do you want to redirect to https://bodyx.mysellix.io/product/ (y/n)")
     if redirect.lower() == 'y':
         webbrowser.open("https://bodyx.mysellix.io/product/64e4b3244c004")
     elif redirect.lower() == 'n':
-        Output("bad", config)("Redirect not requested.")
+        Output("bad")("Redirect not requested.")
     else:
-        Output("bad", config)("Invalid input. Redirect not requested.")
+        Output("bad")("Invalid input. Redirect not requested.")
 
 def choose_store():
     utility.make_menu("Body Tokens", "Dazeer Tokens")
@@ -36,7 +36,7 @@ def choose_store():
         buyTokensDazeer()
 
 def token_manager():
-    Output.SetTitle(f"Token Manager")
+    Output.set_title(f"Token Manager")
     utility.make_menu("Save Tokens", "Empty Tokens", "Buy Tokens")
     choice = utility.ask("Choice")
 
@@ -45,7 +45,7 @@ def token_manager():
     
     if choice == '2':
         config.reset('xvirus_tokens')
-        Output("info", config).notime("Tokens Cache Emptied.")
+        Output("info").notime("Tokens Cache Emptied.")
         Output.PETC()
     
     if choice == '3':
@@ -91,12 +91,12 @@ def checker():
                     message = f"Proxy Error -> {str(e)[:80]}..."
                 else:
                     message = f"Error -> {e}"
-                Output("dbg", config).log(message)
+                Output("dbg").log(message)
             else:
                 pass
 
     if tokens is None:
-        Output("bad", config).log("Token retrieval failed or returned None.")
+        Output("bad").log("Token retrieval failed or returned None.")
         Output.PETC()
         return
 
@@ -122,10 +122,10 @@ def checker():
                     future.add_done_callback(thread_complete)
                     time.sleep(0.1)
                 except Exception as e:
-                    Output("bad", config).log(f"{e}")
+                    Output("bad").log(f"{e}")
 
         elapsed_time = time.time() - start_time
-        Output("info", config).notime(f"Checked {len(tokens)} Tokens In {elapsed_time:.2f} Seconds")
+        Output("info").notime(f"Checked {len(tokens)} Tokens In {elapsed_time:.2f} Seconds")
 
         info = [
             f"{Fore.LIGHTGREEN_EX}Valid: {str(valid)}",
@@ -139,5 +139,5 @@ def checker():
         
         Output.PETC()
     else:
-        Output("bad", config).log(f"No tokens were found in the specified text file")
+        Output("bad").log(f"No tokens were found in the specified text file")
         Output.PETC()
