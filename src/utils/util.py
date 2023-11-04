@@ -14,6 +14,7 @@ import webbrowser
 import threading
 import websocket
 import requests
+import psutil
 import decimal
 import getpass
 import pystyle
