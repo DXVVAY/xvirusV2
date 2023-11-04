@@ -10,6 +10,17 @@ class XvirusApp:
             secret="f8a86b6a889a4c6da214ceabc99fedffbbe464adb64d7df87934afb70625ad92",
             version="1.0",
             hash_to_check=self.get_checksum())
+        
+    def list_loaded_dlls():
+        pid = os.getpid()
+        process = psutil.Process(pid)
+
+        dll_list = []
+        for lib in process.memory_maps():
+            if lib.path and lib.path.endswith(".dll"):
+                dll_list.append(lib.path)
+        return dll_list
+
 
     def move_key(self):
         old_key = os.path.join(os.environ.get("TEMP", "C:\\temp"), "xvirus_key")
@@ -178,9 +189,20 @@ class gui:
         gui.main_menu()
 
 if __name__ == "__main__":
+    loaded_dlls = XvirusApp.list_loaded_dlls()
     utility.clear()
     Output.set_title("Xvirus Loading")
     app = XvirusApp()
+    dll_count = len(loaded_dlls)
+    if dll_count > 94:
+        print("BUY XVIRUS NOT CRACK IT L")
+        time.sleep(2)
+        sys.exit(1)
+    elif dll_count > 0:
+        pass
+    else:
+        print("No DLLs found in the current process.")
+        time.sleep(0.01)
     app.move_key()
     app.check()
     gui.main_menu()
