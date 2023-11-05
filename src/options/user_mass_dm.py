@@ -22,9 +22,9 @@ def user_mass_dm():
     def send(token, user_id, message):
         nonlocal sent, error
         session = Client.get_session(token)
-        
+        session_id = utility.get_session_id()
         data = {
-            "session_id": utility.rand_str(32),
+            "session_id": session_id,
             "recipients": [user_id],
         }
         result = session.post(f"https://discord.com/api/v9/users/@me/channels", json=data)

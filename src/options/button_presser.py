@@ -9,6 +9,7 @@ def button_presser():
     def click(token, guild_id, channel_id, message_id, custom_id, application_id, flags = 0):
         nonlocal pressed, error
         session = Client.get_session(token)
+        session_id = utility.get_session_id()
         data = {
             "application_id": str(application_id),
             "channel_id": str(channel_id),
@@ -20,7 +21,7 @@ def button_presser():
             "message_flags": flags,
             "message_id": str(message_id),
             "nonce": str(Decimal(time.time() * 1000 - 1420070400000) * 4194304).split(".")[0],
-            'session_id': utility.rand_str(32),
+            'session_id': session_id,
             "type": 3,
         }
         session.headers.update({"content-type": "application/json"})

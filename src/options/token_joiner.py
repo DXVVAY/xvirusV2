@@ -10,7 +10,8 @@ def token_joiner():
     def join(token, invite):
         nonlocal joined, error
         session = Client.get_session(token)
-        result = session.post(f"https://discord.com/api/v9/invites/{invite}", json={"session_id": utility.rand_str(32)})
+        session_id = utility.get_session_id()
+        result = session.post(f"https://discord.com/api/v9/invites/{invite}", json={"session_id": session_id})
 
         if result.status_code == 200:
             Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")

@@ -615,6 +615,23 @@ class utility:
             print(label)
         print()
 
+    def get_session_id():
+        ws = websocket.WebSocket()
+        ws.connect("wss://gateway.discord.gg/?v=9&encoding=json")
+        j = json.loads(ws.recv())
+        heartbeat_interval = j['d']['heartbeat_interval']
+        ws.send(json.dumps({"op": 2,"d": {"token": token,"properties": {"$os": "windows","$browser": "Discord","$device": "desktop"}}}))
+        while True:
+            try:
+                r = json.loads(ws.recv())
+                if r["t"] == "READY":
+                    print("got sess id")
+                    return r["d"]["session_id"]
+                break
+            except Exception as e:
+                return utility.rand_str(32)
+                break
+
 class Captcha:
     def payload(self, proxy:str=None, rqdata:str=None) -> None:
         captchaKey = config._get("captcha_key")

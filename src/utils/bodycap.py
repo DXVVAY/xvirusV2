@@ -16,8 +16,8 @@ class BodyCap:
     def solve_recaptcha_v3(self, sitekey : str, url : str, action : str = "submit") -> object:
         return self.solve(type="recaptchav3", sitekey=sitekey, website=url, action=action)
     
-    def solve_hcaptcha(self, sitekey : str, host : str, proxy : str = "") -> object:
-        return self.solve(type="hcaptcha", sitekey=sitekey, host=host, proxy=proxy)
+    def solve_hcaptcha(self, sitekey : str, host : str, proxy : str = "", rqdata : str = "") -> object:
+        return self.solve(type="hcaptcha", sitekey=sitekey, host=host, proxy=proxy, rqdata=rqdata)
 
     def solve(self, **kwargs) -> object:
         start = time.time()

@@ -14,11 +14,11 @@ def token_joiner():
     tokens = TokenManager.get_tokens()
 
     def runJoiner(token, invite):
-        retry, rqtoken = join(token, invite, "","")
+        retry, rqtoken, rqdata, sitekey = join(token, invite, "","")
         if retry:
             cap = BodyCap()
             proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
-            capkey = cap.solve_hcaptcha(sitekey="b2b02ab5-7dae-4d6f-830e-7b55634c888b", host="discord.com", proxy=proxy)
+            capkey = cap.solve_hcaptcha(sitekey=sitekey, host="discord.com", proxy=proxy, rqdata=rqdata)
             Output("cap").log(f'Solving Captcha...')
             capkey = capkey.get("solution")
             if capkey is not None:
@@ -30,6 +30,7 @@ def token_joiner():
     def join(token, invite, capkey, rqtoken):
         nonlocal joined, error
         session = Client.get_session(token)
+        session_id = utility.get_session_id()
         
         if capkey != "":
             session.headers.update({"x-captcha-key":capkey})
@@ -39,29 +40,29 @@ def token_joiner():
             data = {
                 "captcha_key": capkey,
                 "captcha_rqtoken": rqtoken,
-                "session_id": utility.rand_str(32),
+                "session_id": session_id,
             }  
         else:
-            data = {"session_id": utility.rand_str(32),}
+            data = {"session_id": session_id,}
 
         result = session.post(f"https://discord.com/api/v9/invites/{invite}", json=data)
 
         if result.status_code == 200:
             Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             joined += 1
-            return False, None
+            return False, None, None, None
         elif result.text.startswith('{"captcha_key"'):
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
             use_captcha = config._get("use_captcha")
             if use_captcha is True:
-                return True, result.json()["captcha_rqtoken"]
+                return True, result.json()["captcha_rqtoken"], result.json()["captcha_rqdata"], result.json()["captcha_sitekey"]
             else:
                 error += 1
-                return False, None 
+                return False, None, None, None
         else:
             Output.error_logger(token, result.text, result.status_code)
             error += 1
-            return False, None
+            return False, None, None, None
 
         return False
         

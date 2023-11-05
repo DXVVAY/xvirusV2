@@ -29,7 +29,8 @@ def send(token, message, channelid, massping, amount=None):
                     content = f"{message} | {utility.rand_str(7)}"
                 session.headers = static_headers
                 session.headers.update({"Authorization":token})
-                data = {'session_id': utility.rand_str(32), "content": content}
+                session_id = utility.get_session_id()
+                data = {'session_id': session_id, "content": content}
                 result = session.post(f"https://discord.com/api/v9/channels/{channelid}/messages", json=data)
 
                 if result.status_code == 200:

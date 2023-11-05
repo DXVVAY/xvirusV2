@@ -10,7 +10,8 @@ def token_leaver():
     def leave(token, guild_id):
         nonlocal left, error
         session = Client.get_session(token)
-        result = session.delete(f"https://discord.com/api/v9/users/@me/guilds/{guild_id}", json={'session_id': utility.rand_str(32)})
+        session_id = utility.get_session_id()
+        result = session.delete(f"https://discord.com/api/v9/users/@me/guilds/{guild_id}", json={'session_id': session_id})
 
         if result.status_code == 204:
             Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")

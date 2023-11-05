@@ -1,2 +1,2 @@
-test.py
+main.py
 pause
