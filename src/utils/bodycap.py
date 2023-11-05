@@ -30,7 +30,7 @@ class BodyCap:
             "task": task
         }, timeout=5)
 
-        print(r.json())
+        Output("info").log(r.json())
 
         if not "task_id" in r.json():
             return {

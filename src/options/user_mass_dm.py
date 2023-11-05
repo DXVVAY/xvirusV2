@@ -22,7 +22,7 @@ def user_mass_dm():
     def send(token, user_id, message):
         nonlocal sent, error
         session = Client.get_session(token)
-        session_id = utility.get_session_id()
+        session_id = utility.get_session_id(token)
         data = {
             "session_id": session_id,
             "recipients": [user_id],

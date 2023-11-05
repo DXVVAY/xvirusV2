@@ -30,7 +30,7 @@ def token_joiner():
     def join(token, invite, capkey, rqtoken):
         nonlocal joined, error
         session = Client.get_session(token)
-        session_id = utility.get_session_id()
+        session_id = utility.get_session_id(token)
         
         if capkey != "":
             session.headers.update({"x-captcha-key":capkey})

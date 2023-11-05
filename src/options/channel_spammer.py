@@ -29,7 +29,7 @@ def send(token, message, channelid, massping, amount=None):
                     content = f"{message} | {utility.rand_str(7)}"
                 session.headers = static_headers
                 session.headers.update({"Authorization":token})
-                session_id = utility.get_session_id()
+                session_id = utility.get_session_id(token)
                 data = {'session_id': session_id, "content": content}
                 result = session.post(f"https://discord.com/api/v9/channels/{channelid}/messages", json=data)
 

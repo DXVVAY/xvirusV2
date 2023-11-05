@@ -53,6 +53,78 @@ class XvirusApp:
             Output("info").notime(f"Welcome Back {self.pc_username}!")
             sleep(2)
 
+class menus:
+    def cred():
+        print(f'''
+    {Fore.BLUE}[{Fore.RED}Github{Fore.BLUE}] @DXVVAY(DEXV), @Xvirus0, @2l2cgit(AdminX)
+    {Fore.BLUE}[{Fore.RED}Twitter{Fore.BLUE}] @dexvisnotgay
+    {Fore.BLUE}[{Fore.RED}Discord{Fore.BLUE}] .gg/xvirustool, @dexv, @adminxfr
+        ''')
+        Output.PETC()
+
+    def change_log():
+        print(f'''
+    1. Xvirus Full Recode
+    2. All tools unflagged
+    3. Added token server checker so it checks if token are in a server
+    4. Added Restore Cord Bypass (Needs residential proxies)
+    5. Added Sledge Hammer Bypass
+    6. Added Button Presser
+    7. Added Message Reactor
+    8. Unflagged All Profile Changers
+    9. Added Vc Spamm Join And Leave
+    10. Added Soundboard Spammer (Must Be In A VC)
+    11. Added Fake Typer
+    12. Added Forum Spammer
+    13. Fixed User Mass Friend
+    14. Fixed User Mass DM
+    15. Added Message Mass Report
+    16. Added Mass Thread
+    17. Removed Server Mass Friend and Mass DM
+    18. Added Proxy Settings
+        ''')
+        Output.PETC()
+
+    def notes():
+        print(f'''<!> IMPORTANT NOTES!
+
+    1. When you wanna save your tokens make sure your txt file has every new token in a new line.
+        ''')
+        Output.PETC()
+
+    def joiner_menu():
+        utility.make_menu(f"Normal Mode", f"RestoreCord Mode {Fore.RED}(bypass captcha)")
+        choice = utility.ask("Choice")
+        if choice == '1':
+            token_joiner()
+        else:
+            restorecord_bypass()
+    
+    def checker_menu():
+        utility.make_menu("Cache Checker", "Custom Checker", "Server Checker")
+        choice = utility.ask("Choice")
+        if choice == '1':
+            tokens = TokenManager.get_tokens()
+            token_checker(tokens)
+        elif choice == '2':
+            path = utility.ask("Enter the custom path to load tokens from").strip()
+            tokens = TokenManager.custom_path(path)
+            token_checker(tokens)
+        elif choice == '3':
+            server_checker()
+
+    def vc_menu():
+        utility.make_menu("Join And Stay", "Join And Leave Spam")
+        choice = utility.ask("Choice")
+        if choice == '1':
+            token_vc_joiner()
+        else:
+            vc_join_spammer()
+
+    def wip():
+        gui.WIP()
+        
+
 class gui:
     def get_tokens():
         f = config.read('xvirus_tokens')
@@ -95,7 +167,7 @@ class gui:
 {r}    ({lb}02{r}) {lb}> Token Leaver                    {r}({lb}11{r}) {lb}> Server Nick Changer              {r}({lb}20{r}) {lb}> User Mass DM{r}
 {r}    ({lb}03{r}) {lb}> Token Spammer                   {r}({lb}12{r}) {lb}> HypeSquad Changer                {r}({lb}21{r}) {lb}> Mass Report{r}
 {r}    ({lb}04{r}) {lb}> Multi Checker                   {r}({lb}13{r}) {lb}> Bio Changer                      {r}({lb}22{r}) {lb}> Mass Thread{r}
-{r}    ({lb}05{r}) {lb}> Bypass Rules                    {r}({lb}14{r}) {lb}> Pronouns Changer                 {r}({lb}23{r}) {lb}> Forum Spammer{r}
+{r}    ({lb}05{r}) {lb}> Bypass Rules                    {r}({lb}14{r}) {lb}> Pronouns Changer                 {r}({lb}23{r}) {lb}> N/A{r}
 {r}    ({lb}06{r}) {lb}> Bypass RestoreCord              {r}({lb}15{r}) {lb}> Voice Chat Joiner                {r}({lb}24{r}) {lb}> N/A{r}
 {r}    ({lb}07{r}) {lb}> Bypass Sledge Hammer            {r}({lb}16{r}) {lb}> Sound Board Spammer              {r}({lb}25{r}) {lb}> N/A{r}
 {r}    ({lb}08{r}) {lb}> Button Presser                  {r}({lb}17{r}) {lb}> Fake Typer                       {r}({lb}26{r}) {lb}> N/A{r}
@@ -113,44 +185,12 @@ class gui:
         choicee = input(f'└──╼ $ {Fore.BLUE}').lstrip("0")
         choice = choicee.upper()
 
-        def joiner_menu():
-            utility.make_menu(f"Normal Mode", f"RestoreCord Mode {Fore.RED}(bypass captcha)")
-            choice = utility.ask("Choice")
-            if choice == '1':
-                token_joiner()
-            else:
-                restorecord_bypass()
-        
-        def checker_menu():
-            utility.make_menu("Cache Checker", "Custom Checker", "Server Checker")
-            choice = utility.ask("Choice")
-            if choice == '1':
-                tokens = TokenManager.get_tokens()
-                token_checker(tokens)
-            elif choice == '2':
-                path = utility.ask("Enter the custom path to load tokens from").strip()
-                tokens = TokenManager.custom_path(path)
-                token_checker(tokens)
-            elif choice == '3':
-                server_checker()
-
-        def vc_menu():
-            utility.make_menu("Join And Stay", "Join And Leave Spam")
-            choice = utility.ask("Choice")
-            if choice == '1':
-                token_vc_joiner()
-            else:
-                vc_join_spammer()
-
-        def wip():
-            gui.WIP()
-
         try:
             options = {
-                '1': joiner_menu,
+                '1': menus.joiner_menu,
                 '2': token_leaver,
                 '3': channel_spammer,
-                '4': checker_menu,
+                '4': menus.checker_menu,
                 '5': bypass_rules,
                 '6': restorecord_bypass,
                 '7': sledge_hammer,
@@ -161,7 +201,7 @@ class gui:
                 '12': hypesquad_changer,
                 '13': token_bio_changer,
                 '14': token_pron_changer,
-                '15': vc_menu,
+                '15': menus.vc_menu,
                 '16': soundboard_spammer,
                 '17': token_typer,
                 '18': forum_spammer,
@@ -169,9 +209,11 @@ class gui:
                 '20': user_mass_dm,
                 '21': mass_report,
                 '22': mass_thread,
-                '23': forum_spammer,
                 '!': settings,
                 'TKN': token_manager,
+                'TM': menus.cred,
+                '?': menus.change_log,
+                'NOTE': menus.notes,
                 'DBG': run_anti_debug
             }
             choosen = options.get(choice)

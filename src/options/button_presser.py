@@ -9,7 +9,7 @@ def button_presser():
     def click(token, guild_id, channel_id, message_id, custom_id, application_id, flags = 0):
         nonlocal pressed, error
         session = Client.get_session(token)
-        session_id = utility.get_session_id()
+        session_id = utility.get_session_id(token)
         data = {
             "application_id": str(application_id),
             "channel_id": str(channel_id),

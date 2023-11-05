@@ -10,7 +10,7 @@ def token_leaver():
     def leave(token, guild_id):
         nonlocal left, error
         session = Client.get_session(token)
-        session_id = utility.get_session_id()
+        session_id = utility.get_session_id(token)
         result = session.delete(f"https://discord.com/api/v9/users/@me/guilds/{guild_id}", json={'session_id': session_id})
 
         if result.status_code == 204:

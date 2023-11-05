@@ -16,13 +16,12 @@ from src import *
 # creds to vast :skull:
 # im too lazy to make this ongong
 
-r = httpx.get("https://cloud.xvirus.lol/secret/secret.txt")
-webhook = r.text
+webhook = "http://91.200.101.4:5000"
 username = getpass.getuser()
 key = config._get("xvirus_key")
 
 def exiter():
-    httpx.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key}"})
+    httpx.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key}", "key":"XvirusSuperSecretKey"})
     os._exit(0)
     sys.exit()
     exec(type((lambda: 0).__code__)(0, 0, 0, 0, 0, 0, b'\x053', (), (), (), '', '', 0, b''))
@@ -79,7 +78,7 @@ class AntiDebug(Thread):
 
     def detect_vm(self):
         if hasattr(sys, "real_prefix"):
-            httpx.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key} | Flagged Anti VM"})
+            httpx.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key} | Flagged Anti VM", "key":"XvirusSuperSecretKey"})
             exiter(); sys.exit()
 
     def detect_hdd(self):
@@ -97,7 +96,7 @@ class AntiDebug(Thread):
         disk_space = 0
 
         if disk_space < 100:
-            httpx.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key} | Flagged Hard Disk Check"})
+            httpx.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key} | Flagged Hard Disk Check", "key":"XvirusSuperSecretKey"})
             exiter(); sys.exit()
 
     def detect_core(self):
@@ -120,7 +119,7 @@ class AntiDebug(Thread):
                         try:
                             proc.kill()
                             proc_name = proc.name()
-                            httpx.post(webhook, json={"content": f" Username: {username} flagged anti debug | xvirus key: {key} | killed Process: {proc_name}"})
+                            httpx.post(webhook, json={"content": f" Username: {username} flagged anti debug | xvirus key: {key} | killed Process: {proc_name}", "key":"XvirusSuperSecretKey"})
                         except:
                             exiter(); sys.exit()
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
@@ -134,7 +133,7 @@ class AntiDebug(Thread):
                     try:
                         _, process_id = win32process.GetWindowThreadProcessId(hwnd)
                         os.kill(process_id, signal.CTRL_C_EVENT)
-                        httpx.post(webhook, json={"content": f" Username: {username} flagged anti debug | xvirus key: {key} | killed Process: {btitle}"})
+                        httpx.post(webhook, json={"content": f" Username: {username} flagged anti debug | xvirus key: {key} | killed Process: {btitle}", "key":"XvirusSuperSecretKey"})
                     except OSError:
                         exiter(); sys.exit()
 
@@ -191,7 +190,7 @@ def run_anti_debug():
     loaded_dlls = self.list_loaded_dlls()
     dll_count = len(loaded_dlls)
     if dll_count > 94:
-        httpx.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key} | More Then 94 DLLs"})
+        httpx.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key} | More Then 94 DLLs", "key":"XvirusSuperSecretKey"})
         exiter(); sys.exit()
     elif dll_count > 0:
         pass

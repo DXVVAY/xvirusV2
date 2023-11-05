@@ -47,7 +47,6 @@ class Discord:
                     f"https://discord.com/ios/{self.app_version}/manifest.json").json()["metadata"]["build"]
                 break
             except:
-                Output("bad").notime(f"Couldn't Find Build Number In Manifest Version {self.app_version} Since It Doesn't Exist")
                 self.app_version = float(self.app_version)-1
                 continue
 

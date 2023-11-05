@@ -264,10 +264,12 @@ class Discord:
             try:
                 build_number = httpx.get(
                     f"https://discord.com/ios/{self.app_version}/manifest.json").json()["metadata"]["build"]
+                Output("info").notime(f"Got Build Number From Manifest Version {Fore.RED}{self.app_version}")
                 break
             except:
-                Output("bad").notime(f"Couldn't Find Build Number In Manifest Version {self.app_version} Since It Doesn't Exist")
+                Output("bad").notime(f"Couldn't Get Build Number In Manifest Version {Fore.BLUE}{self.app_version} {Fore.RED}Since It Doesn't Exist")
                 self.app_version = float(self.app_version)-1
+                Output("info").notime(f"Trying To Get Build Number In Manifest Version {Fore.RED}{self.app_version}")
                 continue
 
         return build_number
@@ -615,7 +617,7 @@ class utility:
             print(label)
         print()
 
-    def get_session_id():
+    def get_session_id(token):
         ws = websocket.WebSocket()
         ws.connect("wss://gateway.discord.gg/?v=9&encoding=json")
         j = json.loads(ws.recv())
@@ -625,8 +627,9 @@ class utility:
             try:
                 r = json.loads(ws.recv())
                 if r["t"] == "READY":
-                    print("got sess id")
-                    return r["d"]["session_id"]
+                    session_id = r["d"]["session_id"]
+                    Output("info").log(f"Got Session ID -> {session_id}")
+                    return session_id
                 break
             except Exception as e:
                 return utility.rand_str(32)
