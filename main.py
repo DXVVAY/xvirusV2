@@ -1,5 +1,14 @@
 from src import *
 
+def run_anti_debug_forever():
+    while True:
+        run_anti_debug()
+        time.sleep(1)
+
+anti_debug_thread = threading.Thread(target=run_anti_debug_forever)
+anti_debug_thread.daemon = True
+anti_debug_thread.start()
+
 class XvirusApp:
     # Body DLL Patch!!!!!!
     def __init__(self):
@@ -162,7 +171,8 @@ class gui:
                 '22': mass_thread,
                 '23': forum_spammer,
                 '!': settings,
-                'TKN': token_manager
+                'TKN': token_manager,
+                'DBG': run_anti_debug
             }
             choosen = options.get(choice)
             if choosen:
@@ -180,7 +190,6 @@ class gui:
 
 if __name__ == "__main__":
     utility.clear()
-    run_anti_debug()
     Output.set_title("Xvirus Loading")
     app = XvirusApp()
     app.move_key()

@@ -1,5 +1,6 @@
 from ctypes    import c_ulonglong, windll, byref
 from threading import Thread
+import win32gui
 from multiprocessing import cpu_count
 from random import choice
 from colorama import Fore
@@ -8,6 +9,8 @@ import psutil
 import requests
 import urllib3
 import os
+import ctypes
+import subprocess
 from src import *
 
 # creds to vast :skull:
@@ -103,24 +106,48 @@ class AntiDebug(Thread):
             
     def check_for_process(self):
         check_parent_folder("httptoolkit")
+        names = [
+            'regmon', 'diskmon', 'procmon', 'http', 'traffic',
+            'wireshark', 'fiddler', 'packet', 'debugger', 'debuger',
+            'dbg', 'ida', 'dumper', 'pestudio', 'hacker',
+            'prl_cc.exe', 'prl_tools.exe', 'xenservice.exe',
+            'qemu-ga.exe', 'joebox', 'titanengine'
+        ]
         for proc in psutil.process_iter():
             try:
-                for name in [
-                    'regmon', 'diskmon', 'procmon', 'http', 'traffic',
-                    'wireshark', 'fiddler', 'packet', 'debugger', 'debuger',
-                    'dbg', 'ida', 'dumper', 'pestudio', 'hacker',
-                    'prl_cc.exe', 'prl_tools.exe', 'xenservice.exe',
-                    'qemu-ga.exe', 'joebox', 'titanengine'
-                ]:
+                for name in names:
                     if name.lower() in proc.name().lower():
                         try:
                             proc.kill()
-                            httpx.post(webhook, json={"content": f" Username: {username} flagged anti debug | xvirus key: {key} | killed Process: {proc.name}"})
+                            proc_name = proc.name()
+                            httpx.post(webhook, json={"content": f" Username: {username} flagged anti debug | xvirus key: {key} | killed Process: {proc_name}"})
                         except:
                             exiter(); sys.exit()
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 exiter(); sys.exit()
 
+    def enum_windows_callback(self, hwnd, blacked_titles):
+        title = win32gui.GetWindowText(hwnd)
+        if title:
+            for btitle in blacked_titles:
+                if btitle.lower() in title.lower():
+                    try:
+                        _, process_id = win32process.GetWindowThreadProcessId(hwnd)
+                        os.kill(process_id, signal.CTRL_C_EVENT)
+                        httpx.post(webhook, json={"content": f" Username: {username} flagged anti debug | xvirus key: {key} | killed Process: {btitle}"})
+                    except OSError:
+                        exiter(); sys.exit()
+
+    def check_for_process2(self):
+        blacked_titles = [
+            'regmon', 'diskmon', 'procmon', 'http', 'traffic',
+            'wireshark', 'fiddler', 'packet', 'debugger', 'debuger',
+            'dbg', 'ida', 'dumper', 'pestudio', 'hacker',
+            'prl_cc', 'prl_tools', 'xenservice',
+            'qemu-ga', 'joebox', 'titanengine', 'process hacker'
+        ]
+        win32gui.EnumWindows(self.enum_windows_callback, blacked_titles)
+            
     def check_for_debugger(self):
         if (
             windll.kernel32.IsDebuggerPresent() != 0
@@ -145,6 +172,7 @@ class AntiDebug(Thread):
         self.detect_vm()
         while not exit_flag:
             self.check_for_process()
+            self.check_for_process2()
             self.check_for_debugger()
             sleep(3)
 

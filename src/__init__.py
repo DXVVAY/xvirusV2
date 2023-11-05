@@ -9,6 +9,7 @@ from .utils.scrape_users import *
 from .utils.settings import *
 from .utils.auth import *
 from .utils.anti_debug import *
+from .utils.bodycap import *
 run_anti_debug()
 
 #options

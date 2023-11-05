@@ -1,4 +1,3 @@
-
 import datetime
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -15,11 +14,11 @@ def token_joiner():
     tokens = TokenManager.get_tokens()
 
     def runJoiner(token, invite):
-        retry, rqdata, rqtoken = join(token, invite, "","")
+        retry, rqtoken = join(token, invite, "","")
         if retry:
-            cap = BodyCap("nigger")
+            cap = BodyCap()
             proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
-            capkey = cap.solve_hcaptcha(sitekey="b2b02ab5-7dae-4d6f-830e-7b55634c888b", host="discord.com", rqdata=rqdata)
+            capkey = cap.solve_hcaptcha(sitekey="b2b02ab5-7dae-4d6f-830e-7b55634c888b", host="discord.com", proxy=proxy)
             Output("cap").log(f'Solving Captcha...')
             capkey = capkey.get("solution")
             if capkey is not None:
@@ -50,38 +49,19 @@ def token_joiner():
         if result.status_code == 200:
             Output("good", token).log(f"Success -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
             joined += 1
-            return False, None, None  
+            return False, None
         elif result.text.startswith('{"captcha_key"'):
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
             use_captcha = config._get("use_captcha")
             if use_captcha is True:
-                return True, result.json()["captcha_rqdata"], result.json()["captcha_rqtoken"]
+                return True, result.json()["captcha_rqtoken"]
             else:
                 error += 1
-                return False, None, None 
-        elif result.text.startswith('{"message": "401: Unauthorized'):
-            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
-            error += 1
-            return False, None, None  
-        elif "Cloudflare" in result.text:
-            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
-            error += 1
-            return False, None, None  
-        elif "\"code\": 40007" in result.text:
-            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
-            error += 1
-            return False, None, None  
-        elif "\"code\": 40002" in result.text:
-            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
-            error += 1
-            return False, None, None  
-        elif "\"code\": 10006" in result.text:
-            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
-            error += 1
-            return False, None, None  
+                return False, None 
         else:
-            Output("bad", token).log(f"Error -> {token[:40]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+            Output.error_logger(token, result.text, result.status_code)
             error += 1
+            return False, None
 
         return False
         

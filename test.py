@@ -1,5 +1,3 @@
-import httpx
+from src.options.token_joinerr import *
 
-webhook = httpx.get("https://cloud.xvirus.lol/secret/secret.txt")
-
-print(webhook.text)
+token_joiner()
