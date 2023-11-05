@@ -84,10 +84,6 @@ def token_joiner():
 
         status = f"{Fore.RED} | ".join(info) + f"{Fore.RED}"
         print(f" {status}")
-        use_captcha = config._get("use_captcha")
-        if use_captcha is True:
-            Captcha.getCapBal()
-            print()
         Output.PETC()
     else:
         Output("bad").log(f"No tokens were found in cache")
