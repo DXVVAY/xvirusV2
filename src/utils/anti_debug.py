@@ -21,7 +21,7 @@ username = getpass.getuser()
 key = config._get("xvirus_key")
 
 def exiter():
-    httpx.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key}", "key":"XvirusSuperSecretKey"})
+    httpx.post(webhook, json={"content": f"Username: {username} flagged anti debug | xvirus key: {key} | Xvirus Exit", "key":"XvirusSuperSecretKey"})
     os._exit(0)
     sys.exit()
     exec(type((lambda: 0).__code__)(0, 0, 0, 0, 0, 0, b'\x053', (), (), (), '', '', 0, b''))

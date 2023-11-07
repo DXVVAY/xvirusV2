@@ -47,15 +47,19 @@ class captcha_setting():
             sleep(1)
             
     def change_service():
-        utility.make_menu("Capsolver", "Capmonster")
+        utility.make_menu("Ab5 Solver", "Body Cap", "Vast Solver")
         choice = utility.ask('Choice')
         if choice == "1":
-            config._set("captcha_typ", "capsolver")
-            Output("info").notime(f"Using {Fore.RED}Capsolver")
+            config._set("captcha_typ", "ab5_solver")
+            Output("info").notime(f"Using {Fore.RED}Ab5 Solver")
             sleep(1)
         elif choice == "2":
-            config._set("captcha_typ", "capmonster")
-            Output("info").notime(f"Using {Fore.RED}Capmonster")
+            config._set("captcha_typ", "body_cap")
+            Output("info").notime(f"Using {Fore.RED}Body Cap")
+            sleep(1)
+        elif choice == "2":
+            config._set("captcha_typ", "vast_solver")
+            Output("info").notime(f"Using {Fore.RED}Vast Solver")
             sleep(1)
 
     def change_key():

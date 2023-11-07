@@ -211,7 +211,9 @@ class Output:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Invalid Invite)")
         elif "\"code\": 10004" in res_text:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Not In Server)")
-        elif "\"code\": 50013:" or "\"code\": 50001:" in res_text:
+        elif "\"code\": 50013:"  in res_text:
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(No Access)")
+        elif "\"code\": 50001:" in res_text:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(No Access)")
         else:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}({res_text})")
@@ -622,100 +624,113 @@ class utility:
         ws.connect("wss://gateway.discord.gg/?v=9&encoding=json")
         j = json.loads(ws.recv())
         heartbeat_interval = j['d']['heartbeat_interval']
-        ws.send(json.dumps({"op": 2,"d": {"token": token,"properties": {"$os": "windows","$browser": "Discord","$device": "desktop"}}}))
+        statuses = ["online", "idle", "dnd"]
+        ws.send(json.dumps({
+            "op": 2,
+            "d": {
+                "token": token,
+                "properties": {
+                    "$os": "windows",
+                    "$browser": "Discord",
+                    "$device": "desktop"
+                },
+                "presence": {
+                    "game": {
+                        "name": "Xvirus Tools",
+                        "type": 0,
+                        "details": "Get Xvirus From 🔽🔽🔽🔽🔽🔽🔽",
+                        "state": "https://xvirus.lol | https://discord.gg/xvirustool",
+                    },
+                    "status": random.choice(statuses),
+                    "since": 0,
+                    "activities": [],
+                    "afk": False,
+                },
+            }
+        }))
         while True:
             try:
                 r = json.loads(ws.recv())
                 if r["t"] == "READY":
                     session_id = r["d"]["session_id"]
-                    Output("info").log(f"Got Session ID -> {session_id}")
                     return session_id
                 break
             except Exception as e:
                 return utility.rand_str(32)
                 break
 
-class Captcha:
-    def payload(self, proxy:str=None, rqdata:str=None) -> None:
-        captchaKey = config._get("captcha_key")
-        p = {
-            "clientKey":captchaKey,
+class ab5_solver:
+    def __init__(self, url, sitekey, rqdata):
+        self.key = "ab5-65a65aaa-cffb-4235-95b3-a485fff7cfdd"
+        self.url = url
+        self.sitekey = sitekey
+        self.rqdata = rqdata
+        self.proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
+
+    def solve(self):
+        while True:
+            r = requests.get(
+                f"http://154.29.72.34:5393/solve?url={self.url}&sitekey={self.sitekey}&proxy={self.proxy}",
+                headers={"authorization": self.key})
+            if "pass" in r.text:
+                return r.json()["pass"]
+
+class BodyCap:
+    def __init__(self, url, sitekey, rqdata):
+        self.key = config._get("captcha_key")
+        self.url = url.replace("https://", "")
+        self.sitekey = sitekey
+        self.rqdata = rqdata
+        self.proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
+
+    def solve(self) -> object:
+        start = time.time()
+
+        r = requests.post("https://api.hcaptcha.lol/api/create_task", json={
+            "clientKey": self.key,
             "task": {
-                "websiteURL":"https://discord.com/",
-                "websiteKey":"a9b5fb07-92ff-493f-86fe-352a2803b3df",
-                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-                "enterprisePayload":{
-                    "rqdata": rqdata,
-                }
+                "type": "hcaptcha",
+                "sitekey": self.sitekey,
+                "host": self.url,
+                "proxy": self.proxy,
+                "rqdata": self.rqdata
             }
-        }
-        p['appId']="E68E89B1-C5EB-49FE-A57B-FBE32E34A2B4"
-        p['task']['type'] = "HCaptchaTurboTask"
-        p['task']['proxy'] = proxy 
-        return p
+        }, timeout=5)
 
+        Output("info").log(r.json())
 
-    def __init__(self, proxy:str, siteKey:str, siteUrl:str, rqdata:str) -> None:
-        self.debug = False
-        self.proxy = proxy
-        self.siteKey = siteKey
-        self.siteUrl = siteUrl
+        if not "task_id" in r.json():
+            return None
+    
+        task_id = r.json()["task_id"]
+        while True:
+            r = requests.post("https://api.hcaptcha.lol/api/get_task_result", json={
+                "clientKey": self.key,
+                "task_id": task_id
+            }, timeout=120)
+            errors = ["timeout", "error", "failed"]
+            if r.json()["status"] == "completed":
+                break
+            if r.json()["status"] in errors:
+                return None
+            
+            time.sleep(1)
+        
+        return r.json()["solution"]
+                     
+class Captcha:
+    def __init__(self, url, sitekey, rqdata):
+        self.cap_type = config._get("captcha_typ")
+        self.url = url
+        self.sitekey = sitekey
         self.rqdata = rqdata
 
-    def solveCaptcha(self) -> str:
-        captchaKey = config._get("captcha_key")
-        captchaType = config._get("captcha_typ")
-        if captchaType == "capsolver":
-            r = requests.post(f"https://api.capsolver.com/createTask",json=self.payload(self.proxy, self.rqdata))
-            try:
-                if r.json().get("taskId"):
-                    taskid = r.json()["taskId"]
-                else:
-                    return None
-            except:
-                Output("bad").log("Couldn't get task id.",r.text)
-                return None
-            while True:
-                try:
-                    r = requests.post(f"https://api.capsolver.com/getTaskResult",json={"clientKey":captchaKey,"taskId":taskid})
-                    if r.json()["status"] == "ready":
-                        key = r.json()["solution"]["gRecaptchaResponse"]
-                        return key
-                    elif r.json()['status'] == "failed":
-                        return None
-                except:
-                    Output("bad").log("Failed to get status.",r.text)
-                    return None
-        elif captchaType == "capmonster":
-            capmonster = HCaptchaTask(captchaKey)
-            capmonster.set_user_agent(f"Discord-Android/{DiscordProps.buildNumber};RNA")
-            task_id = capmonster.create_task(
-                website_url=self.siteUrl, 
-                website_key=self.siteKey, 
-                custom_data=self.rqdata,
-            )
-            result = capmonster.join_task_result(task_id)
-            return result.get("gRecaptchaResponse")
-        else:
-            utility.make_menu("Capsolver", "Capmonster")
-            choice = utility.ask('Choice')
-            if choice == "1":
-                config._set("captcha_typ", "capsolver")
-                Output("info").notime(f"Using {Fore.RED}Capsolver")
-                sleep(1)
-            elif choice == "2":
-                config._set("captcha_typ", "capmonster")
-                Output("info").notime(f"Using {Fore.RED}Capmonster")
-                sleep(1)
+    def solve(self):
+        captcha_solver = None
 
-    def getCapBal():
-        captchaKey = config._get("captcha_key")
-        captchaType = config._get("captcha_typ")
-        if captchaType == "capsolver":
-            get_balance_resp = httpx.post(f"https://api.capsolver.com/getBalance", json={"clientKey": captchaKey}).text
-            bal = json.loads(get_balance_resp)["balance"]
-            Output("info").notime(f"Captcha Balance: ${bal}")
-        elif captchaType == "capmonster":
-            get_balance_resp = httpx.post(f"https://api.capmonster.cloud/getBalance", json={"clientKey": captchaKey}).text
-            bal = json.loads(get_balance_resp)["balance"]
-            Output("info").notime(f"Captcha Balance: ${bal}")
+        if self.cap_type == "ab5_solver":
+            captcha_solver = ab5_solver(self.url, self.sitekey, self.rqdata)
+        elif self.cap_type == "body_cap":
+            captcha_solver = BodyCap(self.url, self.sitekey, self.rqdata)
+
+        return captcha_solver

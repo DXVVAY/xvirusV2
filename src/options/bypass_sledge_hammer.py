@@ -116,7 +116,7 @@ class Sledgehammer():
             object =''.join([words[0]]+[word.capitalize() for word in words[1:]])
 
         for option in embed["components"][0]["components"][0]["options"]:
-            value =option["value"]
+            value = option["value"]
 
             if value == object:
                 return value
