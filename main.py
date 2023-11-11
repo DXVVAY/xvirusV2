@@ -67,13 +67,16 @@ class menus:
     1. Added Captcha Solver
     2. Fixed False succeess on some stuff (example: joiner)
     3. Almost full recode again :skull:
+    4. Fixed Some Bugs 
+    5. More Solvers will be added later
         ''')
         Output.PETC()
 
     def notes():
         print(f'''<!> IMPORTANT NOTES!
 
-    1. When you wanna save your tokens make sure your txt file has every new token in a new line.
+    1. You can get a ab5 captcha solver key from https://discord.gg/PnGPPeRb2A
+    2. When you wanna save your tokens make sure your txt file has every new token in a new line.
         ''')
         Output.PETC()
 

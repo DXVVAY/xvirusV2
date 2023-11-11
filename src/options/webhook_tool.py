@@ -4,9 +4,9 @@ def spammer(webhook, Message):
     session = Client.get_simple_session()
     result = session.post(webhook, json={"content": Message})
     if result.status_code == 204:
-        Output("good", token).log(f"Left -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+        Output("good").log(f"Sent -> {Message[:70]} {Fore.LIGHTBLACK_EX}({result.status_code})")
     else:
-        Output.error_logger(token, result.text, result.status_code)
+        Output.error_logger(Message, result.text, result.status_code)
 
 def webhook_spammer():
     webhook = utility.ask("Webhook")

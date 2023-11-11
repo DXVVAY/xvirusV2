@@ -40,8 +40,7 @@ def token_joiner():
     server_name = utility.get_server_name(invite)
     if server_name is not None:
         Output("info").notime(f"Joining {Fore.RED}{server_name}")
-
-    utility.run_threads(max_threads=max_threads, func=joiner, args=[invite], delay=0)
     use_captcha = config._get("use_captcha")
     if use_captcha is True:
-        get_captcha_bal()
+        Captcha.get_captcha_bal()
+    utility.run_threads(max_threads=max_threads, func=joiner, args=[invite], delay=0)

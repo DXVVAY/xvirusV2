@@ -40,8 +40,7 @@ def user_mass_friend():
     Output.set_title(f"User Mass Friend")
     username = utility.ask("Username")
     max_threads = utility.asknum("Thread Count")
-
-    utility.run_threads(max_threads=max_threads, func=frineder, args=[username], delay=0)
     use_captcha = config._get("use_captcha")
     if use_captcha is True:
-        get_captcha_bal()
+        Captcha.get_captcha_bal()
+    utility.run_threads(max_threads=max_threads, func=frineder, args=[username], delay=0)

@@ -31,7 +31,7 @@ import sys
 import os
 import re
 
-THIS_VERSION = "2.0.0"
+THIS_VERSION = "2.0.1"
 whitelisted = ["1157603083308761118", "1157425827517055017", "1146496916419526727", "1157400926877925558", "1156946611646247013", "1149731357656883311", "322415832275615746"]
 
 class Config:
@@ -600,7 +600,7 @@ class utility:
             return None
 
     def CheckWebhook(webhook):
-            response = requests.get(thing)
+            response = requests.get(webhook)
             if response.status_code == 200:
                 json_data = response.json()
                 name = json_data.get("name", "Webhook")
@@ -699,4 +699,4 @@ class Captcha:
         key = config._get("captcha_key")
         r = requests.get(f"https://api.ab5.wtf/balance", headers={'authorization': key})
         bal = r.json()['balance']
-        Output("info").notime(f"\nCaptcha Balance: {Fore.RED}${bal}")
+        Output("info").notime(f"Captcha Balance: {Fore.RED}${bal}")

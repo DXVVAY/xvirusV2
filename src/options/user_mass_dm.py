@@ -52,8 +52,7 @@ def user_mass_dm():
     user_id = utility.ask("User ID")
     message = utility.ask("Message")
     max_threads = utility.asknum("Thread Count")
-
-    utility.run_threads(max_threads=max_threads, func=dmer, args=[user_id, message], delay=0)
     use_captcha = config._get("use_captcha")
     if use_captcha is True:
-        get_captcha_bal()
+        Captcha.get_captcha_bal()
+    utility.run_threads(max_threads=max_threads, func=dmer, args=[user_id, message], delay=0)
