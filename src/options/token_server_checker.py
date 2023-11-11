@@ -4,7 +4,6 @@ def server_checker():
     Output.set_title(f"Token Server Checker")
     yes = 0
     error = 0
-    args = []
     valid_tokens = []
     tokens = TokenManager.get_tokens()
     folder_path = os.path.join(os.getenv('LOCALAPPDATA'), 'xvirus_config')
@@ -38,22 +37,9 @@ def server_checker():
             else:
                 pass
 
-
-    if tokens is None:
-        Output("bad").log("Token retrieval failed or returned None.")
-        Output.PETC()
-        return
-
     guild_id = utility.ask("Guild ID")
     max_threads = utility.asknum("Thread Count")
-
-    try:
-        if not max_threads.strip():
-            max_threads = "16"
-        else:
-            max_threads = int(max_threads)
-    except ValueError:
-        max_threads = "16"
+    max_threads = int(max_threads)
 
     if tokens:
         start_time = time.time()

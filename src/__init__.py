@@ -5,7 +5,6 @@
 # utils
 from .utils.util import *
 from .utils.scrape_ids import *
-from .utils.scrape_users import *
 from .utils.settings import *
 from .utils.auth import *
 from .utils.anti_debug import *
@@ -34,7 +33,6 @@ from .options.soundboard_spammer import *
 from .options.token_typer import *
 from .options.forum_spammer import *
 from .options.user_mass_friend import *
-from .options.server_mass_friend import *
 from .options.token_server_checker import *
 from .options.user_mass_dm import *
 from .options.mass_report import *

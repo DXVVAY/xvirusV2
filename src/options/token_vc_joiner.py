@@ -4,6 +4,7 @@ def token_vc_joiner():
     joined = 0
     error = 0
     tokens = TokenManager.get_tokens()
+
     def run(token, guild_id, channel_id, mute, deaf, video):
         nonlocal joined, error
         ws = WebSocket()
@@ -32,11 +33,6 @@ def token_vc_joiner():
             else:
                 pass
 
-    if tokens is None:
-        Output("bad").log("Token retrieval failed or returned None.")
-        Output.PETC()
-        return
-
     guild_id = utility.ask("Guild ID")
     channel_id = utility.ask("Channel ID")
     deaf = utility.ask("Defean (y/n)")
@@ -54,15 +50,9 @@ def token_vc_joiner():
         video = True
     else:
         video = False
-    max_threads = utility.asknum("Thread Count")
 
-    try:
-        if not max_threads.strip():
-            max_threads = "16"
-        else:
-            max_threads = int(max_threads)
-    except ValueError:
-        max_threads = "16"
+    max_threads = utility.asknum("Thread Count")
+    max_threads = int(max_threads)
 
     if tokens:
         start_time = time.time()

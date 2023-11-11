@@ -40,26 +40,13 @@ def send(token, message, channel_id, title):
 
 def mass_thread():
     Output.set_title(f"Mass Thread")
-    args = []
     tokens = TokenManager.get_tokens()
-
-    if tokens is None:
-        Output("bad").log("Token retrieval failed or returned None.")
-        Output.PETC()
-        return
-
     channel_id = utility.ask("Channel ID")
     title = utility.ask("Thread Title")
     message = utility.ask("Message")
     max_threads = utility.asknum("Thread Count")
-    
-    try:
-        if not max_threads.strip():
-            max_threads = "16"
-        else:
-            max_threads = int(max_threads)
-    except ValueError:
-        max_threads = "16"
+    max_threads = int(max_threads)
+
 
     while True:
         if tokens:

@@ -1,60 +1,46 @@
 from src import *
 
-def webhook_tool():
-    Output.set_title(f"Webhook Tools")
-    session = Client.tls_session()
-    args = []
-    def spammer(webhook, Message):
-        result = session.post(webhook, json={"content": Message})
+def spammer(webhook, Message):
+    session = Client.get_simple_session()
+    result = session.post(webhook, json={"content": Message})
+    if result.status_code == 204:
+        Output("good", token).log(f"Left -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+    else:
+        Output.error_logger(token, result.text, result.status_code)
 
-        if result.status_code == 204 or result.status_code == 200:
-            Output("good").log(f"Success -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code})")
-        elif result.text.startswith('{"captcha_key"'):
-            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
-        elif result.status_code == 429:
-            pass   
-        elif result.text.startswith('{"message": "401: Unauthorized'):
-            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Unauthorized)")
-        elif "Cloudflare" in result.text:
-            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(CloudFlare Blocked)")
-        elif "\"code\": 40007" in result.text:
-            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Token Banned)")
-        elif "\"code\": 40002" in result.text:
-            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Locked Token)")
-        elif "\"code\": 10006" in result.text:
-            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Invalid Invite)")
-        else:
-            Output("bad").log(f"Error -> {webhook[:60]} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}({result.text})")
+def webhook_spammer():
+    webhook = utility.ask("Webhook")
+    message = utility.ask("Message")
+    utility.CheckWebhook(webhook)
+    max_threads = utility.asknum("Thread Count")
+    max_threads = int(max_threads)
 
-    def webhook_spammer():
-        webhook = utility.ask("Webhook")
-        message = utility.ask("Message")
-        utility.CheckWebhook(webhook)
-        max_threads = utility.asknum("Thread Count")
-
+    def thread_complete(future):
+        debug = config._get("debug_mode")
         try:
-            if not max_threads.strip():
-                max_threads = 16
+            result = future.result()
+        except Exception as e:
+            if debug:
+                if "failed to do request" in str(e):
+                    message = f"Proxy Error -> {str(e)[:80]}..."
+                else:
+                    message = f"Error -> {e}"
+                Output("dbg").log(message)
             else:
-                max_threads = int(max_threads)
-        except ValueError:
-            max_threads = 16
+                pass
 
-        if webhook:
-            while True:
-                with ThreadPoolExecutor(max_workers=max_threads) as executor:
-                    try:
-                        args = [webhook, message]
-                        futures = [executor.submit(spammer, *args) for _ in range(max_threads)]
-                        for future in futures:
-                            future.result()
-                    except Exception as e:
-                        Output("bad").log(f"Error: {e}")
+    while True:
+        with ThreadPoolExecutor(max_workers=max_threads) as executor:
+            try:
+                args = [webhook, message]
+                future = executor.submit(spammer, *args)
+                future.add_done_callback(thread_complete)
+                time.sleep(0.1)
+            except Exception as e:
+                Output("bad").log(f"Error: {e}")
 
-        else:
-            Output("bad").log(f"Invalid Webhook")
-            Output.PETC()
-    
+def webhook_tool():
+    Output.set_title(f"Webhook Tool")
     utility.make_menu("Webhook Spammer", "Webhook Deleter")
     choice = utility.ask("Choice")
 
@@ -62,7 +48,9 @@ def webhook_tool():
         webhook_spammer()
     
     if choice == '2':
+        session = Client.get_simple_session()
         webhook = utility.ask("Webhook")
         utility.CheckWebhook(webhook)
         session.delete(webhook)
         Output("good").notime("Webhook successfully deleted")
+

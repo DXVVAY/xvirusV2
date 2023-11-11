@@ -1,102 +1,59 @@
 from src import *
 
+def send_message(token, channel_id, message):
+    session = Client.get_session(token)
+    result = session.post(f"https://discord.com/api/v9/channels/{channel_id}/messages",json={'content': message})
+    if result.status_code == 200:
+        Output("good", token).log(f"Success {Fore.LIGHTBLACK_EX}->{Fore.GREEN} {message[:20]}... {Fore.LIGHTBLACK_EX}-> {token[:50]} {Fore.LIGHTBLACK_EX}({result.status_code})")
+    else:
+        Output.error_logger(token, result.text, result.status_code)
+
+def send(token, user_id, message, capkey, rqtoken):
+    session = Client.get_session(token)
+
+    if capkey != "":
+        session.headers.update({"x-captcha-key":capkey})
+        session.headers.update({"x-captcha-rqtoken":rqtoken})
+
+    data = {
+        "session_id": utility.rand_str(32),
+        "recipients": [user_id],
+    }
+    
+    result = session.post(f"https://discord.com/api/v9/users/@me/channels", json=data)
+    if result.status_code == 200:
+        Output("good", token).log(f"Opened DM -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+        if 'id' in result.json():
+            channel_id = result.json()['id']
+            send_message(token, channel_id, message) 
+        return False, None, None, None
+    elif result.text.startswith('{"captcha_key"'):
+        Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
+        use_captcha = config._get("use_captcha")
+        if use_captcha is True:
+            return True, result.json()["captcha_rqtoken"], result.json()["captcha_rqdata"], result.json()["captcha_sitekey"]
+        else:
+            return False, None, None, None
+    else:
+        Output.error_logger(token, result.text, result.status_code)
+        return False, None, None, None
+
+    return False
+
+def dmer(user_id, message, token):
+    retry, rqtoken, rqdata, sitekey = send(token, user_id, message, "","")
+    if retry:
+        cap = Captcha("https://discord.com", sitekey=sitekey, rqdata=rqdata)
+        capkey = cap.solve()
+        send(token, user_id, message, capkey, rqtoken)
+
 def user_mass_dm():
     Output.set_title(f"User Mass DM")
-    sent = 0
-    error = 0
-    args = []
-    tokens = TokenManager.get_tokens()
-
-    def send_message(token, channel_id, message) -> None:
-        nonlocal sent, error
-        session = Client.get_session(token)
-        result = session.post(f"https://discord.com/api/v9/channels/{channel_id}/messages",json={'content': message})
-
-        if result.status_code == 200:
-            Output("good", token).log(f"Success {Fore.LIGHTBLACK_EX}->{Fore.GREEN} {message[:20]}... {Fore.LIGHTBLACK_EX}-> {token[:50]} {Fore.LIGHTBLACK_EX}({result.status_code})")
-            sent += 1
-        else:
-            Output.error_logger(token, result.text, result.status_code)
-            error += 1
-
-    def send(token, user_id, message):
-        nonlocal sent, error
-        session = Client.get_session(token)
-        session_id = utility.get_session_id(token)
-        data = {
-            "session_id": session_id,
-            "recipients": [user_id],
-        }
-        result = session.post(f"https://discord.com/api/v9/users/@me/channels", json=data)
-
-        if result.status_code == 200:
-            Output("good", token).log(f"Opened DM -> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-            if 'id' in result.json():
-                channel_id = result.json()['id']
-                send_message(token, channel_id, message) 
-        else:
-            Output.error_logger(token, result.text, result.status_code)
-            error += 1
-
-        
-    def thread_complete(future):
-        nonlocal sent, error
-        debug = config._get("debug_mode")
-        try:
-            result = future.result()
-        except Exception as e:
-            if debug:
-                if "failed to do request" in str(e):
-                    message = f"Proxy Error -> {str(e)[:80]}..."
-                else:
-                    message = f"Error -> {e}"
-                Output("dbg").log(message)
-            else:
-                pass
-
-    if tokens is None:
-        Output("bad").log("Token retrieval failed or returned None.")
-        Output.PETC()
-        return
-
     user_id = utility.ask("User ID")
     message = utility.ask("Message")
     max_threads = utility.asknum("Thread Count")
 
-    try:
-        if not max_threads.strip():
-            max_threads = "16"
-        else:
-            max_threads = int(max_threads)
-    except ValueError:
-        max_threads = "16"
-
-    if tokens:
-        start_time = time.time()
-
-        with ThreadPoolExecutor(max_workers=max_threads) as executor:
-            for token in tokens:
-                try:
-                    token = TokenManager.OnlyToken(token)
-                    args = [token, user_id, message]
-                    future = executor.submit(send, *args)
-                    future.add_done_callback(thread_complete)
-                    time.sleep(0.1)
-                except Exception as e:
-                    Output("bad").log(f"{e}")
-
-        elapsed_time = time.time() - start_time
-        Output("info").notime(f"Sent Friend Request Using {str(sent)} Tokens In {elapsed_time:.2f} Seconds")
-
-        info = [
-            f"{Fore.LIGHTGREEN_EX}Sent: {str(sent)}",
-            f"{Fore.LIGHTRED_EX}Errors: {str(error)}",
-            f"{Fore.LIGHTCYAN_EX}Total: {len(tokens)}"
-        ]
-
-        status = f"{Fore.RED} | ".join(info) + f"{Fore.RED}"
-        print(f" {status}")
-        Output.PETC()
-    else:
-        Output("bad").log(f"No tokens were found in cache")
-        Output.PETC()
+    utility.run_threads(max_threads=max_threads, func=dmer, args=[user_id, message], delay=0)
+    use_captcha = config._get("use_captcha")
+    if use_captcha is True:
+        get_captcha_bal()

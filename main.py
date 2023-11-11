@@ -64,24 +64,9 @@ class menus:
 
     def change_log():
         print(f'''
-    1. Xvirus Full Recode
-    2. All tools unflagged
-    3. Added token server checker so it checks if token are in a server
-    4. Added Restore Cord Bypass (Needs residential proxies)
-    5. Added Sledge Hammer Bypass
-    6. Added Button Presser
-    7. Added Message Reactor
-    8. Unflagged All Profile Changers
-    9. Added Vc Spamm Join And Leave
-    10. Added Soundboard Spammer (Must Be In A VC)
-    11. Added Fake Typer
-    12. Added Forum Spammer
-    13. Fixed User Mass Friend
-    14. Fixed User Mass DM
-    15. Added Message Mass Report
-    16. Added Mass Thread
-    17. Removed Server Mass Friend and Mass DM
-    18. Added Proxy Settings
+    1. Added Captcha Solver
+    2. Fixed False succeess on some stuff (example: joiner)
+    3. Almost full recode again :skull:
         ''')
         Output.PETC()
 
@@ -167,7 +152,7 @@ class gui:
 {r}    ({lb}02{r}) {lb}> Token Leaver                    {r}({lb}11{r}) {lb}> Server Nick Changer              {r}({lb}20{r}) {lb}> User Mass DM{r}
 {r}    ({lb}03{r}) {lb}> Token Spammer                   {r}({lb}12{r}) {lb}> HypeSquad Changer                {r}({lb}21{r}) {lb}> Mass Report{r}
 {r}    ({lb}04{r}) {lb}> Multi Checker                   {r}({lb}13{r}) {lb}> Bio Changer                      {r}({lb}22{r}) {lb}> Mass Thread{r}
-{r}    ({lb}05{r}) {lb}> Bypass Rules                    {r}({lb}14{r}) {lb}> Pronouns Changer                 {r}({lb}23{r}) {lb}> N/A{r}
+{r}    ({lb}05{r}) {lb}> Bypass Rules                    {r}({lb}14{r}) {lb}> Pronouns Changer                 {r}({lb}23{r}) {lb}> WebHook Tool{r}
 {r}    ({lb}06{r}) {lb}> Bypass RestoreCord              {r}({lb}15{r}) {lb}> Voice Chat Joiner                {r}({lb}24{r}) {lb}> N/A{r}
 {r}    ({lb}07{r}) {lb}> Bypass Sledge Hammer            {r}({lb}16{r}) {lb}> Sound Board Spammer              {r}({lb}25{r}) {lb}> N/A{r}
 {r}    ({lb}08{r}) {lb}> Button Presser                  {r}({lb}17{r}) {lb}> Fake Typer                       {r}({lb}26{r}) {lb}> N/A{r}
@@ -209,6 +194,7 @@ class gui:
                 '20': user_mass_dm,
                 '21': mass_report,
                 '22': mass_thread,
+                '23': webhook_tool,
                 '!': settings,
                 'TKN': token_manager,
                 'TM': menus.cred,

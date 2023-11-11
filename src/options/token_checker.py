@@ -6,7 +6,6 @@ def token_checker(tokens):
     locked = 0
     invalid = 0
     error = 0
-    args = []
 
     def check_token(token):
         nonlocal valid, locked, invalid, error
@@ -43,20 +42,8 @@ def token_checker(tokens):
             else:
                 pass
 
-    if tokens is None:
-        Output("bad").log("Token retrieval failed or returned None.")
-        Output.PETC()
-        return
-
     max_threads = utility.asknum("Thread Count")
-
-    try:
-        if not max_threads.strip():
-            max_threads = "16"
-        else:
-            max_threads = int(max_threads)
-    except ValueError:
-        max_threads = "16"
+    max_threads = int(max_threads)
 
     if tokens:
         start_time = time.time()

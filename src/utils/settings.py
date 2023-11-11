@@ -45,25 +45,9 @@ class captcha_setting():
             config._set("use_captcha", True)
             Output("info").notime(f"Captcha Use Toggled {Fore.RED}ON")
             sleep(1)
-            
-    def change_service():
-        utility.make_menu("Ab5 Solver", "Body Cap", "Vast Solver")
-        choice = utility.ask('Choice')
-        if choice == "1":
-            config._set("captcha_typ", "ab5_solver")
-            Output("info").notime(f"Using {Fore.RED}Ab5 Solver")
-            sleep(1)
-        elif choice == "2":
-            config._set("captcha_typ", "body_cap")
-            Output("info").notime(f"Using {Fore.RED}Body Cap")
-            sleep(1)
-        elif choice == "2":
-            config._set("captcha_typ", "vast_solver")
-            Output("info").notime(f"Using {Fore.RED}Vast Solver")
-            sleep(1)
 
     def change_key():
-        key = utility.ask("Captcha Key")
+        key = utility.ask("Ab5 Solver Key")
         config._set("captcha_key", key)
         Output("info").notime("Captcha Key Applied")
         sleep(1)  
@@ -75,13 +59,11 @@ def settings():
         Output("bad").notime(f'Invalid Setting')
         sleep(1)
     elif choice == "1":
-        utility.make_menu("Toggle Captcha Use", "Choose Captcha Service", "Add/Change Captcha Key")
+        utility.make_menu("Toggle Captcha Use", "Add/Change Captcha Key")
         captchachoice = utility.ask('Choice')
         if captchachoice == '1':
             captcha_setting.toggle_captcha()
         elif captchachoice == '2':
-            captcha_setting.change_service()
-        elif captchachoice == '3':
             captcha_setting.change_key()
         else:
             Output("bad").notime("Invalid Choice")

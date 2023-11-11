@@ -215,6 +215,10 @@ class Output:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(No Access)")
         elif "\"code\": 50001:" in res_text:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(No Access)")
+        elif "\"code\": 10008:" in res_text:
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Unknown)")
+        elif "\"code\": 50033:" in res_text:
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Invlid Recipient)")
         else:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}({res_text})")
 
@@ -596,21 +600,15 @@ class utility:
             return None
 
     def CheckWebhook(webhook):
-        try:
-            response = requests.get(webhook)
-            response.raise_for_status()
-        except requests.exceptions.RequestException:
-            Output("bad").notime(f"Invalid Webhook.")
-            sleep(1)
-            Output.PETC()
-    
-        try:
-            json_data = response.json()
-            j = json_data["name"]
-            Output("info").notime(f"Valid webhook! {Fore.RED}({j})")
-        except (KeyError, json.decoder.JSONDecodeError):
-            Output("bad").notime(f"Invalid Webhook.")
-            sleep(1)
+            response = requests.get(thing)
+            if response.status_code == 200:
+                json_data = response.json()
+                name = json_data.get("name", "Webhook")
+                Output("good").log(f"Valid webhook! ({name})")
+            else:
+                Output("bad").log("Invalid Webhook.")
+                sleep(1)
+                Output.PETC()
     
     def make_menu(*options):
         print()
@@ -619,118 +617,86 @@ class utility:
             print(label)
         print()
 
-    def get_session_id(token):
-        ws = websocket.WebSocket()
-        ws.connect("wss://gateway.discord.gg/?v=9&encoding=json")
-        j = json.loads(ws.recv())
-        heartbeat_interval = j['d']['heartbeat_interval']
-        statuses = ["online", "idle", "dnd"]
-        ws.send(json.dumps({
-            "op": 2,
-            "d": {
-                "token": token,
-                "properties": {
-                    "$os": "windows",
-                    "$browser": "Discord",
-                    "$device": "desktop"
-                },
-                "presence": {
-                    "game": {
-                        "name": "Xvirus Tools",
-                        "type": 0,
-                        "details": "Get Xvirus From 🔽🔽🔽🔽🔽🔽🔽",
-                        "state": "https://xvirus.lol | https://discord.gg/xvirustool",
-                    },
-                    "status": random.choice(statuses),
-                    "since": 0,
-                    "activities": [],
-                    "afk": False,
-                },
-            }
-        }))
-        while True:
+    def run_threads(max_threads, func, args=[], delay=0):
+        def thread_complete(future):
+            debug = config._get("debug_mode")
             try:
-                r = json.loads(ws.recv())
-                if r["t"] == "READY":
-                    session_id = r["d"]["session_id"]
-                    return session_id
-                break
+                result = future.result()
             except Exception as e:
-                return utility.rand_str(32)
-                break
+                if debug:
+                    if "failed to do request" in str(e):
+                        message = f"Proxy Error -> {str(e)[:80]}..."
+                    else:
+                        message = f"Error -> {e}"
+                    Output("dbg").log(message)
+                else:
+                    pass
 
-class ab5_solver:
-    def __init__(self, url, sitekey, rqdata):
-        self.key = "ab5-65a65aaa-cffb-4235-95b3-a485fff7cfdd"
-        self.url = url
-        self.sitekey = sitekey
-        self.rqdata = rqdata
-        self.proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
+        tokens = TokenManager.get_tokens()
+        max_threads = int(max_threads)
 
-    def solve(self):
-        while True:
-            r = requests.get(
-                f"http://154.29.72.34:5393/solve?url={self.url}&sitekey={self.sitekey}&proxy={self.proxy}",
-                headers={"authorization": self.key})
-            if "pass" in r.text:
-                return r.json()["pass"]
+        if tokens:
+            with ThreadPoolExecutor(max_workers=max_threads) as executor:
+                for token in tokens:
+                    try:
+                        token = TokenManager.OnlyToken(token)
+                        args.append(token)
+                        future = executor.submit(func, *args)
+                        future.add_done_callback(thread_complete)
+                        args.remove(token)
+                        time.sleep(delay)
+                    except Exception as e:
+                        Output("bad").log(f"{e}")
 
-class BodyCap:
-    def __init__(self, url, sitekey, rqdata):
-        self.key = config._get("captcha_key")
-        self.url = url.replace("https://", "")
-        self.sitekey = sitekey
-        self.rqdata = rqdata
-        self.proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
-
-    def solve(self) -> object:
-        start = time.time()
-
-        r = requests.post("https://api.hcaptcha.lol/api/create_task", json={
-            "clientKey": self.key,
-            "task": {
-                "type": "hcaptcha",
-                "sitekey": self.sitekey,
-                "host": self.url,
-                "proxy": self.proxy,
-                "rqdata": self.rqdata
-            }
-        }, timeout=5)
-
-        Output("info").log(r.json())
-
-        if not "task_id" in r.json():
-            return None
+            Output.PETC()
+        else:
+            Output("bad").log(f"No tokens were found in cache")
+            Output.PETC()
     
-        task_id = r.json()["task_id"]
-        while True:
-            r = requests.post("https://api.hcaptcha.lol/api/get_task_result", json={
-                "clientKey": self.key,
-                "task_id": task_id
-            }, timeout=120)
-            errors = ["timeout", "error", "failed"]
-            if r.json()["status"] == "completed":
-                break
-            if r.json()["status"] in errors:
-                return None
-            
-            time.sleep(1)
-        
-        return r.json()["solution"]
+    def get_server_name(invite):
+        req = requests.get(f"https://discord.com/api/v9/invites/{invite}?with_counts=true&with_expiration=true")
+        if req.status_code == 200:
+            res = req.json()
+            name = res['guild']['name']
+            return name
+        else:
+            return None
                      
 class Captcha:
-    def __init__(self, url, sitekey, rqdata):
-        self.cap_type = config._get("captcha_typ")
+    def __init__(self, url, sitekey, rqdata=""):
+        self.proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
+        self.user_agent = discord_props.user_agent
+        self.key = config._get("captcha_key")
         self.url = url
         self.sitekey = sitekey
         self.rqdata = rqdata
 
     def solve(self):
-        captcha_solver = None
+        Output("cap").log(f'Solving Captcha...')
+        while True:
+            payload = {
+                'url': self.url,
+                'sitekey': self.sitekey,
+                'proxy': self.proxy
+            }
 
-        if self.cap_type == "ab5_solver":
-            captcha_solver = ab5_solver(self.url, self.sitekey, self.rqdata)
-        elif self.cap_type == "body_cap":
-            captcha_solver = BodyCap(self.url, self.sitekey, self.rqdata)
+            if self.rqdata != "":
+                payload['rqdata'] = self.rqdata
 
-        return captcha_solver
+            try:
+                response = requests.get(
+                    "https://api.ab5.wtf/solve", params=payload, headers={'authorization': self.key})
+                if 'pass' in response.text:
+                    answer = response.json()['pass']
+                    Output("cap").log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {answer[:70]}")
+                    return answer
+            except requests.RequestException as e:
+                Output("bad").log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {e}")
+                continue
+    
+    @staticmethod
+    def get_captcha_bal():
+        key = config._get("captcha_key")
+        r = requests.get(f"https://api.ab5.wtf/balance", headers={'authorization': key})
+        bal = r.json()['balance']
+        Output("info").notime(f"\nCaptcha Balance: {Fore.RED}${bal}")

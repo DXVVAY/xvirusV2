@@ -1,14 +1,6 @@
-
-import datetime
-import threading
-import time
-from concurrent.futures import ThreadPoolExecutor
-import secrets
-from colorama import Fore
-
 from src import *
 
-def send(token, guild_id, channel_id, message, title):  
+def send(guild_id, channel_id, message, title, token):  
     try:
         session = Client.get_session(token)
         session.headers.update({"referer":f"https://discord.com/channels/{guild_id}/{channel_id}"})
@@ -52,46 +44,9 @@ def send(token, guild_id, channel_id, message, title):
 
 def forum_spammer():
     Output.set_title(f"Mass Thread")
-    args = []
-    tokens = TokenManager.get_tokens()
-
-    if tokens is None:
-        Output("bad").log("Token retrieval failed or returned None.")
-        Output.PETC()
-        return
-
     guild_id = utility.ask("Guild ID")
     channel_id = utility.ask("Channel ID")
     title = utility.ask("Title")
     message = utility.ask("Message")
     max_threads = utility.asknum("Thread Count")
-    
-    try:
-        if not max_threads.strip():
-            max_threads = "16"
-        else:
-            max_threads = int(max_threads)
-    except ValueError:
-        max_threads = "16"
-
-    while True:
-        if tokens:
-            def thread_send(token):
-                try:
-                    token = TokenManager.OnlyToken(token)
-                    args = [token, guild_id, channel_id, message, title]
-                    send(*args)
-                except Exception as e:
-                    Output("bad").log(f"{e}")
-
-            threads = []
-            for token in tokens:
-                thread = threading.Thread(target=thread_send, args=(token,))
-                thread.start()
-                threads.append(thread)
-
-            for thread in threads:
-                thread.join()
-        else:
-            Output("bad").log(f"No tokens were found in cache")
-            Output.PETC()
+    utility.run_threads(max_threads=max_threads, func=send, args=[guild_id, channel_id, message, title], delay=0)

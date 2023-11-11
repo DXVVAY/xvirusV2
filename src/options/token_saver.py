@@ -5,18 +5,18 @@ def buyTokensDazeer():
     if redirect.lower() == 'y':
         webbrowser.open("https://dazeer.sellpass.io/products/634d684f745af")
     elif redirect.lower() == 'n':
-        Output("bad")("Redirect not requested.")
+        Output("bad").notime("Redirect not requested.")
     else:
-        Output("bad")("Invalid input. Redirect not requested.")
+        Output("bad").notime("Invalid input. Redirect not requested.")
 
 def buyTokensBody(): 
     redirect = utility.ask("Do you want to redirect to https://bodyx.mysellix.io/product/ (y/n)")
     if redirect.lower() == 'y':
         webbrowser.open("https://bodyx.mysellix.io/product/64e4b3244c004")
     elif redirect.lower() == 'n':
-        Output("bad")("Redirect not requested.")
+        Output("bad").notime("Redirect not requested.")
     else:
-        Output("bad")("Invalid input. Redirect not requested.")
+        Output("bad").notime("Invalid input. Redirect not requested.")
 
 def choose_store():
     utility.make_menu("Body Tokens", "Dazeer Tokens")
@@ -30,12 +30,16 @@ def choose_store():
 
 def token_manager():
     Output.set_title(f"Token Manager")
-    utility.make_menu("Save Tokens", "Empty Tokens", "Buy Tokens")
+    utility.make_menu("Save Tokens", "Clear Tokens", "Buy Tokens")
     choice = utility.ask("Choice")
 
     if choice == '1':
-        checker()
-    
+        check = utility.ask("Check Tokens And Save Valid Ones (y/n)")
+        if check == 'y':
+            checker()
+        else:
+            saver()
+
     if choice == '2':
         config.reset('xvirus_tokens')
         Output("info").notime("Tokens Cache Emptied.")
@@ -88,20 +92,8 @@ def checker():
             else:
                 pass
 
-    if tokens is None:
-        Output("bad").log("Token retrieval failed or returned None.")
-        Output.PETC()
-        return
-
     max_threads = utility.asknum("Thread Count")
-
-    try:
-        if not max_threads.strip():
-            max_threads = "16"
-        else:
-            max_threads = int(max_threads)
-    except ValueError:
-        max_threads = "16"
+    max_threads = int(max_threads)
 
     if tokens:
         start_time = time.time()
@@ -134,3 +126,13 @@ def checker():
     else:
         Output("bad").log(f"No tokens were found in the specified text file")
         Output.PETC()
+
+def saver():
+    token_file_path = utility.ask("Enter the path to the text file containing tokens").strip()
+    tokens = TokenManager.custom_path(token_file_path)
+    for token in tokens:
+        config.add('xvirus_tokens', token)
+        Output("good").log(f"Saved -> {token}") 
+        sleep(0.5)
+
+    Output.PETC()
