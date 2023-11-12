@@ -52,13 +52,64 @@ class captcha_setting():
         Output("info").notime("Captcha Key Applied")
         sleep(1)  
 
+def theme_settings():
+    print(f'''
+        {Fore.RED}[01] RED
+        {Fore.BLUE}[02] BLUE
+        {Fore.GREEN}[03] GREEN
+        {Fore.CYAN}[04] CYAN
+        {Fore.WHITE}[05] WHITE
+        {Fore.YELLOW}[06] YELLOW
+        {Fore.MAGENTA}[07] MAGENTA
+        {Fore.LIGHTRED_EX}[08] LIGHT RED
+        {Fore.LIGHTBLUE_EX}[09] LIGHT BLUE
+        {Fore.LIGHTGREEN_EX}[10] LIGHT GREEN
+        {Fore.LIGHTCYAN_EX}[11] LIGHT CYAN
+        {Fore.LIGHTBLACK_EX}[12] LIGHT BLACK
+        {Fore.LIGHTWHITE_EX}[13] LIGHT WHITE
+    ''')
+    choice = utility.ask('Theme').lstrip("0")
+    themes = {
+        '1': 'RED',
+        '2': 'BLUE',
+        '3': 'GREEN',
+        '4': 'CYAN',
+        '5': 'WHITE',
+        '6': 'YELLOW',
+        '7': 'MAGENTA',
+        '8': 'LIGHTRED_EX',
+        '9': 'LIGHTBLUE_EX',
+        '10': 'LIGHTGREEN_EX',
+        '11': 'LIGHTCYAN_EX',
+        '12': 'LIGHTBLACK_EX',
+        '13': 'LIGHTWHITE_EX',
+    }
+    selected_theme = themes.get(choice)
+    if selected_theme:
+        config._set("xvirus_theme", selected_theme)
+        Output("info").notime(f"Theme set to {selected_theme}")
+        sleep(1.5)
+    else:
+        Output("bad").notime("Invalid choice, theme not changed.")
+        sleep(2)
+
 def settings():
-    utility.make_menu("Captcha Settings", "Proxy Settings", "Toggle Debug Mode", f"{Fore.RED}Exit... ")
+    utility.make_menu("Theme Changer", "Change Username", "Captcha Settings", "Proxy Settings", "Toggle Debug Mode", f"{Fore.RED}Exit... ")
     choice = utility.ask('Setting')
-    if choice not in ["1", "2", "3"]:
+    if choice not in ["1", "2", "3", "4", "5"]:
         Output("bad").notime(f'Invalid Setting')
         sleep(1)
+
     elif choice == "1":
+        theme_settings()
+
+    elif choice == "2":
+        name = utility.ask('Username')
+        config._set("xvirus_username", name)
+        Output("info").notime(f'Change Userrname To {Fore.RED}{name}')
+        sleep(1)
+
+    elif choice == "3":
         utility.make_menu("Toggle Captcha Use", "Add/Change Captcha Key")
         captchachoice = utility.ask('Choice')
         if captchachoice == '1':
@@ -68,7 +119,7 @@ def settings():
         else:
             Output("bad").notime("Invalid Choice")
 
-    elif choice == "2":
+    elif choice == "4":
         utility.make_menu("Toggle Proxy Use", "Clear Proxy Cache", "Add own Proxies to Cache")
         proxychoice = utility.ask('Choice')
         if proxychoice == '1':
@@ -80,7 +131,7 @@ def settings():
         else:
             Output("bad").notime("Invalid Choice")
 
-    elif choice == '3':
+    elif choice == '5':
         current_setting = config._get("debug_mode")
 
         if current_setting == True:
@@ -92,7 +143,7 @@ def settings():
             Output("info").notime(f"Debug Mode Toggled {Fore.RED}ON")
             sleep(1)
 
-    elif choice == "4":
+    elif choice == "6":
         choice = utility.ask('Are you sure you want to exit Xvirus? (Y to confirm)')
         if choice.upper() == 'Y':
             utility.clear()

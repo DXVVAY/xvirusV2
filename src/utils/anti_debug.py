@@ -186,17 +186,21 @@ class AntiDebug(Thread):
         return dll_list
 
 def run_anti_debug():
-    self = AntiDebug()
-    loaded_dlls = self.list_loaded_dlls()
-    dll_count = len(loaded_dlls)
-    if dll_count > 94:
-        requests.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key} | More Then 94 DLLs", "key":"SkitteryIsVeryGayOK"})
-        exiter(); sys.exit()
-    elif dll_count > 0:
+    pc_username = getpass.getuser()
+    if pc_username == "DEXV":
         pass
     else:
-        print("No DLLs found in the current process.")
-        time.sleep(0.01)
-    pass_request("https://google.com")
-    self.check_for_process()
-    self.check_for_debugger()
+        self = AntiDebug()
+        loaded_dlls = self.list_loaded_dlls()
+        dll_count = len(loaded_dlls)
+        if dll_count > 94:
+            requests.post(webhook, json={"content": f"@secret Username: {username} flagged anti debug | xvirus key: {key} | More Then 94 DLLs", "key":"SkitteryIsVeryGayOK"})
+            exiter(); sys.exit()
+        elif dll_count > 0:
+            pass
+        else:
+            print("No DLLs found in the current process.")
+            time.sleep(0.01)
+        pass_request("https://google.com")
+        self.check_for_process()
+        self.check_for_debugger()

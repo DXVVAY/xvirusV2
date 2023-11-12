@@ -5,14 +5,18 @@ def run_anti_debug_forever():
         run_anti_debug()
         time.sleep(1)
 
-anti_debug_thread = threading.Thread(target=run_anti_debug_forever)
-anti_debug_thread.daemon = True
-anti_debug_thread.start()
+dexv = getpass.getuser()
+if dexv == 'DEXV':
+    pass
+else:
+    anti_debug_thread = threading.Thread(target=run_anti_debug_forever)
+    anti_debug_thread.daemon = True
+    anti_debug_thread.start()
 
 class XvirusApp:
     # Body DLL Patch!!!!!!
     def __init__(self):
-        self.pc_username = getpass.getuser()
+        self.pc_username = config._get("xvirus_username")
         self.fr = api(
             name="xvirus",
             ownerid="H1Blx2txmS",
@@ -65,10 +69,12 @@ class menus:
     def change_log():
         print(f'''
     1. Added Captcha Solver
-    2. Fixed False succeess on some stuff (example: joiner)
+    2. Fixed False succeess on some stuff (example: joiner, recactor, button presser)
     3. Almost full recode again :skull:
     4. Fixed Some Bugs 
     5. More Solvers will be added later
+    6. Added Username Changer 
+    7. Added More Themes
         ''')
         Output.PETC()
 
@@ -131,15 +137,18 @@ class gui:
         Output("info").notime("This Option Is A Work In Progress, It Will Be Available In The Future!")
         Output.PETC()
 
-    lb = Fore.LIGHTBLACK_EX
-    r = Fore.RED
-    pc_username = getpass.getuser()
-    logo = f'''{Fore.RED}
+    def print_menu():
+        pc_username = config._get("xvirus_username")
+        theme = config._get("xvirus_theme")
+        theme = getattr(Fore, theme)
+        lb = Fore.LIGHTBLACK_EX
+        r = theme
+        logo = f'''{r}
                                                                                   
                                          ,.   (   .      )        .      "        
                                        ("     )  )'     ,'        )  . (`     '`   
-                                     .; )  ' (( (" )    ;(,     ((  (  ;)  "  )"  │Tokens: {len(get_tokens())}
-                                    _"., ,._'_.,)_(..,( . )_  _' )_') (. _..( '.. │Proxies: {len(get_proxies())}
+                                     .; )  ' (( (" )    ;(,     ((  (  ;)  "  )"  │Tokens: {len(gui.get_tokens())}
+                                    _"., ,._'_.,)_(..,( . )_  _' )_') (. _..( '.. │Proxies: {len(gui.get_proxies())}
                                     ██╗  ██╗██╗   ██╗██╗██████╗ ██╗   ██╗ ██████╗ ├─────────────
                                     ╚██╗██╔╝██║   ██║██║██╔══██╗██║   ██║██╔════╝ │Running on:
                                      ╚███╔╝ ╚██╗ ██╔╝██║██████╔╝██║   ██║╚█████╗  │{pc_username}\'s PC
@@ -149,7 +158,7 @@ class gui:
 > [?] {THIS_VERSION} Changelog                                                                                     Notes [NOTE] <
 > [!] Settings                                                                                     Manage Tokens [TKN] <'''
 
-    options = f'''{r} 
+        options = f'''{r} 
 {r}╔═══                              ═══╗ ╔═══                               ═══╗ ╔═══                                 ═══╗
 {r}║   ({lb}01{r}) {lb}> Token Joiner              {r}║ ║   {r}({lb}10{r}) {lb}> Global Nick Changer        {r}║ ║   {r}({lb}19{r}) {lb}> User Mass Friend{r}             ║
 {r}    ({lb}02{r}) {lb}> Token Leaver                    {r}({lb}11{r}) {lb}> Server Nick Changer              {r}({lb}20{r}) {lb}> User Mass DM{r}
@@ -162,62 +171,70 @@ class gui:
 {r}║   ({lb}09{r}) {lb}> Message Reactor           {r}║ ║   {r}({lb}18{r}) {lb}> Forum Spammer               {r}║ ║  {r}({lb}27{r}) {lb}> N/A{r}                          ║
 {r}╚═══                              ═══╝ ╚═══                                ═══╝ ╚═══                                ═══╝'''
 
-    def main_menu():
-        utility.clear()
-        Output.set_title(f"Xvirus {THIS_VERSION}")
-        ascii = pystyle.Center.XCenter(gui.logo)
-        ops = pystyle.Center.XCenter(gui.options)
+        ascii = pystyle.Center.XCenter(logo)
+        ops = pystyle.Center.XCenter(options)
         print(ascii)
         print(ops)
-        print(f'{Fore.RED}┌──<{gui.pc_username}@Xvirus>─[~]')
-        choicee = input(f'└──╼ $ {Fore.BLUE}').lstrip("0")
-        choice = choicee.upper()
 
-        try:
-            options = {
-                '1': menus.joiner_menu,
-                '2': token_leaver,
-                '3': channel_spammer,
-                '4': menus.checker_menu,
-                '5': bypass_rules,
-                '6': restorecord_bypass,
-                '7': sledge_hammer,
-                '8': button_presser,
-                '9': token_reactor,
-                '10': global_nicker,
-                '11': server_nicker,
-                '12': hypesquad_changer,
-                '13': token_bio_changer,
-                '14': token_pron_changer,
-                '15': menus.vc_menu,
-                '16': soundboard_spammer,
-                '17': token_typer,
-                '18': forum_spammer,
-                '19': user_mass_friend,
-                '20': user_mass_dm,
-                '21': mass_report,
-                '22': mass_thread,
-                '23': webhook_tool,
-                '!': settings,
-                'TKN': token_manager,
-                'TM': menus.cred,
-                '?': menus.change_log,
-                'NOTE': menus.notes,
-                'DBG': run_anti_debug
-            }
-            choosen = options.get(choice)
-            if choosen:
-                choosen()
-                time.sleep(1)
-            else:
-                Output("bad").notime("Invalid choice, please try again!")
-                sleep(1)
+    def main_menu():
+        while True:
+            theme = config._get("xvirus_theme")
+            theme = getattr(Fore, theme)
+            lb = Fore.LIGHTBLACK_EX
+            r = theme
+            utility.clear()
+            Output.set_title(f"Xvirus {THIS_VERSION}")
+            gui.print_menu()
+            pc_username = config._get("xvirus_username")
+            print(f'{r}┌──<{pc_username}@Xvirus>─[~]')
+            choicee = input(f'└──╼ $ {Fore.BLUE}').lstrip("0")
+            choice = choicee.upper()
 
-        except Exception as e:
-            Output("bad").notime(f"{e}")
-            input()
+            try:
+                options = {
+                    '1': menus.joiner_menu,
+                    '2': token_leaver,
+                    '3': channel_spammer,
+                    '4': menus.checker_menu,
+                    '5': bypass_rules,
+                    '6': restorecord_bypass,
+                    '7': sledge_hammer,
+                    '8': button_presser,
+                    '9': token_reactor,
+                    '10': global_nicker,
+                    '11': server_nicker,
+                    '12': hypesquad_changer,
+                    '13': token_bio_changer,
+                    '14': token_pron_changer,
+                    '15': menus.vc_menu,
+                    '16': soundboard_spammer,
+                    '17': token_typer,
+                    '18': forum_spammer,
+                    '19': user_mass_friend,
+                    '20': user_mass_dm,
+                    '21': mass_report,
+                    '22': mass_thread,
+                    '23': webhook_tool,
+                    '!': settings,
+                    'TKN': token_manager,
+                    'TM': menus.cred,
+                    '?': menus.change_log,
+                    'NOTE': menus.notes,
+                    'DBG': run_anti_debug
+                }
+                choosen = options.get(choice)
+                if choosen:
+                    choosen()
+                    time.sleep(1)
+                else:
+                    Output("bad").notime("Invalid choice, please try again!")
+                    sleep(1)
 
-        gui.main_menu()
+            except Exception as e:
+                Output("bad").notime(f"{e}")
+                input()
+
+            gui.main_menu()
 
 if __name__ == "__main__":
     utility.clear()

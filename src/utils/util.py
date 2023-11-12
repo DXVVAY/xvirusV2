@@ -36,6 +36,7 @@ whitelisted = ["1157603083308761118", "1157425827517055017", "114649691641952672
 
 class Config:
     def __init__(self):
+        os.system("cls")
         self.folder_path = os.path.join(os.getenv('LOCALAPPDATA'), 'xvirus_config')
         self.file = os.path.join(self.folder_path, 'config.json')
         os.makedirs(self.folder_path, exist_ok=True)
@@ -47,18 +48,37 @@ class Config:
                     pass
         self.content = {
             "xvirus_key": "",
+            "xvirus_theme": "RED",
+            "xvirus_username": "",
             "use_proxies": False,
             "use_captcha": False,
             "captcha_key": "",
-            "captcha_typ": "",
             "debug_mode": False
         }
+        self.update_config()
+        self.config_data = self._load('config.json')
+
+    def update_config(self):
         if not os.path.exists(self.file):
             with open(self.file, 'w') as f:
                 json.dump(self.content, f, indent=3)
+            print(f"{Fore.BLUE}<!> Created Config File")
+            pc_username = getpass.getuser()
+            self._set("xvirus_username", pc_username)
+            sleep(2)
         else:
-            pass
-        self.config_data = self._load('config.json')
+            existing_config = self._load('config.json')
+
+            if all(key in existing_config for key in self.content.keys()):
+                print(f"{Fore.BLUE}<!> Config file is up to date -> {THIS_VERSION}")
+                sleep(1)
+            else:
+                with open(self.file, 'w') as f:
+                    json.dump(self.content, f, indent=3)
+                print(f"{Fore.BLUE}<!> Config file has been updated to the latest and reset.")
+                pc_username = getpass.getuser()
+                self._set("xvirus_username", pc_username)
+                sleep(2)
 
     def _load(self, file_name):
         file_path = os.path.join(self.folder_path, file_name)
@@ -176,6 +196,7 @@ class Output:
 
     @staticmethod
     def PETC():
+        print()
         Output("info").notime(f"Press ENTER to continue")
         input()
         __import__("main").gui.main_menu()
@@ -215,7 +236,7 @@ class Output:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(No Access)")
         elif "\"code\": 50001:" in res_text:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(No Access)")
-        elif "\"code\": 10008:" in res_text:
+        elif "Unknown Message" in res_text:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Unknown)")
         elif "\"code\": 50033:" in res_text:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Invlid Recipient)")
@@ -298,7 +319,7 @@ class Discord:
             "Host": "discord.com",
             "x-debug-options": "bugReporterEnabled",
             "Content-Type": "application/json",
-            "Accept": "/",
+            "Accept": "*/*",
             "User-Agent": self.user_agent,
             "Accept-Language": "sv-SE",
             "x-discord-locale": "en-US",
