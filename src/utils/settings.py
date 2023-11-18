@@ -46,8 +46,19 @@ class captcha_setting():
             Output("info").notime(f"Captcha Use Toggled {Fore.RED}ON")
             sleep(1)
 
+    def change_type():
+        utility.make_menu("Dexv Solver", "Ab5 Solver")
+        typ = utility.ask(f"Choice")
+        if typ == "1":
+            config._set("captcha_typ", "Dexv")
+            Output("info").notime(f"Captcha Solver Switched To {Fore.RED}Dexv Solver")
+        else:
+            config._set("captcha_typ", "Ab5")
+            Output("info").notime(f"Captcha Solver Switched To {Fore.RED}Ab5 Solver")
+
     def change_key():
-        key = utility.ask("Ab5 Solver Key")
+        typ = config._get("captcha_typ")
+        key = utility.ask(f"{typ} Solver Key")
         config._set("captcha_key", key)
         Output("info").notime("Captcha Key Applied")
         sleep(1)  
@@ -96,7 +107,7 @@ def theme_settings():
 def settings():
     utility.make_menu("Theme Changer", "Change Username", "Captcha Settings", "Proxy Settings", "Toggle Debug Mode", f"{Fore.RED}Exit... ")
     choice = utility.ask('Setting')
-    if choice not in ["1", "2", "3", "4", "5"]:
+    if choice not in ["1", "2", "3", "4", "5", "6"]:
         Output("bad").notime(f'Invalid Setting')
         sleep(1)
 
@@ -110,11 +121,13 @@ def settings():
         sleep(1)
 
     elif choice == "3":
-        utility.make_menu("Toggle Captcha Use", "Add/Change Captcha Key")
+        utility.make_menu("Toggle Captcha Use", "Change Captcha Service", "Add/Change Captcha Key")
         captchachoice = utility.ask('Choice')
         if captchachoice == '1':
             captcha_setting.toggle_captcha()
         elif captchachoice == '2':
+            captcha_setting.change_type()
+        elif captchachoice == '3':
             captcha_setting.change_key()
         else:
             Output("bad").notime("Invalid Choice")

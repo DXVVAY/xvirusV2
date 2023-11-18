@@ -1,7 +1,6 @@
 from capmonster_python import HCaptchaTask, capmonster
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from websocket import WebSocket
 from json import dumps, loads
 from decimal import Decimal
 from random import randint
@@ -52,11 +51,11 @@ class Config:
             "xvirus_username": "",
             "use_proxies": False,
             "use_captcha": False,
+            "captcha_typ": "Dexv",
             "captcha_key": "",
             "debug_mode": False
         }
         self.update_config()
-        self.config_data = self._load('config.json')
 
     def update_config(self):
         if not os.path.exists(self.file):
@@ -97,16 +96,19 @@ class Config:
             json.dump(data, file, indent=4)
 
     def _set(self, key, value):
-        self.config_data[key] = value
-        self._save('config.json', self.config_data)
+        config_data = self._load('config.json')
+        config_data[key] = value
+        self._save('config.json', config_data)
 
     def _get(self, key, default=None):
-        return self.config_data.get(key, default) if default is not None else self.config_data.get(key)
+        config_data = self._load('config.json')
+        return config_data.get(key, default) if default is not None else config_data.get(key)
 
     def _remove(self, key):
-        if key in self.config_data:
-            del self.config_data[key]
-            self._save('config.json', self.config_data)
+        config_data = self._load('config.json')
+        if key in config_data:
+            del config_data[key]
+            self._save('config.json', config_data)
 
     def add(self, file_name, data):
         if file_name not in self.xvirus_files:
@@ -683,7 +685,7 @@ class utility:
         else:
             return None
                      
-class Captcha:
+class Captcha_ab5:
     def __init__(self, url, sitekey, rqdata=""):
         self.proxy = "http://" + ProxyManager.clean_proxy(ProxyManager.random_proxy())
         self.user_agent = discord_props.user_agent
@@ -698,11 +700,10 @@ class Captcha:
             payload = {
                 'url': self.url,
                 'sitekey': self.sitekey,
-                'proxy': self.proxy
+                'proxy': self.proxy,
+                'userAgent': self.user_agent,
+                'rqdata': self.rqdata
             }
-
-            if self.rqdata != "":
-                payload['rqdata'] = self.rqdata
 
             try:
                 response = requests.get(
@@ -721,3 +722,72 @@ class Captcha:
         r = requests.get(f"https://api.ab5.wtf/balance", headers={'authorization': key})
         bal = r.json()['balance']
         Output("info").notime(f"Captcha Balance: {Fore.RED}${bal}")
+
+class Captcha_dexv:
+    def __init__(self, url, sitekey, rqdata=""):
+        self.key = config._get("captcha_key")
+        self.url = url
+        self.sitekey = sitekey
+        self.rqdata = rqdata
+
+    def solve(self):
+        Output("cap").log(f'Solving Captcha...')
+        while True:
+            payload = {
+                'url': self.url,
+                'sitekey': self.sitekey,
+                'api_key': self.key,
+                'rqdata': self.rqdata,
+            }
+
+            try:
+                response = requests.post("http://solver.dexv.lol:1000/api/solve_hcap", json=payload)
+                response_data = response.json()
+                if 'solved' in response_data:
+                    answer = response_data['solved']
+                    Output("cap").log(f"Solved Captcha -> {Fore.LIGHTBLACK_EX} {answer[:70]}")
+                    return answer
+                else:
+                    Output("bad").log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {response_data}")
+                    break
+            except requests.RequestException as e:
+                Output("bad").log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {e}")
+                continue
+
+    @staticmethod
+    def get_captcha_bal():
+        key = config._get("captcha_key")
+        r = requests.get(f"http://solver.dexv.lol:1000/api/get_balance", json={"key": key})
+        bal = r.json()['balance']
+        Output("info").notime(f"Captcha Balance: {Fore.RED}${bal}")
+
+class Captcha:
+    def __init__(self, url, sitekey, rqdata=""):
+        self.url = url
+        self.sitekey = sitekey
+        self.rqdata = rqdata
+
+    def solve(self):
+        captcha_type = config._get('captcha_typ')
+
+        if captcha_type == "Dexv":
+            cap = Captcha_dexv(url=self.url, sitekey=self.sitekey, rqdata=self.rqdata)
+            capkey = cap.solve()
+            return capkey
+        elif captcha_type == "Ab5":
+            cap = Captcha_ab5(url=self.url, sitekey=self.sitekey, rqdata=self.rqdata)
+            capkey = cap.solve()
+            return capkey
+        else:
+            Output("bad").log("Capcha Solver Not Initialized Please Choose Captcha Type In Settings")
+        
+    @staticmethod
+    def get_captcha_bal():
+        captcha_type = config._get('captcha_typ')
+        
+        if captcha_type == "Dexv":
+            Captcha_dexv.get_captcha_bal()
+        elif captcha_type == "Ab5":
+            Captcha_ab5.get_captcha_bal()
+        else:
+            Output("bad").log("Capcha Solver Not Initialized Please Choose Captcha Type In Settings")

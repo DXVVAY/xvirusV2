@@ -1,85 +1,21 @@
 from src import *
 
+def send(guild_id, vc_id, token):
+    ws = WebSocket()
+    ws.connect("wss://gateway.discord.gg/?v=8&encoding=json")
+    hello = json.loads(ws.recv())
+    ws.send(json.dumps({"op": 2,"d": {"token": token,"properties": {"$os": "windows","$browser": "Discord","$device": "desktop"}}}))
+    ws.send(json.dumps({"op": 4,"d": {"guild_id": guild_id,"channel_id": vc_id,"self_mute": False,"self_deaf": False, "self_stream?": False, "self_video": False}}))
+    ws.send(json.dumps({"op": 18,"d": {"type": "guild","guild_id": guild_id,"channel_id": vc_id,"preferred_region": "singapore"}}))
+    ws.send(json.dumps({"op": 1,"d": None}))
+    while True:
+        ws.recv()
+        time.sleep(hello.get("d").get("heartbeat_interval") / 1000)
+
 def token_vc_joiner():
-    joined = 0
-    error = 0
-    tokens = TokenManager.get_tokens()
-
-    def run(token, guild_id, channel_id, mute, deaf, video):
-        nonlocal joined, error
-        ws = WebSocket()
-        ws.connect("wss://gateway.discord.gg/?v=8&encoding=json")
-        hello = loads(ws.recv())
-        heartbeat_interval = hello['d']['heartbeat_interval']
-        ws.send(dumps({"op": 2,"d": {"token": token,"properties": {"$os": "windows","$browser": "Discord","$device": "desktop"}}}))
-        ws.send(dumps({"op": 4,"d": {"guild_id": guild_id,"channel_id": channel_id,"self_mute": mute,"self_deaf": deaf, "self_video": video}}))
-        ws.send(dumps({"op": 1,"d": None}))
-        sleep(0.1)
-        Output("good", token).log(f"Success -> {token}")
-        joined += 1
-
-    def thread_complete(future):
-        nonlocal joined, error
-        debug = config._get("debug_mode")
-        try:
-            result = future.result()
-        except Exception as e:
-            if debug:
-                if "failed to do request" in str(e):
-                    message = f"Proxy Error -> {str(e)[:80]}..."
-                else:
-                    message = f"Error -> {e}"
-                Output("dbg").log(message)
-            else:
-                pass
-
+    Output.set_title("Vc Joiner")
     guild_id = utility.ask("Guild ID")
-    channel_id = utility.ask("Channel ID")
-    deaf = utility.ask("Defean (y/n)")
-    if deaf == "y":
-        deaf = True
-    else:
-        deaf = False
-    mute = utility.ask("Mute (y/n)")
-    if mute == "y":
-        mute = True
-    else:
-        mute = False
-    video = utility.ask("Video (y/n)")
-    if video == "y":
-        video = True
-    else:
-        video = False
-
+    vc_id = utility.ask("VC ID")
     max_threads = utility.asknum("Thread Count")
-    max_threads = int(max_threads)
 
-    if tokens:
-        start_time = time.time()
-
-        with ThreadPoolExecutor(max_workers=max_threads) as executor:
-            for token in tokens:
-                try:
-                    token = TokenManager.OnlyToken(token)
-                    args = [token, guild_id, channel_id, mute, deaf, video]
-                    future = executor.submit(run, *args)
-                    future.add_done_callback(thread_complete)
-                    time.sleep(0.1)
-                except Exception as e:
-                    Output("bad").log(f"{e}")
-
-        elapsed_time = time.time() - start_time
-        Output("info").notime(f"Joined VC Using {str(joined)} Tokens In {elapsed_time:.2f} Seconds")
-
-        info = [
-            f"{Fore.LIGHTGREEN_EX}Joined: {str(joined)}",
-            f"{Fore.LIGHTRED_EX}Errors: {str(error)}",
-            f"{Fore.LIGHTCYAN_EX}Total: {len(tokens)}"
-        ]
-
-        status = f"{Fore.RED} | ".join(info) + f"{Fore.RED}\n"
-        print(f" {status}")
-        Output.PETC()
-    else:
-        Output("bad").log(f"No tokens were found in cache")
-        Output.PETC()
+    utility.run_threads(max_threads=max_threads, func=send, args=[guild_id, vc_id], delay=0)

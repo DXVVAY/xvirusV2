@@ -21,6 +21,8 @@ def join(token, invite, capkey, rqtoken):
     else:
         Output.error_logger(token, result.text, result.status_code)
         return False, None, None, None
+    
+    return False
 
 
 def joiner(invite, token):

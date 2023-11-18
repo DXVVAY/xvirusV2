@@ -24,7 +24,7 @@ def send(token, message, channelid, massping, amount=None):
         while True:
             try:
                 if massping == 'y':
-                    content = f"{message} | {utility.get_random_id(int(amount))}"
+                    content = f"{utility.rand_str(12)} | {message} | {utility.get_random_id(int(amount))} | {utility.rand_str(7)}"
                 else:
                     content = f"{message} | {utility.rand_str(7)}"
                 session.headers = static_headers
@@ -95,6 +95,7 @@ def channel_spammer():
                     token = TokenManager.OnlyToken(token)
                     args = [token, message, channel_id, massping, amount]
                     send(*args)
+                    time.sleep(1)
                 except Exception as e:
                     print(f"{e}")
 

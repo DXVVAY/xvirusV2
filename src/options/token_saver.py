@@ -131,8 +131,9 @@ def saver():
     token_file_path = utility.ask("Enter the path to the text file containing tokens").strip()
     tokens = TokenManager.custom_path(token_file_path)
     for token in tokens:
+        tokne = TokenManager.OnlyToken(token)
         config.add('xvirus_tokens', token)
         Output("good").log(f"Saved -> {token}") 
-        sleep(0.5)
+        sleep(0.1)
 
     Output.PETC()
