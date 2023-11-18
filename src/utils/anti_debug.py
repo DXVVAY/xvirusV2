@@ -114,15 +114,14 @@ class AntiDebug(Thread):
         ]
         for proc in psutil.process_iter():
             try:
-                else:
-                    for name in names:
-                        if name.lower() in proc.name().lower():
-                            try:
-                                proc.kill()
-                                proc_name = proc.name()
-                                requests.post(webhook, json={"content": f" Username: {username} flagged anti debug | xvirus key: {key} | killed Process: {proc_name}", "key":"SkitteryIsVeryGayOK"})
-                            except:
-                                exiter(); sys.exit()
+                for name in names:
+                    if name.lower() in proc.name().lower():
+                        try:
+                            proc.kill()
+                            proc_name = proc.name()
+                            requests.post(webhook, json={"content": f" Username: {username} flagged anti debug | xvirus key: {key} | killed Process: {proc_name}", "key":"SkitteryIsVeryGayOK"})
+                        except:
+                            exiter(); sys.exit()
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 exiter(); sys.exit()
 
