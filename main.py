@@ -68,13 +68,7 @@ class menus:
 
     def change_log():
         print(f'''
-    1. Added Captcha Solver
-    2. Fixed False succeess on some stuff (example: joiner, recactor, button presser)
-    3. Almost full recode again :skull:
-    4. Fixed Some Bugs 
-    5. More Solvers will be added later
-    6. Added Username Changer 
-    7. Added More Themes
+    1. Inbuilt captcha solver (FREE OMGOMG)
         ''')
         Output.PETC()
 
@@ -230,7 +224,7 @@ class gui:
                     sleep(1)
 
             except Exception as e:
-                Output("bad").notime(f"{e}")
+                Output("bad").notime(e)
                 input()
 
             gui.main_menu()

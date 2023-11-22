@@ -9,8 +9,12 @@ def join(token, invite, capkey, rqtoken):
 
     result = session.post(f"https://discord.com/api/v9/invites/{invite}", json={"session_id": utility.rand_str(32)})
     if result.status_code == 200:
-        Output("good", token).log(f"Joined {Fore.LIGHTBLACK_EX}{invite} {Fore.GREEN}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
-        return False, None, None, None
+        if capkey == "":
+            Output("good", token).log(f"Joined {Fore.LIGHTBLACK_EX}{invite} {Fore.GREEN}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            return False, None, None, None
+        else:
+            Output("good", token).log(f"Joined {Fore.LIGHTBLACK_EX}With Cptcha {Fore.GREEN}-> {token} {Fore.LIGHTBLACK_EX}({result.status_code})")
+            return False, None, None, None
     elif result.text.startswith('{"captcha_key"'):
         Output("bad", token).log(f"Error -> {token} {Fore.LIGHTBLACK_EX}({result.status_code}) {Fore.RED}(Captcha)")
         use_captcha = config._get("use_captcha")

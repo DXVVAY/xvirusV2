@@ -131,7 +131,7 @@ class Sledgehammer():
 def send(guild_id, channel_id, message_id, token):
     sledgehammer = Sledgehammer(token=token, guild_id=guild_id, channel_id=channel_id, message_id=message_id)
     answer = sledgehammer.verify()
-    Output("good", token).log(f"Success -> {token}{Fore.LIGHTBLACK_EX} (Answer Was {answer})")
+    Output("good", token).log(f"Success -> {token}{Fore.LIGHTBLACK_EX} ({answer})")
 
 def sledge_hammer():
     Output.set_title(f"Sledge Hammer Bypass")
@@ -139,5 +139,4 @@ def sledge_hammer():
     guild_id = message["guild_id"]
     channel_id = message["channel_id"]
     message_id = message["message_id"]
-    max_threads = utility.asknum("Thread Count")
-    utility.run_threads(max_threads=max_threads, func=send, args=[guild_id, channel_id, message_id], delay=0)
+    utility.run_threads(max_threads="1", func=send, args=[guild_id, channel_id, message_id], delay=0)

