@@ -55,6 +55,6 @@ Finally it uses the headers to send requests to the discord API very securely
  
  Skittery, a good friend + helped alot
  
- 0x50, great manager
+ 0x50, great manager and very great friend⁉️⁉️🔥
  
  Body, really helpful
