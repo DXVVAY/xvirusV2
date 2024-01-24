@@ -59,4 +59,4 @@ Finally it uses the headers to send requests to the discord API very securely
  
  0x50, great manager and very great friend⁉️⁉️🔥
  
- Body, really helpful
+ Body, really helpful + sexy french man
