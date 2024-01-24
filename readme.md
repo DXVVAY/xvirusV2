@@ -9,6 +9,7 @@ print("diggers rhymes with what?")
 # Adminx is a skid
 
 He always claimed that he could code in c++ and or python, whenever we asked him to work on xvirus or code overall anything he just said "hes too lazy" or "he doesnt feel like it"
+
 well, he never could code. Always regreted asking him to code with me, all he did was blackmail me to pay him or he would leak the source even tho he didnt contribute to the project at all.
 
 ## "his" fire project
