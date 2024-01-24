@@ -6,7 +6,6 @@
 from .utils.util import *
 from .utils.scrape_ids import *
 from .utils.settings import *
-from .utils.auth import *
 from .utils.anti_debug import *
 run_anti_debug()
 
