@@ -1,18 +1,5 @@
 from src import *
 
-def run_anti_debug_forever():
-    while True:
-        run_anti_debug()
-        time.sleep(1)
-
-dexv = getpass.getuser()
-if dexv == 'DEXV':
-    pass
-else:
-    anti_debug_thread = threading.Thread(target=run_anti_debug_forever)
-    anti_debug_thread.daemon = True
-    anti_debug_thread.start()
-
 class menus:
     def cred():
         print(f'''
