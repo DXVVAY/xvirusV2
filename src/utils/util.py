@@ -421,24 +421,13 @@ class ProxyManager:
     def clean_proxy(proxy):
         if isinstance(proxy, str):
             parts = proxy.split(':')
-            if '@' in proxy or len(parts) == 2:
-                return proxy
-            elif len(parts) == 4:
+            if '@' in proxy or len(parts) in [2, 4] or '.' in parts[0]:
                 return f'{parts[2:]}@{parts[:2]}'
-            elif '.' in parts[0]:
-                return f'{parts[2:]}@{parts[:2]}'
-            else:
-                return f'{parts[:2]}@{parts[2:]}'
+            return f'{parts[:2]}@{parts[2:]}'
         elif isinstance(proxy, dict):
-            http_proxy = proxy.get("http") or proxy.get("https")
-            https_proxy = proxy.get("https") or proxy.get("http")
-            if http_proxy or https_proxy:
-                return {
-                    "http://": http_proxy,
-                    "https://": https_proxy
-                }
-            elif proxy in [dict(), {}]:
-                return {}
+            http = proxy.get("http") or proxy.get("https")
+            https = proxy.get("https") or proxy.get("http")
+            return {"http://": http, "https://": https} if http or https else {}
         return proxy
 
 class TokenManager:
