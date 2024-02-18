@@ -538,38 +538,23 @@ class utility:
             print('\n'*120)
         return
 
-    def message_info(message_link = None):
-        if message_link is None:
-            message_link = utility.ask("Message link")
-        pattern = re.compile(r"^https:\/\/(ptb\.|canary\.)?discord\.com\/channels\/\d+\/\d+\/\d+$")
-        if pattern.match(message_link):
-            link_parts = message_link.split("/")
-            guild_id, channel_id, message_id = link_parts[4], link_parts[5], link_parts[6]
+    def message_info(link = None):
+        link = link or utility.ask("Message link")
+        pattern = r"^https:\/\/(ptb\.|canary\.)?discord\.com\/channels\/\d+\/\d+\/\d+$"
+        if re.match(pattern, link):
+            guild_id, channel_id, message_id = link.split("/")[4:7]
             return {
-                "guild_id": guild_id,
-                "channel_id": channel_id,
+                "guild_id": guild_id, 
+                "channel_id": channel_id, 
                 "message_id": message_id
             }
-        else:
-            Output("bad").notime("Invalid message link")
-            return None
+        Output("bad").notime("Invalid message link")
 
-    def get_message(token, channel_id, message_id, session=None, headers=None, cookie=None):
-        if session is None or headers is None or cookie is None:
+    def get_buttons(token: str, channel_id: str, message_id: str):
+        try:
             session = Client.get_session(token)
-        try:
             response = session.get(f"https://discord.com/api/v9/channels/{channel_id}/messages?limit=1&around={message_id}").json()
-            return response[0]
-        except Exception as e:
-            return {"code": 10008}
-
-    def get_buttons(token, guild_id, channel_id, message_id, session=None, headers=None, cookie=None):
-        try:
-            message = utility.get_message(token, str(channel_id), str(message_id), session, headers, cookie)
-
-            if message.get("code") == 10008 or len(message.get("components", [])) == 0:
-                return None
-
+            message = response[0]
             buttons = []
             for component in message["components"]:
                 for button in component.get("components", []):
@@ -581,44 +566,25 @@ class utility:
 
             return buttons
         except Exception as e:
-            Output("bad").notime(f"{e}")
+            Output("bad").notime(e)
             return None
     
-    def get_reactions(channel_id, message_id, iteration=0):
-        if iteration > 5:
-            return None
-
+    def get_reactions(channel_id: str, message_id: str):
         try:
             token = TokenManager.get_random_token()
-            message = utility.get_message(token=token, channel_id=channel_id, message_id=message_id)
-            if message.get("code") == 10008:
-                return utility.get_reactions(channel_id, message_id, iteration=iteration+1)
-            emojis = []
-            reactions = message.get("reactions", [])
-
+            session = Client.get_session(token)
+            response = session.get(f"https://discord.com/api/v9/channels/{channel_id}/messages?limit=1&around={message_id}").json()
+            reactions = response[0].get("reactions", [])
             if not reactions:
                 return None
-
-            for reaction in reactions:
-                emoji = reaction["emoji"]
-                emoji_name = emoji["name"]
-                emoji_id = emoji["id"]
-
-                if emoji_id is None:
-                    custom = False
-                    emoji_name_with_id = emoji_name
-                else:
-                    custom = True
-                    emoji_name_with_id = f"{emoji_name}:{emoji_id}"
-
-                emojis.append({
-                    "name": emoji_name_with_id,
-                    "count": reaction["count"],
-                    "custom": custom
-                })
-            return emojis
+            
+            return [{
+                "name": f"{r['emoji']['name']}" if r['emoji']['id'] is None else f"{r['emoji']['name']}:{r['emoji']['id']}",
+                "count": r["count"],
+                "custom": r['emoji']['id'] is not None
+            } for r in reactions]
         except Exception as e:
-            Output("bad").notime(f"{e}")
+            Output("bad").notime(e)
             return None
 
     def CheckWebhook(webhook):
