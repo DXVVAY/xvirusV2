@@ -1,3 +1,10 @@
+# SKIDS 
+people are stealing my vanity and selling the source dont trust them 🤷‍♂️
+https://discord.gg/xvirustool <- i am NOT associated with this vanity anymore so dont trust
+![Discord_pgxBhnu2G3](https://github.com/DXVVAY/Xvirus-Tools/assets/89728480/90703783-bd10-428e-8ab7-e4329b3d5731)
+
+ps: THIS IS NOT ME
+
 # This project is NOT my best work. Do not judge me on my ability to code on this. + It is **VERY** flagged :kek: 
 
 XvirusV2 was fully coded and maintained by me (dexv) all other retards "developers" had nothing to do with this
